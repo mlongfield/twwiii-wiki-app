@@ -47,6 +47,9 @@ Decisions that constrain this spec:
 ## Non-goals
 
 - Calculating final stats. That is the stat engine (sub-project 3).
+- Calculating turns to research a technology. The model exposes base costs,
+  research modifiers and campaign constants; how the game combines them is
+  confirmed and implemented in the stat engine.
 - Display grouping or deduplication of near-identical records (for example,
   Alarielle's four character records). The model keeps every record; the wiki
   decides presentation.
@@ -75,7 +78,7 @@ Code lives in a `twwiki/model/` package:
 | `abilities.py` | Unit abilities, special-ability parameters, phases |
 | `units.py` | Units with base stats, weapons, abilities, availability |
 | `characters.py` | Characters, skills, skill trees |
-| `campaign.py` | Buildings, technologies, items, traits, factions, cultures |
+| `campaign.py` | Buildings, technologies and technology trees, items, traits, factions, cultures, difficulty levels, campaign variables |
 | `build.py` | Orchestration, reverse links, indexes, schema export, manifest |
 | `__main__.py` | CLI entry point |
 
@@ -90,8 +93,9 @@ model/<build_id>/
 ```
 
 Entity types: `unit`, `character`, `skill`, `ability`, `effect`,
-`effect_bundle`, `building_level`, `building_chain`, `technology`, `item`,
-`trait`, `faction`, `culture`, `subculture`. Roughly 45,000 entities in total.
+`effect_bundle`, `building_level`, `building_chain`, `technology`,
+`technology_tree`, `item`, `trait`, `faction`, `culture`, `subculture`,
+`difficulty_level`, `campaign_variable`. Roughly 46,000 entities in total.
 
 JSON Lines per type keeps files diffable line by line without writing 45,000
 separate files.
@@ -106,7 +110,8 @@ separate files.
 ```
 
 **EffectApplication**, used everywhere an effect is applied: skill levels,
-items, buildings, technologies, trait levels, effect bundles.
+items, buildings, technologies, trait levels, effect bundles, difficulty
+levels.
 
 ```
 { "effect": Link, "scope": "force_to_force_own", "value": 4.0,
@@ -117,6 +122,17 @@ items, buildings, technologies, trait levels, effect bundles.
 **Text**: display strings keep game markup (`[[img:…]]`, `[[col:…]]`,
 `[[sl:…]]`, `[[url:…]]`, `[[i]]`, `[[b]]`) and placeholders (`%+n`, `%n`)
 unchanged. A missing or empty loc entry is `null`.
+
+Text-replacement tokens `{{tr:<target>}}` are **substituted by the model**,
+because they are fixed strings rather than formatting. A target resolves to
+the loc entry whose key is exactly `<target>`, otherwise to
+`ui_text_replacements_localised_text_<target>`,
+`campaign_localised_strings_string_<target>`, `cultures_subcultures_<target>`
+or `random_localisation_strings_string_<target>`, in that order. Substitution
+repeats until no resolvable token remains (maximum depth 5). This resolves
+8,094 of the 8,169 distinct targets in the current build; unresolved tokens
+stay in the text unchanged. Tooltip tokens (`{{tt:…}}`) and game-context tokens
+(`{{Cco…}}`) depend on live campaign state and are left unchanged.
 
 ## Entity contents
 
@@ -200,11 +216,29 @@ global flag, and a list of `EffectApplication`.
   recruited.
 - **building_chain**: name, levels in order.
 - **technology** (1,869): name, description, icon, civil/engineering/military
-  and hidden flags, building level that unlocks it, tree node and links
-  (`technology_nodes`, `technology_node_links`), required technologies and
-  buildings, effects (`technology_effects_junction`). Research cost is out of
-  scope for this spec: `technologies` has no cost column and its source has
-  not been confirmed.
+  and hidden flags, building level that unlocks it, required technologies and
+  buildings, effects (`technology_effects_junction`), and **placements**: one
+  entry per tree node the technology appears in,
+  `{tree: Link, node_key, tier, indent, research_points_required,
+  cost_per_round, resource_cost}`. Cost lives on the node, not the technology:
+  112 technologies appear in more than one tree and 46 of those cost different
+  amounts (for example `wh2_dlc13_tech_emp_infantry_1_c` costs 900 in
+  `emp_civ_reworkd` and 700 in `emp_wulfhart`). The 221 technologies in no tree
+  have an empty `placements` list.
+- **technology_tree** (node sets in `technology_node_sets`): culture,
+  subculture and faction scope, colour, and nodes with their placement fields
+  plus required parents, UI group and pixel offsets, and links
+  (`technology_node_links`).
+- **resource_cost** (embedded, not a separate entity): `{key, treasury_cost,
+  pooled_resources: [{pooled_resource_factor, amount, context}],
+  trade_resources: [<trade resource key>]}` from `resource_costs`,
+  `resource_cost_pooled_resource_junctions` and
+  `resource_cost_trade_resource_junctions`. Used by 254 technology nodes, for
+  example `wh2_dlc09_tmb_tech_agent_unlock` costing 250 canopic jars.
+- **Research modifiers** need no special handling: they are ordinary effects
+  whose bonus targets carry `research_points` (shown as "Research rate", from
+  skills, technologies, buildings, bundles and items), `research_rate_mod`, or
+  `research_cost_mod`. Each effect's reverse links list every source.
 - **item** (2,671): name, description, type, category, subcategory, legendary
   flag, allowed agents and subtypes, required skills, effects
   (`ancillary_to_effects`).
@@ -212,6 +246,14 @@ global flag, and a list of `EffectApplication`.
   (`trait_level_effects`), antitraits.
 - **faction** (717), **culture**, **subculture**: names, hierarchy, and the
   units, lords and heroes each can use.
+- **difficulty_level** (7, from -3 to 3): effect applications from
+  `campaign_difficulty_handicap_effects`, split into `ai` and `human` lists,
+  each with its optional campaign restriction. For example AI factions get
+  `research_cost_mod` from these rows.
+- **campaign_variable** (1,052): key and value from `campaign_variables`, plus
+  per-campaign or per-difficulty overrides from
+  `campaigns_campaign_variables_junctions`. Includes
+  `base_research_points_per_turn` (100) and `minimum_research_rate` (5).
 
 ## Build flow
 
@@ -248,12 +290,14 @@ build.**
 | Situation | Behaviour |
 |---|---|
 | Loc entry missing or empty | Field is `null`; manifest counts missing names per type |
+| `{{tr:…}}` token with no matching loc entry | Token left in the text; manifest counts distinct unresolved targets |
 | Reference to a record that does not exist | Link kept with `name: null, missing: true`; manifest counts per link type |
 | Source table absent (failed to decode) | Entity type marked `partial` in manifest with the missing table; build continues |
 | Entity fails schema validation | Build fails; nothing is published |
 
 `manifest.json` contains: build id, model version, generated-at timestamp,
-entity counts per type, missing-name counts, missing-link counts, partial types.
+entity counts per type, missing-name counts, missing-link counts, unresolved
+`{{tr:…}}` target count, partial types.
 
 ## Testing
 
@@ -276,6 +320,13 @@ pytest, with three layers:
    - Training Field (`wh_main_emp_barracks_1`): chain
      `wh_main_EMPIRE_barracks`, level 0, create cost 750, culture
      `wh_main_emp_empire`.
+   - Technology `wh2_dlc13_tech_emp_infantry_1_c`: two placements, 900
+     research points in `emp_civ_reworkd` and 700 in `emp_wulfhart`.
+   - Tech node resource cost `wh2_dlc09_tmb_tech_agent_unlock`: treasury 0,
+     pooled resource `canopic_jars_technology` amount -250.
+   - Campaign variable `base_research_points_per_turn` = 100.
+   - Text token: the description of `wh_main_effect_technology_research_points`
+     renders as `Research rate: %+n`.
 3. **Whole-build checks**: entity counts equal source row counts (for example
    units = 2,609); every entity validates; missing-link rate per link type does
    not exceed the baseline recorded in the tests.
@@ -295,3 +346,13 @@ Tests that need the real database are skipped with a clear message when
 - Skill tree links are `REQUIRED` (10,470) or `SUBSET_REQUIRED` (10,120).
 - Building names come from `building_culture_variants_name_` + building +
   culture + subculture + faction, concatenated without separators.
+- Research cost is `technology_nodes.research_points_required` (0 to 1,600),
+  with `cost_per_round` on 68 nodes, `resource_cost` on 254 nodes and
+  `food_cost` unused. There are 1,843 nodes across 33 node sets.
+- Research modifier effects: `wh_main_effect_technology_research_points`
+  (`research_points`) is applied by 37 skill levels, 39 technologies, 205
+  buildings, 83 bundles and 23 items; `research_cost_mod` is applied only by
+  AI difficulty handicap rows; `research_rate_mod` by one skill. No campaign
+  overrides the research campaign variables.
+- 17,758 loc strings contain `{{…}}` tokens: 18,748 `tr` uses, 498 `tt`, and
+  about 1,000 game-context (`Cco…`) uses.
