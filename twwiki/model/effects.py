@@ -70,9 +70,15 @@ def bonus_targets(ctx: Context) -> dict[str, list[dict]]:
     for table in tables:
         cols = {r["column_name"]: r["ref_table"] for r in ctx.rows(
             "SELECT column_name, ref_table FROM _columns WHERE table_name = ?", [table])}
-        effect_col = next(c for c in EFFECT_COLUMNS if c in cols)
-        bonus_col = next(c for c in BONUS_COLUMNS if c in cols)
+        effect_col = next((c for c in EFFECT_COLUMNS if c in cols), None)
+        bonus_col = next((c for c in BONUS_COLUMNS if c in cols), None)
+        if effect_col is None or bonus_col is None:
+            ctx.partial.setdefault("effect", []).append(f"{table} (unrecognised columns)")
+            continue
         target_cols = [c for c in cols if c not in (effect_col, bonus_col)]
+        if len(target_cols) > 1:
+            ctx.partial.setdefault("effect", []).append(f"{table} (unrecognised columns)")
+            continue
         target_col = target_cols[0] if target_cols else None
         select = f'"{effect_col}" AS effect, "{bonus_col}" AS bonus'
         if target_col:

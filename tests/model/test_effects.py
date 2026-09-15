@@ -89,3 +89,45 @@ def test_missing_effects_table_is_partial():
     assert effects.catalog(ctx) == {"effect": {}, "effect_bundle": {}}
     assert effects.build(ctx) == {"effect": [], "effect_bundle": []}
     assert ctx.partial == {"effect": ["effects"], "effect_bundle": ["effect_bundles", "effect_bundles_to_effects_junctions"]}
+
+
+def test_unrecognised_bonus_table_is_skipped_and_recorded():
+    ctx = effects_context(
+        effect_bonus_value_weird_junction=[
+            {"thing": "e_attack", "other": "x"}
+        ],
+        _columns=(
+            columns("effect_bonus_value_basic_junction", ("effect", "effects"), ("bonus_value_id", "campaign_bonus_value_ids_basic"))
+            + columns("effect_bonus_value_ids_unit_sets", ("bonus_value_id", "x"), ("effect", "effects"), ("unit_set", "unit_sets"))
+            + columns("effect_bonus_value_unit_ability_junctions", ("effect", "effects"), ("bonus_value_id", "x"), ("unit_ability", "unit_abilities"))
+            + columns("effect_bonus_value_unit_set_unit_ability_junctions", ("bonus_value_id", "x"), ("effect", "effects"),
+                      ("unit_set_ability", "unit_set_unit_ability_junctions"))
+            + columns("effect_bonus_value_weird_junction", ("thing", None), ("other", None))
+        )
+    )
+    built = effects.build(ctx)
+    assert "effect_bonus_value_weird_junction (unrecognised columns)" in ctx.partial["effect"]
+    # e_attack's bonus_targets should not include the weird junction
+    attack_targets = {e["key"]: e for e in built["effect"]}["e_attack"]["bonus_targets"]
+    assert not any(t["source_table"] == "effect_bonus_value_weird_junction" for t in attack_targets)
+
+
+def test_bonus_table_with_two_target_columns_is_skipped_and_recorded():
+    ctx = effects_context(
+        effect_bonus_value_double_junction=[
+            {"effect": "e_attack", "bonus_value_id": "b", "first": "x", "second": "y"}
+        ],
+        _columns=(
+            columns("effect_bonus_value_basic_junction", ("effect", "effects"), ("bonus_value_id", "campaign_bonus_value_ids_basic"))
+            + columns("effect_bonus_value_ids_unit_sets", ("bonus_value_id", "x"), ("effect", "effects"), ("unit_set", "unit_sets"))
+            + columns("effect_bonus_value_unit_ability_junctions", ("effect", "effects"), ("bonus_value_id", "x"), ("unit_ability", "unit_abilities"))
+            + columns("effect_bonus_value_unit_set_unit_ability_junctions", ("bonus_value_id", "x"), ("effect", "effects"),
+                      ("unit_set_ability", "unit_set_unit_ability_junctions"))
+            + columns("effect_bonus_value_double_junction", ("effect", "effects"), ("bonus_value_id", "x"), ("first", None), ("second", None))
+        )
+    )
+    built = effects.build(ctx)
+    assert "effect_bonus_value_double_junction (unrecognised columns)" in ctx.partial["effect"]
+    # e_attack's bonus_targets should not include the double junction
+    attack_targets = {e["key"]: e for e in built["effect"]}["e_attack"]["bonus_targets"]
+    assert not any(t["source_table"] == "effect_bonus_value_double_junction" for t in attack_targets)
