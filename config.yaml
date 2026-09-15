@@ -5,6 +5,7 @@ paths:
   raw_dir: "./raw"
   db_path: "./twwiki.duckdb"
   site_dir: "./site"
+  model_dir: "./model"
 
 server:
   url: "ws://127.0.0.1:45127/ws"
