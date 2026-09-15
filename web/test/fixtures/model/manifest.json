@@ -1,0 +1,26 @@
+{
+  "build_id": "1eb25ce70f3a",
+  "model_version": 2,
+  "generated_at": "2026-09-15T21:16:59.060808+00:00",
+  "counts": {
+    "unit": 2,
+    "character": 1,
+    "skill": 51,
+    "ability": 1,
+    "effect": 226,
+    "effect_bundle": 0,
+    "building_level": 9,
+    "building_chain": 114,
+    "technology": 67,
+    "technology_tree": 1,
+    "item": 1,
+    "trait": 0,
+    "faction": 1,
+    "culture": 1,
+    "subculture": 2,
+    "difficulty_level": 0,
+    "campaign_variable": 0,
+    "region": 4,
+    "province": 1
+  }
+}

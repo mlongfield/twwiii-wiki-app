@@ -1,0 +1,240 @@
+{
+  "$defs": {
+    "EffectApplication": {
+      "additionalProperties": false,
+      "properties": {
+        "effect": {
+          "$ref": "#/$defs/Link"
+        },
+        "scope": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Scope"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        },
+        "source": {
+          "$ref": "#/$defs/Link"
+        },
+        "value_damaged": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value Damaged"
+        },
+        "value_ruined": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value Ruined"
+        },
+        "context_requirement": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Context Requirement"
+        },
+        "advancement_stage": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Advancement Stage"
+        }
+      },
+      "required": [
+        "effect",
+        "scope",
+        "value",
+        "source",
+        "value_damaged",
+        "value_ruined",
+        "context_requirement",
+        "advancement_stage"
+      ],
+      "title": "EffectApplication",
+      "type": "object"
+    },
+    "Link": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "title": "Type",
+          "type": "string"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name"
+        },
+        "missing": {
+          "title": "Missing",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "type",
+        "key",
+        "name",
+        "missing"
+      ],
+      "title": "Link",
+      "type": "object"
+    },
+    "SkillLevel": {
+      "additionalProperties": false,
+      "properties": {
+        "level": {
+          "title": "Level",
+          "type": "integer"
+        },
+        "unlocked_at_rank": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Unlocked At Rank"
+        },
+        "effects": {
+          "items": {
+            "$ref": "#/$defs/EffectApplication"
+          },
+          "title": "Effects",
+          "type": "array"
+        }
+      },
+      "required": [
+        "level",
+        "unlocked_at_rank",
+        "effects"
+      ],
+      "title": "SkillLevel",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "key": {
+      "title": "Key",
+      "type": "string"
+    },
+    "name": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Name"
+    },
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Description"
+    },
+    "image": {
+      "title": "Image",
+      "type": "string"
+    },
+    "icon_image": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Icon Image"
+    },
+    "unlocked_at_rank": {
+      "title": "Unlocked At Rank",
+      "type": "integer"
+    },
+    "is_background_skill": {
+      "title": "Is Background Skill",
+      "type": "boolean"
+    },
+    "levels": {
+      "items": {
+        "$ref": "#/$defs/SkillLevel"
+      },
+      "title": "Levels",
+      "type": "array"
+    },
+    "characters": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Link"
+      },
+      "title": "Characters",
+      "type": "array"
+    }
+  },
+  "required": [
+    "key",
+    "name",
+    "description",
+    "image",
+    "icon_image",
+    "unlocked_at_rank",
+    "is_background_skill",
+    "levels",
+    "characters"
+  ],
+  "title": "Skill",
+  "type": "object"
+}

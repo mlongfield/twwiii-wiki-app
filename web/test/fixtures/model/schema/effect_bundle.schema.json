@@ -1,0 +1,209 @@
+{
+  "$defs": {
+    "EffectApplication": {
+      "additionalProperties": false,
+      "properties": {
+        "effect": {
+          "$ref": "#/$defs/Link"
+        },
+        "scope": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Scope"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        },
+        "source": {
+          "$ref": "#/$defs/Link"
+        },
+        "value_damaged": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value Damaged"
+        },
+        "value_ruined": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value Ruined"
+        },
+        "context_requirement": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Context Requirement"
+        },
+        "advancement_stage": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Advancement Stage"
+        }
+      },
+      "required": [
+        "effect",
+        "scope",
+        "value",
+        "source",
+        "value_damaged",
+        "value_ruined",
+        "context_requirement",
+        "advancement_stage"
+      ],
+      "title": "EffectApplication",
+      "type": "object"
+    },
+    "Link": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "title": "Type",
+          "type": "string"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name"
+        },
+        "missing": {
+          "title": "Missing",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "type",
+        "key",
+        "name",
+        "missing"
+      ],
+      "title": "Link",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "key": {
+      "title": "Key",
+      "type": "string"
+    },
+    "title": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Title"
+    },
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Description"
+    },
+    "target": {
+      "title": "Target",
+      "type": "string"
+    },
+    "priority": {
+      "title": "Priority",
+      "type": "integer"
+    },
+    "icon": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Icon"
+    },
+    "icon_image": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Icon Image"
+    },
+    "is_global_effect": {
+      "title": "Is Global Effect",
+      "type": "boolean"
+    },
+    "effects": {
+      "items": {
+        "$ref": "#/$defs/EffectApplication"
+      },
+      "title": "Effects",
+      "type": "array"
+    }
+  },
+  "required": [
+    "key",
+    "title",
+    "description",
+    "target",
+    "priority",
+    "icon",
+    "icon_image",
+    "is_global_effect",
+    "effects"
+  ],
+  "title": "EffectBundle",
+  "type": "object"
+}

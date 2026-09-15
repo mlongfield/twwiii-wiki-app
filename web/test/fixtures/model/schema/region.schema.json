@@ -1,0 +1,254 @@
+{
+  "$defs": {
+    "Link": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "title": "Type",
+          "type": "string"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name"
+        },
+        "missing": {
+          "title": "Missing",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "type",
+        "key",
+        "name",
+        "missing"
+      ],
+      "title": "Link",
+      "type": "object"
+    },
+    "SlotResource": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name"
+        },
+        "icon_image": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Icon Image"
+        }
+      },
+      "required": [
+        "key",
+        "name",
+        "icon_image"
+      ],
+      "title": "SlotResource",
+      "type": "object"
+    },
+    "SlotTemplate": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "primary",
+            "secondary",
+            "port"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "variant": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Variant"
+        },
+        "resource": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SlotResource"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "permitted_chains": {
+          "items": {
+            "$ref": "#/$defs/Link"
+          },
+          "title": "Permitted Chains",
+          "type": "array"
+        }
+      },
+      "required": [
+        "key",
+        "role",
+        "variant",
+        "resource",
+        "permitted_chains"
+      ],
+      "title": "SlotTemplate",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "key": {
+      "title": "Key",
+      "type": "string"
+    },
+    "name": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Name"
+    },
+    "campaign": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Campaign"
+    },
+    "is_settlement": {
+      "title": "Is Settlement",
+      "type": "boolean"
+    },
+    "province": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Link"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "is_province_capital": {
+      "title": "Is Province Capital",
+      "type": "boolean"
+    },
+    "starting_owner": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Link"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "is_faction_capital": {
+      "title": "Is Faction Capital",
+      "type": "boolean"
+    },
+    "slot_cap": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Slot Cap"
+    },
+    "cultural_originator": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Link"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "region_groups": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Region Groups",
+      "type": "array"
+    },
+    "template_source": {
+      "enum": [
+        "special",
+        "generic"
+      ],
+      "title": "Template Source",
+      "type": "string"
+    },
+    "slot_templates": {
+      "items": {
+        "$ref": "#/$defs/SlotTemplate"
+      },
+      "title": "Slot Templates",
+      "type": "array"
+    }
+  },
+  "required": [
+    "key",
+    "name",
+    "campaign",
+    "is_settlement",
+    "province",
+    "is_province_capital",
+    "starting_owner",
+    "is_faction_capital",
+    "slot_cap",
+    "cultural_originator",
+    "region_groups",
+    "template_source",
+    "slot_templates"
+  ],
+  "title": "Region",
+  "type": "object"
+}

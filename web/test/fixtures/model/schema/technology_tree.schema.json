@@ -1,0 +1,301 @@
+{
+  "$defs": {
+    "Link": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "title": "Type",
+          "type": "string"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name"
+        },
+        "missing": {
+          "title": "Missing",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "type",
+        "key",
+        "name",
+        "missing"
+      ],
+      "title": "Link",
+      "type": "object"
+    },
+    "PooledResourceCost": {
+      "additionalProperties": false,
+      "properties": {
+        "pooled_resource_factor": {
+          "title": "Pooled Resource Factor",
+          "type": "string"
+        },
+        "amount": {
+          "title": "Amount",
+          "type": "integer"
+        },
+        "context": {
+          "title": "Context",
+          "type": "string"
+        }
+      },
+      "required": [
+        "pooled_resource_factor",
+        "amount",
+        "context"
+      ],
+      "title": "PooledResourceCost",
+      "type": "object"
+    },
+    "ResourceCost": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "treasury_cost": {
+          "title": "Treasury Cost",
+          "type": "integer"
+        },
+        "pooled_resources": {
+          "items": {
+            "$ref": "#/$defs/PooledResourceCost"
+          },
+          "title": "Pooled Resources",
+          "type": "array"
+        },
+        "trade_resources": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Trade Resources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "key",
+        "treasury_cost",
+        "pooled_resources",
+        "trade_resources"
+      ],
+      "title": "ResourceCost",
+      "type": "object"
+    },
+    "TreeLink": {
+      "additionalProperties": false,
+      "properties": {
+        "parent": {
+          "title": "Parent",
+          "type": "string"
+        },
+        "child": {
+          "title": "Child",
+          "type": "string"
+        },
+        "initial_descent_tiers": {
+          "title": "Initial Descent Tiers",
+          "type": "integer"
+        },
+        "visible_in_ui": {
+          "title": "Visible In Ui",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "parent",
+        "child",
+        "initial_descent_tiers",
+        "visible_in_ui"
+      ],
+      "title": "TreeLink",
+      "type": "object"
+    },
+    "TreeNode": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "technology": {
+          "$ref": "#/$defs/Link"
+        },
+        "tier": {
+          "title": "Tier",
+          "type": "integer"
+        },
+        "indent": {
+          "title": "Indent",
+          "type": "integer"
+        },
+        "research_points_required": {
+          "title": "Research Points Required",
+          "type": "integer"
+        },
+        "cost_per_round": {
+          "title": "Cost Per Round",
+          "type": "integer"
+        },
+        "resource_cost": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ResourceCost"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "required_parents": {
+          "title": "Required Parents",
+          "type": "integer"
+        },
+        "ui_group": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ui Group"
+        },
+        "pixel_offset_x": {
+          "title": "Pixel Offset X",
+          "type": "integer"
+        },
+        "pixel_offset_y": {
+          "title": "Pixel Offset Y",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "key",
+        "technology",
+        "tier",
+        "indent",
+        "research_points_required",
+        "cost_per_round",
+        "resource_cost",
+        "required_parents",
+        "ui_group",
+        "pixel_offset_x",
+        "pixel_offset_y"
+      ],
+      "title": "TreeNode",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "key": {
+      "title": "Key",
+      "type": "string"
+    },
+    "name": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Name"
+    },
+    "culture": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Link"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "subculture": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Link"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "faction": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Link"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "campaign": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Campaign"
+    },
+    "colour": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Colour"
+    },
+    "nodes": {
+      "items": {
+        "$ref": "#/$defs/TreeNode"
+      },
+      "title": "Nodes",
+      "type": "array"
+    },
+    "links": {
+      "items": {
+        "$ref": "#/$defs/TreeLink"
+      },
+      "title": "Links",
+      "type": "array"
+    }
+  },
+  "required": [
+    "key",
+    "name",
+    "culture",
+    "subculture",
+    "faction",
+    "campaign",
+    "colour",
+    "nodes",
+    "links"
+  ],
+  "title": "TechnologyTree",
+  "type": "object"
+}

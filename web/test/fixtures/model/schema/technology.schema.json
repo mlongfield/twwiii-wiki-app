@@ -1,0 +1,362 @@
+{
+  "$defs": {
+    "EffectApplication": {
+      "additionalProperties": false,
+      "properties": {
+        "effect": {
+          "$ref": "#/$defs/Link"
+        },
+        "scope": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Scope"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        },
+        "source": {
+          "$ref": "#/$defs/Link"
+        },
+        "value_damaged": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value Damaged"
+        },
+        "value_ruined": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value Ruined"
+        },
+        "context_requirement": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Context Requirement"
+        },
+        "advancement_stage": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Advancement Stage"
+        }
+      },
+      "required": [
+        "effect",
+        "scope",
+        "value",
+        "source",
+        "value_damaged",
+        "value_ruined",
+        "context_requirement",
+        "advancement_stage"
+      ],
+      "title": "EffectApplication",
+      "type": "object"
+    },
+    "Link": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "title": "Type",
+          "type": "string"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name"
+        },
+        "missing": {
+          "title": "Missing",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "type",
+        "key",
+        "name",
+        "missing"
+      ],
+      "title": "Link",
+      "type": "object"
+    },
+    "Placement": {
+      "additionalProperties": false,
+      "properties": {
+        "tree": {
+          "$ref": "#/$defs/Link"
+        },
+        "node_key": {
+          "title": "Node Key",
+          "type": "string"
+        },
+        "tier": {
+          "title": "Tier",
+          "type": "integer"
+        },
+        "indent": {
+          "title": "Indent",
+          "type": "integer"
+        },
+        "research_points_required": {
+          "title": "Research Points Required",
+          "type": "integer"
+        },
+        "cost_per_round": {
+          "title": "Cost Per Round",
+          "type": "integer"
+        },
+        "resource_cost": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ResourceCost"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "tree",
+        "node_key",
+        "tier",
+        "indent",
+        "research_points_required",
+        "cost_per_round",
+        "resource_cost"
+      ],
+      "title": "Placement",
+      "type": "object"
+    },
+    "PooledResourceCost": {
+      "additionalProperties": false,
+      "properties": {
+        "pooled_resource_factor": {
+          "title": "Pooled Resource Factor",
+          "type": "string"
+        },
+        "amount": {
+          "title": "Amount",
+          "type": "integer"
+        },
+        "context": {
+          "title": "Context",
+          "type": "string"
+        }
+      },
+      "required": [
+        "pooled_resource_factor",
+        "amount",
+        "context"
+      ],
+      "title": "PooledResourceCost",
+      "type": "object"
+    },
+    "ResourceCost": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "treasury_cost": {
+          "title": "Treasury Cost",
+          "type": "integer"
+        },
+        "pooled_resources": {
+          "items": {
+            "$ref": "#/$defs/PooledResourceCost"
+          },
+          "title": "Pooled Resources",
+          "type": "array"
+        },
+        "trade_resources": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Trade Resources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "key",
+        "treasury_cost",
+        "pooled_resources",
+        "trade_resources"
+      ],
+      "title": "ResourceCost",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "key": {
+      "title": "Key",
+      "type": "string"
+    },
+    "name": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Name"
+    },
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Description"
+    },
+    "long_description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Long Description"
+    },
+    "icon": {
+      "title": "Icon",
+      "type": "string"
+    },
+    "icon_image": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Icon Image"
+    },
+    "is_civil": {
+      "title": "Is Civil",
+      "type": "boolean"
+    },
+    "is_engineering": {
+      "title": "Is Engineering",
+      "type": "boolean"
+    },
+    "is_military": {
+      "title": "Is Military",
+      "type": "boolean"
+    },
+    "is_hidden": {
+      "title": "Is Hidden",
+      "type": "boolean"
+    },
+    "unlocked_by_building": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Link"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "required_technologies": {
+      "items": {
+        "$ref": "#/$defs/Link"
+      },
+      "title": "Required Technologies",
+      "type": "array"
+    },
+    "required_buildings": {
+      "items": {
+        "$ref": "#/$defs/Link"
+      },
+      "title": "Required Buildings",
+      "type": "array"
+    },
+    "effects": {
+      "items": {
+        "$ref": "#/$defs/EffectApplication"
+      },
+      "title": "Effects",
+      "type": "array"
+    },
+    "placements": {
+      "items": {
+        "$ref": "#/$defs/Placement"
+      },
+      "title": "Placements",
+      "type": "array"
+    }
+  },
+  "required": [
+    "key",
+    "name",
+    "description",
+    "long_description",
+    "icon",
+    "icon_image",
+    "is_civil",
+    "is_engineering",
+    "is_military",
+    "is_hidden",
+    "unlocked_by_building",
+    "required_technologies",
+    "required_buildings",
+    "effects",
+    "placements"
+  ],
+  "title": "Technology",
+  "type": "object"
+}
