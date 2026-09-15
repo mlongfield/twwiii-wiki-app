@@ -32,6 +32,7 @@ def evaluate_membership(units: list[dict], rules: list[dict]) -> dict[str, set[s
                 continue
             hits = index.get((field, value), set())
             matched = set(hits) if matched is None else matched & hits
+        # A row with no non-empty filters matches no units; guards against malformed catch-all rows.
         target = exclude if r["exclude"] else include
         target[r["unit_set"]] |= matched or set()
 

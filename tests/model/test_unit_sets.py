@@ -76,3 +76,16 @@ def test_resolve_unit_sets_missing_table_is_partial():
     ctx = make_context({"main_units": [{"unit": "gs", "caste": "x", "land_unit": ""}]})
     assert resolve_unit_sets(ctx) == {}
     assert ctx.partial["unit"] == ["land_units", "unit_sets", "unit_set_to_unit_junctions"]
+
+
+def test_row_without_filters_matches_no_units():
+    members = evaluate_membership(UNITS, [rule("blank")])
+    assert members["blank"] == set()
+    # A set with mixed include rows: one blank and one with filters
+    members = evaluate_membership(UNITS, [rule("mixed", cls="com"), rule("mixed")])
+    assert members["mixed"] == {"kf", "hag"}
+
+
+def test_exclude_only_set_has_no_members():
+    members = evaluate_membership(UNITS, [rule("only_ex", exclude=True, caste="lord")])
+    assert members["only_ex"] == set()
