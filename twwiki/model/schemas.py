@@ -40,3 +40,43 @@ class EffectApplication(Strict):
     value_ruined: float | None = None       # buildings only
     context_requirement: str | None = None  # buildings only
     advancement_stage: str | None = None    # effect bundles only
+
+
+# ---- Effects ---------------------------------------------------------------
+
+class BonusTarget(Strict):
+    bonus_value_id: str
+    source_table: str
+    target_table: str | None
+    target_key: str | None
+    target: Link | None
+    unit_set: str | None
+    ability: Link | None
+    attribute: str | None
+    phase: str | None
+
+
+@entity("effect")
+class Effect(Strict):
+    key: str
+    description: str | None
+    additional_tooltip: str | None
+    category: str
+    icon: str | None
+    icon_negative: str | None
+    priority: int
+    is_positive_value_good: bool
+    bonus_targets: list[BonusTarget]
+    sources: list[Link] = []
+
+
+@entity("effect_bundle")
+class EffectBundle(Strict):
+    key: str
+    title: str | None
+    description: str | None
+    target: str
+    priority: int
+    icon: str | None
+    is_global_effect: bool
+    effects: list[EffectApplication]

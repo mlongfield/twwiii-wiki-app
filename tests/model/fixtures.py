@@ -22,3 +22,10 @@ def make_context(tables: dict[str, list[dict]], loc: dict[str, str] | None = Non
     if loc:
         con.executemany("INSERT INTO loc VALUES (?, ?)", list(loc.items()))
     return Context(con=con, loc=LocResolver(dict(loc)))
+
+
+def register_catalogs(ctx: Context, *modules) -> None:
+    """Register entity names the way build.py does before building."""
+    for module in modules:
+        for entity_type, names in module.catalog(ctx).items():
+            ctx.links.register(entity_type, names)
