@@ -16,7 +16,10 @@ def skill_node(key, skill, tier, indent, **o):
     return row
 
 
-def character_context():
+def character_context(extra_items=None):
+    items = [{"set": "kf_tree", "item": "n_leader"}, {"set": "kf_tree", "item": "n_mentor"}]
+    if extra_items:
+        items.extend(extra_items)
     ctx = make_context({
         "agent_subtypes": [subtype(), subtype(key="wizard", associated_unit_override="wiz_unit",
                                              magic_lore="lore_fire", is_caster=True)],
@@ -34,7 +37,7 @@ def character_context():
             {"key": "orphan_tree", "agent_subtype_key": "", "agent_key": "champion", "faction_key": "", "subculture": "",
              "campaign_key": "", "for_army": False, "for_navy": False},
         ],
-        "character_skill_node_set_items": [{"set": "kf_tree", "item": "n_leader"}, {"set": "kf_tree", "item": "n_mentor"}],
+        "character_skill_node_set_items": items,
         "character_skill_nodes": [skill_node("n_leader", "leader_of_men", 7, 0),
                                   skill_node("n_mentor", "mentor", 30, 0, subculture="wh_main_sc_emp_empire")],
         "character_skill_node_links": [{"parent_key": "n_leader", "child_key": "n_mentor", "link_type": "REQUIRED",
@@ -111,3 +114,12 @@ def test_skill_levels_and_effects():
     assert [(l["level"], l["unlocked_at_rank"]) for l in mentor["levels"]] == [(1, None), (2, 12)]
     for skill in skills.values():
         schemas.ENTITY_MODELS["skill"].model_validate(skill)
+
+
+def test_skill_tree_items_pointing_at_missing_nodes_are_counted():
+    ctx = character_context(extra_items=[{"set": "kf_tree", "item": "n_gone"}])
+    built = characters.build(ctx)
+    kf = {c["key"]: c for c in built["character"]}["kf"]
+    assert [n["key"] for n in kf["skill_trees"][0]["nodes"]] == ["n_leader", "n_mentor"]
+    assert ctx.links.missing["skill_tree.missing_node"] == 1
+    schemas.ENTITY_MODELS["character"].model_validate(kf)

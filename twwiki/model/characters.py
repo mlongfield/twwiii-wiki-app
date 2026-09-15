@@ -8,11 +8,16 @@ from .context import Context, by_key, grouped, opt
 from .effects import effect_application
 
 
+def _land_units(ctx: Context) -> dict[str, str | None]:
+    """Load unit -> land_unit mapping, or empty dict if table missing."""
+    return {r["unit"]: opt(r["land_unit"]) for r in ctx.rows("SELECT unit, land_unit FROM main_units")} \
+        if ctx.table_exists("main_units") else {}
+
+
 def catalog(ctx: Context) -> dict[str, dict[str, str | None]]:
     out: dict[str, dict[str, str | None]] = {"character": {}, "skill": {}}
     if ctx.table_exists("agent_subtypes"):
-        land_unit = {r["unit"]: opt(r["land_unit"]) for r in ctx.rows("SELECT unit, land_unit FROM main_units")} \
-            if ctx.table_exists("main_units") else {}
+        land_unit = _land_units(ctx)
         for r in ctx.rows("SELECT key, associated_unit_override FROM agent_subtypes"):
             lu = land_unit.get(r["associated_unit_override"])
             name = (ctx.loc.text(f"land_units_onscreen_name_{lu}") if lu else None) \
@@ -33,8 +38,7 @@ def build(ctx: Context) -> dict[str, list[dict]]:
 def _characters(ctx: Context) -> list[dict]:
     if not ctx.require("character", "agent_subtypes"):
         return []
-    land_unit = {r["unit"]: opt(r["land_unit"]) for r in ctx.rows("SELECT unit, land_unit FROM main_units")} \
-        if ctx.table_exists("main_units") else {}
+    land_unit = _land_units(ctx)
     unit_abilities = grouped(ctx, "land_units_to_unit_abilites_junctions", "land_unit", "ability")
     permitted = grouped(ctx, "faction_agent_permitted_subtypes", "subtype", "faction, agent")
     trees = _skill_trees(ctx)
@@ -86,7 +90,11 @@ def _skill_trees(ctx: Context) -> dict[str, list[dict]]:
         if not subtype:
             ctx.links.missing["skill_tree.no_agent_subtype"] += 1
             continue
-        node_rows = sorted((nodes[i["item"]] for i in items.get(s["key"], []) if i["item"] in nodes),
+        set_items = items.get(s["key"], [])
+        for i in set_items:
+            if i["item"] not in nodes:
+                ctx.links.missing["skill_tree.missing_node"] += 1
+        node_rows = sorted((nodes[i["item"]] for i in set_items if i["item"] in nodes),
                            key=lambda n: (n["indent"], n["tier"], n["key"]))
         node_keys = {n["key"] for n in node_rows}
         by_character[subtype].append({
