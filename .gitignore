@@ -10,3 +10,7 @@ site/
 *.duckdb
 *.duckdb.wal
 *.partial/
+
+# Agent workspaces
+.superpowers/
+.worktrees/
