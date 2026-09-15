@@ -27,7 +27,8 @@ Decisions that constrain this spec and 2b:
   views**, a **region building browser** (pick a real campaign region),
   **site-wide search**, and **game icons and images**.
 - Images in v1: ability, skill, technology, effect and effect-bundle icons;
-  unit cards; building, resource and settlement-type icons; inline text icons.
+  unit cards and unit portraits; item icons; faction flags; building and
+  resource icons; inline text icons.
 - Region data comes **from the extracted tables now**; decoding the campaign
   start-position files (`startpos.esf`) is a later enhancement.
 
@@ -96,10 +97,29 @@ Verified against game build `fb20553df5af` and rpfm_server 5.0.6.
 | `building_culture_variants.icon` (folder `ui/buildings/icons`) | 1,177 | 1,176 |
 | `resources.icon_filepath` (full path, backslashes) | 29 | 29 |
 | `settlement_types.icon` (full path) | 16 | 16 |
-| inline `[[img:…]]` targets in all loc text (folder `ui/skins/default`, then unique file name) | 659 | 251 |
+| inline `[[img:…]]` targets in all loc text (`ui_tagged_images`, else the target as a path) | 659 | 646 |
+| `ancillary_types.ui_icon` via `ancillaries.type` (full path) | 521 | 521 |
+| `factions.flags_path` + `/mon_64.png` | 717 | 717 |
+| `units_custom_battle_permissions.general_portrait` (full path) | 450 | 450 |
 
 - `unit_variants` maps a land unit (`unit`) to `unit_card`, with an optional
-  `faction` override; Greatswords map to `wh_main_emp_greatswords`.
+  `faction` override; Greatswords map to `wh_main_emp_greatswords`. 718 of the
+  2,486 default cards are not in `ui/units/icons`; 695 of those are characters.
+- `units_custom_battle_permissions.general_portrait` (450 distinct files in
+  `ui/portraits/portholes`) gives a portrait for 1,119 units and covers 615
+  of the 718 missing cards (e.g. `wh3_dlc26_ogr_cha_paymaster` →
+  `ui/portraits/portholes/no_culture/ogr_paymaster_campaign_01_0.png`).
+- `ui_tagged_images` (589 rows: `key`, `image_path`) is the game's table for
+  inline `[[img:<key>]]` text icons, e.g. `icon_hero` →
+  `ui/skins/default/icon_agent_small.png`, `brt_aquitaine` →
+  `UI/Flags/wh_dlc05_brt_aquitaine/mon_24.png`. The remaining targets are
+  written as paths.
+- Items: `ancillaries.type` → `ancillary_types.ui_icon` (full path) resolves for
+  all 2,671 items (folders `ui/campaign ui/ancillaries`, `ui/campaign ui/mounts`,
+  `ui/battle ui/ability_icons`, `ui/skins/default`).
+- Factions: `factions.flags_path` (e.g. `ui\flags\wh_main_emp_empire`) holds
+  `mon_24.png`, `mon_64.png` and `mon_256.png` for all 717 factions.
+- Paths in tables can contain repeated separators (`UI\Flags\\wh_main_emp_empire`).
 
 ## Goals
 
@@ -116,8 +136,11 @@ Verified against game build `fb20553df5af` and rpfm_server 5.0.6.
 - Decoding `startpos.esf`, and therefore exact slots and resources for the 543
   settlements without a matched special template.
 - Matching the 169 special templates whose names are not region stems.
-- Lord portraits, 3D art, loading-screen art, DDS or TGA conversion.
-- Per-faction unit card overrides (only the land unit's default card).
+- Portraits other than a unit's custom-battle portrait (no faction-leader art,
+  no campaign character portraits), 3D art, loading-screen art, DDS or TGA
+  conversion.
+- Per-faction unit card and portrait overrides (only the default card and the
+  first custom-battle portrait).
 - Anything in the web app (2b): rendering, search indexing, tree layout.
 
 ## Architecture
@@ -135,8 +158,11 @@ A new module `twwiki/extract_images.py` runs after the tables inside
   `ExtractPackedFiles` with `["", {"GameFiles": [{"Folder": <folder>}]}, <staging>/images, false]`.
 - Initial `images.folders`: `ui/battle ui/ability_icons`,
   `ui/campaign ui/technologies`, `ui/campaign ui/skills`,
-  `ui/campaign ui/effect_bundles`, `ui/units/icons`, `ui/buildings/icons`,
-  `ui/skins`.
+  `ui/campaign ui/effect_bundles`, `ui/campaign ui/ancillaries`,
+  `ui/campaign ui/mounts`, `ui/campaign ui/climate_types`, `ui/units/icons`,
+  `ui/buildings/icons`, `ui/portraits/portholes`, `ui/flags`,
+  `ui/frontend ui/faction_bullets`, `ui/common ui/unit_category_icons`,
+  `ui/cheat_sheet`, `ui/skins` (about 26,000 files).
 - The extract manifest gains `images: {folders: {<folder>: <file count>}, failed_folders: [{folder, error}]}`.
 - The build id additionally covers the packs that contain files under the
   configured folders, identified from the dependency cache listing
@@ -240,16 +266,23 @@ cycle protection. Removals apply after additions.
 | `unit` | `card_image` | `unit_variants.unit_card` for the unit's land unit where `faction` is empty, in `ui/units/icons` |
 | `building_level` | `icon_image` | `building_culture_variants.icon` of the variant chosen for the name, in `ui/buildings/icons` |
 | `region.slot_templates[].resource` | `icon_image` | `resources.icon_filepath` |
+| `unit` | `portrait_image` | `units_custom_battle_permissions.general_portrait`, first non-empty by faction; the web app shows it where `card_image` is null |
+| `item` | `icon_image` | `ancillary_types.ui_icon` for the item's `type` |
+| `faction` | `flag_image` | `flags_path` + `/mon_64.png` |
 
 - **`images/inline.json`**: an object mapping every distinct `[[img:<target>]]`
-  target found in any entity text to its image path or null.
+  target found in any entity text to its image path or null. A target that is
+  a `ui_tagged_images` key resolves through that row's `image_path`; any other
+  target is resolved as a path (folder `ui/skins/default`, then unique file
+  name).
 
 ## Image resolution
 
 `ImageIndex.resolve(field: str, value: str | None, folders: list[str]) -> str | None`:
 
 1. Empty or null value → null (not counted).
-2. Normalise: lower-case, backslashes to forward slashes, trim.
+2. Normalise: lower-case, backslashes to forward slashes, collapse repeated
+   slashes, trim.
 3. Try, in order: the value as a path; each `folder/value`; each of those
    with `.png` appended when the value has no extension.
 4. Otherwise, if the file name (with `.png` appended when needed) occurs
@@ -314,8 +347,9 @@ pytest, following sub-project 1's layers.
   (`is_settlement` false); province capital; schema validation.
 - `building_chain.availability`: scoped rows, empty strings to null, sorting,
   de-duplication.
-- Image fields on ability, unit (`unit_variants`), trait (via category) and
-  building level.
+- Image fields on ability, skill, technology, effect, effect bundle, unit card
+  (`unit_variants`) and portrait, item (via type), faction flag, trait (via
+  category) and building level; inline targets through `ui_tagged_images`.
 - `write_output`: copies only used images, writes `inline.json`, manifest
   `images` section; with images unavailable, image fields are null and the
   build succeeds.
@@ -338,6 +372,11 @@ when the build has no `images/` directory):**
   `ui/units/icons/wh_main_emp_greatswords.png`.
 - `ability` `wh2_dlc09_army_abilities_barrage_of_the_legion`: `icon_image`
   `ui/battle ui/ability_icons/wh2_dlc09_army_abilities_barrage_of_the_legion.png`.
+- `item` `wh2_dlc09_anc_magic_standard_banner_of_the_hidden_dead`: `icon_image`
+  `ui/campaign ui/ancillaries/wh2_dlc09_anc_magic_standard_banner_of_the_hidden_dead.png`.
+- `faction` `wh_main_emp_empire`: `flag_image` `ui/flags/wh_main_emp_empire/mon_64.png`.
+- `unit` `wh3_dlc26_ogr_cha_paymaster`: `portrait_image`
+  `ui/portraits/portholes/no_culture/ogr_paymaster_campaign_01_0.png`.
 - Missing and ambiguous image counts per field do not exceed
   `tests/model/missing_images_baseline.json`, generated from the first real
   build.
@@ -346,5 +385,6 @@ when the build has no `images/` directory):**
 
 - Decode `startpos.esf` for exact slots, settlement types and resources of all
   settlements.
-- Per-faction unit card overrides and lord portraits.
+- Per-faction unit card and portrait overrides; faction-leader and campaign
+  character portraits.
 - Generic orphan-junction-row counter (offered as a separate task).

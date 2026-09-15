@@ -18,7 +18,7 @@
 - Every image field name ends in `_image` and holds a path relative to `model/<build_id>/images/` (lower-case, forward slashes) or null.
 - Gaps in game data are counted (manifest or `ctx.links.missing`), never silently dropped. Only schema validation failures and image copy failures stop a model build.
 - `raw/` is append-only per build; never delete or overwrite a previous build's directory.
-- Do not change RPFM settings (in particular do not enable the ESF editor). Out of scope: `startpos.esf`, lord portraits, 3D art, DDS/TGA conversion, per-faction unit cards, the web app.
+- Do not change RPFM settings (in particular do not enable the ESF editor). Out of scope: `startpos.esf`, portraits other than units' custom-battle portraits, 3D art, DDS/TGA conversion, per-faction unit cards and portraits, the web app.
 - Code style: match the surrounding modules (module docstring, `from __future__ import annotations`, `opt()` for RPFM empty strings, `by_key`/`grouped` helpers, links only via `ctx.links.link`).
 - Commit with a heredoc message ending in the trailer line `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>`.
 - Work on branch `feature/wiki-data-regions-images`. Do not push.
@@ -34,7 +34,7 @@
 | `twwiki/model/regions.py` (new) | `region` and `province` entities; slot-template matching; chain-set resolution |
 | `twwiki/model/context.py` | `Context.images`, `Context.manifest_sections` |
 | `twwiki/model/schemas.py` | New `*_image` fields, `ChainAvailability`, `SlotResource`, `SlotTemplate`, `Region`, `Province` |
-| `twwiki/model/{abilities,characters,technologies,effects,items,units,buildings}.py` | Resolve their image fields; buildings also availability |
+| `twwiki/model/{abilities,characters,technologies,effects,items,units,buildings,factions}.py` | Resolve their image fields; buildings also availability |
 | `twwiki/model/build.py` | Register `regions`; copy images; `images/inline.json`; manifest sections; `run(..., raw_root)` |
 | `twwiki/model/__main__.py` | Pass `paths.raw_dir` to `run` |
 | `twwiki/extract.py`, `twwiki/rpfm_client.py`, `config.yaml` | Image export wired into extraction |
@@ -87,7 +87,7 @@ def index():
 
 
 def test_normalise_lowercases_and_uses_forward_slashes():
-    assert normalise(" UI\\Campaign UI\\Skills\\X.PNG ") == "ui/campaign ui/skills/x.png"
+    assert normalise(" UI\\Campaign UI\\\\Skills\\X.PNG ") == "ui/campaign ui/skills/x.png"
 
 
 def test_resolves_full_path_with_backslashes():
@@ -201,7 +201,7 @@ IMG_TOKEN = re.compile(r"\[\[img:([^\]]+)\]\]")
 
 
 def normalise(path: str) -> str:
-    return path.strip().replace("\\", "/").lstrip("/").lower()
+    return re.sub(r"/+", "/", path.strip().replace("\\", "/")).lstrip("/").lower()
 
 
 class ImageIndex:
@@ -553,8 +553,16 @@ images:
     - "ui/campaign ui/technologies"
     - "ui/campaign ui/skills"
     - "ui/campaign ui/effect_bundles"
+    - "ui/campaign ui/ancillaries"
+    - "ui/campaign ui/mounts"
+    - "ui/campaign ui/climate_types"
     - "ui/units/icons"
     - "ui/buildings/icons"
+    - "ui/portraits/portholes"
+    - "ui/flags"
+    - "ui/frontend ui/faction_bullets"
+    - "ui/common ui/unit_category_icons"
+    - "ui/cheat_sheet"
     - "ui/skins"
 ```
 
@@ -579,12 +587,12 @@ EOF
 ### Task 3: Image fields on existing entities
 
 **Files:**
-- Modify: `twwiki/model/schemas.py`, `twwiki/model/abilities.py`, `twwiki/model/characters.py`, `twwiki/model/technologies.py`, `twwiki/model/effects.py`, `twwiki/model/items.py`, `twwiki/model/units.py`, `twwiki/model/buildings.py`
-- Test: `tests/model/test_image_fields.py`
+- Modify: `twwiki/model/schemas.py`, `twwiki/model/abilities.py`, `twwiki/model/characters.py`, `twwiki/model/technologies.py`, `twwiki/model/effects.py`, `twwiki/model/items.py`, `twwiki/model/units.py`, `twwiki/model/buildings.py`, `twwiki/model/factions.py`
+- Test: `tests/model/test_image_fields.py`, `tests/model/test_build.py` (its hand-written faction gains `flag_image`)
 
 **Interfaces:**
 - Consumes: `ctx.images.resolve(field, value, folders)` and the folder constants from Task 1.
-- Produces (schema fields, all `str | None`): `Effect.icon_image`, `Effect.icon_negative_image`, `EffectBundle.icon_image`, `Ability.icon_image`, `Skill.icon_image`, `Technology.icon_image`, `Trait.icon_image`, `Unit.card_image`, `BuildingLevel.icon_image`. Count field names: `ability.icon_image`, `skill.icon_image`, `technology.icon_image`, `effect.icon_image`, `effect.icon_negative_image`, `effect_bundle.icon_image`, `trait.icon_image`, `unit.card_image`, `building_level.icon_image`.
+- Produces (schema fields, all `str | None`): `Effect.icon_image`, `Effect.icon_negative_image`, `EffectBundle.icon_image`, `Ability.icon_image`, `Skill.icon_image`, `Technology.icon_image`, `Trait.icon_image`, `Unit.card_image`, `Unit.portrait_image`, `Item.icon_image`, `Faction.flag_image`, `BuildingLevel.icon_image`. Count field names: `ability.icon_image`, `skill.icon_image`, `technology.icon_image`, `effect.icon_image`, `effect.icon_negative_image`, `effect_bundle.icon_image`, `trait.icon_image`, `unit.card_image`, `unit.portrait_image`, `item.icon_image`, `faction.flag_image`, `building_level.icon_image`.
 - Produces: `buildings.level_variant(ctx, level_key, variants) -> dict | None` (the variant that names a level).
 
 - [ ] **Step 1: Write the failing tests**
@@ -598,10 +606,11 @@ import tests.model.test_abilities as t_abilities
 import tests.model.test_buildings as t_buildings
 import tests.model.test_characters as t_characters
 import tests.model.test_effects as t_effects
+import tests.model.test_factions as t_factions
 import tests.model.test_items as t_items
 import tests.model.test_technologies as t_technologies
 import tests.model.test_units as t_units
-from twwiki.model import abilities, buildings, characters, effects, items, schemas, technologies, units
+from twwiki.model import abilities, buildings, characters, effects, factions, items, schemas, technologies, units
 from twwiki.model.images import ImageIndex
 
 
@@ -665,17 +674,47 @@ def test_trait_icon_image_comes_from_its_category():
         schemas.ENTITY_MODELS["trait"].model_validate(t)
 
 
-def test_unit_card_image_uses_the_variant_without_a_faction():
-    ctx = with_images(t_units.unit_context({"unit_variants": [
-        {"faction": "", "name": "", "unit": "gs_land", "variant": "", "unit_card": "gs_card"},
-        {"faction": "reikland", "name": "", "unit": "arch_land", "variant": "", "unit_card": "reik_archers"},
-    ]}), "ui/units/icons/gs_card.png", "ui/units/icons/reik_archers.png")
+def test_unit_card_uses_the_default_variant_and_portrait_the_first_by_faction():
+    ctx = with_images(t_units.unit_context({
+        "unit_variants": [
+            {"faction": "", "name": "", "unit": "gs_land", "variant": "", "unit_card": "gs_card"},
+            {"faction": "reikland", "name": "", "unit": "arch_land", "variant": "", "unit_card": "reik_archers"},
+        ],
+        "units_custom_battle_permissions": [
+            {"faction": "reikland", "unit": "gs", "general_portrait": ""},
+            {"faction": "reikland", "unit": "archers",
+             "general_portrait": "ui\\portraits\\portholes\\no_culture\\reik_captain_0.png"},
+            {"faction": "averland", "unit": "archers",
+             "general_portrait": "ui/portraits/portholes/no_culture/aver_captain_0.png"},
+        ],
+    }), "ui/units/icons/gs_card.png", "ui/units/icons/reik_archers.png",
+        "ui/portraits/portholes/no_culture/reik_captain_0.png", "ui/portraits/portholes/no_culture/aver_captain_0.png")
     built = {u["key"]: u for u in units.build(ctx)["unit"]}
     assert built["gs"]["card_image"] == "ui/units/icons/gs_card.png"
+    assert built["gs"]["portrait_image"] is None
     assert built["archers"]["card_image"] is None
-    assert built["ship"]["card_image"] is None
+    assert built["archers"]["portrait_image"] == "ui/portraits/portholes/no_culture/aver_captain_0.png"
+    assert built["ship"]["card_image"] is None and built["ship"]["portrait_image"] is None
     for u in built.values():
         schemas.ENTITY_MODELS["unit"].model_validate(u)
+
+
+def test_item_icon_image_comes_from_its_type():
+    ctx = with_images(t_items.items_context(), "ui/campaign ui/ancillaries/arcane_item.png")
+    ctx.con.execute("CREATE TABLE ancillary_types (type VARCHAR, ui_icon VARCHAR)")
+    ctx.con.execute("INSERT INTO ancillary_types VALUES (?, ?)",
+                    ["wh_main_anc_arcane_item", "ui/campaign ui/ancillaries/arcane_item.png"])
+    built = {i["key"]: i for i in items.build(ctx)["item"]}
+    assert built["blue_khepra"]["icon_image"] == "ui/campaign ui/ancillaries/arcane_item.png"
+    for i in built.values():
+        schemas.ENTITY_MODELS["item"].model_validate(i)
+
+
+def test_faction_flag_image():
+    ctx = with_images(t_factions.factions_context(), "ui/flags/reikland/mon_64.png")
+    faction = factions.build(ctx)["faction"][0]
+    assert faction["flag_image"] == "ui/flags/reikland/mon_64.png"
+    schemas.ENTITY_MODELS["faction"].model_validate(faction)
 
 
 def test_building_level_icon_image_uses_the_naming_variant():
@@ -705,7 +744,9 @@ In `twwiki/model/schemas.py`:
 - `Effect`: after `icon_negative: str | None` add `icon_image: str | None` and `icon_negative_image: str | None`.
 - `EffectBundle`: after `icon: str | None` add `icon_image: str | None`.
 - `Ability`: after `icon: str` add `icon_image: str | None`.
-- `Unit`: after `land_unit: str | None` add `card_image: str | None`.
+- `Unit`: after `land_unit: str | None` add `card_image: str | None` and `portrait_image: str | None`.
+- `Item`: after `explanation: str | None` add `icon_image: str | None`.
+- `Faction`: after `flags_path: str` add `flag_image: str | None`.
 - `Skill`: after `image: str` add `icon_image: str | None`.
 - `Technology`: after `icon: str` add `icon_image: str | None`.
 - `BuildingLevel`: after `short_description: str | None` add `icon_image: str | None`.
@@ -757,18 +798,47 @@ and after `"icon": r["icon"],` add:
                 "trait.icon_image", categories[r["icon"]]["icon_path"] if r["icon"] in categories else None),
 ```
 
+In `_items()`, after `required = grouped(...)` add:
+
+```python
+    types = by_key(ctx, "ancillary_types", "type")
+```
+
+and after `"explanation": ctx.loc.text(f"ancillaries_explanation_text_{key}"),` add:
+
+```python
+            "icon_image": ctx.images.resolve(
+                "item.icon_image", types[r["type"]]["ui_icon"] if r["type"] in types else None),
+```
+
+`twwiki/model/factions.py` — in the faction dict after `"flags_path": r["flags_path"],` add:
+
+```python
+                "flag_image": ctx.images.resolve(
+                    "faction.flag_image", f"{r['flags_path']}/mon_64.png" if opt(r["flags_path"]) else None),
+```
+
+`tests/model/test_build.py` — in `fake_faction`, change `"primary_colour": None, "units": [], "characters": []}` to `"primary_colour": None, "flag_image": None, "units": [], "characters": []}`.
+
 `twwiki/model/units.py` — add `from .images import UNIT_CARDS`; in `build()` after `unit_sets = resolve_unit_sets(ctx)` add:
 
 ```python
     # Faction-specific cards are out of scope; take the unit's default card.
     cards = {r["unit"]: r["unit_card"] for r in ctx.rows(
         "SELECT unit, unit_card FROM unit_variants WHERE faction = ''")} if ctx.table_exists("unit_variants") else {}
+    # Characters mostly have no card; their custom-battle portrait stands in.
+    portraits: dict[str, str] = {}
+    if ctx.table_exists("units_custom_battle_permissions"):
+        for p in ctx.rows("SELECT * FROM units_custom_battle_permissions ORDER BY unit, faction"):
+            if opt(p.get("general_portrait")) and p["unit"] not in portraits:
+                portraits[p["unit"]] = p["general_portrait"]
 ```
 
 and after `"land_unit": lu["key"] if lu else None,` add:
 
 ```python
             "card_image": ctx.images.resolve("unit.card_image", cards.get(lu["key"]) if lu else None, UNIT_CARDS),
+            "portrait_image": ctx.images.resolve("unit.portrait_image", portraits.get(key)),
 ```
 
 `twwiki/model/buildings.py` — add `from .images import BUILDING_ICONS`; replace `level_name` with:
@@ -809,7 +879,7 @@ and after `"short_description": short,` add:
 - [ ] **Step 5: Run tests**
 
 Run: `uv run pytest tests/model/test_image_fields.py -v`
-Expected: PASS (7 tests)
+Expected: PASS (9 tests)
 
 Run: `uv run pytest`
 Expected: all tests pass (real-data tests build every entity with the new fields; images are unavailable there, so all image fields are null).
@@ -817,9 +887,9 @@ Expected: all tests pass (real-data tests build every entity with the new fields
 - [ ] **Step 6: Commit**
 
 ```bash
-git add twwiki/model tests/model/test_image_fields.py
+git add twwiki/model tests/model/test_image_fields.py tests/model/test_build.py
 git commit -F - <<'EOF'
-feat(model): resolve icon and unit card images on entities
+feat(model): resolve icons, unit cards and portraits, item icons and faction flags
 
 Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
 EOF
@@ -1552,23 +1622,29 @@ def write_images(root, *paths):
 
 def test_write_output_copies_used_images_and_writes_inline_map(tmp_path):
     raw = tmp_path / "raw_images"
-    write_images(raw, "ui/units/icons/gs.png", "ui/units/icons/unused.png", "ui/skins/default/icon_hero.png")
-    ctx = make_context({"dummy": [{"a": 1}]})
+    write_images(raw, "ui/units/icons/gs.png", "ui/units/icons/unused.png", "ui/skins/default/icon_agent_small.png",
+                 "ui/battle ui/ability_icons/causes_fear.png")
+    ctx = make_context({"dummy": [{"a": 1}], "ui_tagged_images": [
+        {"key": "icon_hero", "image_path": "UI\\Skins\\default\\icon_agent_small.png"}]})
     ctx.images = ImageIndex.scan(raw)
     assert ctx.images.resolve("unit.card_image", "gs", ("ui/units/icons",)) == "ui/units/icons/gs.png"
-    entities = build.build_all(ctx, modules=[fake_module(flags_path="[[img:icon_hero]] [[img:icon_gone]]")])
+    entities = build.build_all(ctx, modules=[fake_module(
+        flags_path="[[img:icon_hero]] [[img:icon_gone]] [[img:ui/Battle UI/ability_icons/causes_fear.png]]")])
 
     out = build.write_output(ctx, entities, tmp_path / "model", "abc123")
 
     assert (out / "images" / "ui/units/icons/gs.png").read_bytes() == b"png"
-    assert (out / "images" / "ui/skins/default/icon_hero.png").exists()
+    assert (out / "images" / "ui/skins/default/icon_agent_small.png").exists()
     assert not (out / "images" / "ui/units/icons/unused.png").exists()
     assert json.loads((out / "images" / "inline.json").read_text(encoding="utf-8")) == {
-        "icon_gone": None, "icon_hero": "ui/skins/default/icon_hero.png"}
+        "icon_gone": None,
+        "icon_hero": "ui/skins/default/icon_agent_small.png",
+        "ui/Battle UI/ability_icons/causes_fear.png": "ui/battle ui/ability_icons/causes_fear.png",
+    }
     images = json.loads((out / "manifest.json").read_text(encoding="utf-8"))["images"]
-    assert images["available"] is True and images["files_copied"] == 2
+    assert images["available"] is True and images["files_copied"] == 3
     assert images["fields"]["unit.card_image"] == {"referenced": 1, "resolved": 1, "missing": 0, "ambiguous": 0}
-    assert images["fields"]["inline"] == {"referenced": 2, "resolved": 1, "missing": 1, "ambiguous": 0}
+    assert images["fields"]["inline"] == {"referenced": 3, "resolved": 2, "missing": 1, "ambiguous": 0}
 
 
 def test_write_output_without_images_marks_them_unavailable(tmp_path):
@@ -1617,13 +1693,16 @@ Expected: FAIL (`inline.json` missing, `run()` takes 2 positional arguments)
 
 In `twwiki/model/build.py`:
 
-1. Add `from .images import INLINE_ICONS, ImageIndex, inline_targets` after `from .context import Context`.
+1. Change `from .context import Context` to `from .context import Context, by_key` and add `from .images import INLINE_ICONS, ImageIndex, inline_targets` after it.
 2. Set `MODEL_VERSION = 2`.
 3. In `write_output`, change `for sub in ("entities", "index", "schema"):` to `for sub in ("entities", "index", "schema", "images"):`.
 4. In `write_output`, directly before `manifest = {`, add:
 
 ```python
-    inline = {target: ctx.images.resolve("inline", target, INLINE_ICONS) for target in inline_targets(entities)}
+    # [[img:<key>]] names a ui_tagged_images row; anything else is written as a path.
+    tagged = {k: r["image_path"] for k, r in by_key(ctx, "ui_tagged_images", "key").items()}
+    inline = {target: ctx.images.resolve("inline", tagged.get(target.strip(), target), INLINE_ICONS)
+              for target in inline_targets(entities)}
     (staging / "images" / "inline.json").write_text(
         json.dumps(inline, ensure_ascii=False, indent=1, sort_keys=True), encoding="utf-8")
     files_copied = ctx.images.copy_used(staging / "images")
@@ -1702,7 +1781,7 @@ Expected: JSON containing `"version"`. If the request fails, stop and report BLO
 - [ ] **Step 2: Extract**
 
 Run: `uv run python -m twwiki.extract`
-Expected: a new `raw/<build_id>/` (different from `fb20553df5af`, because the image packs are now part of the id) whose `manifest.json` has `"undecodable": []`, `images.failed_folders == []` and `images.folders` counts close to: ability_icons 2399, technologies 1506, skills 793, effect_bundles 1049, units/icons 1023, buildings/icons 1363, ui/skins 12075. Check with:
+Expected: a new `raw/<build_id>/` (different from `fb20553df5af`, because the image packs are now part of the id) whose `manifest.json` has `"undecodable": []`, `images.failed_folders == []` and `images.folders` counts close to: ability_icons 2399, technologies 1506, skills 793, effect_bundles 1049, ancillaries 352, mounts 120, climate_types 11, units/icons 1023, buildings/icons 1363, portraits/portholes 2153, flags 3088, faction_bullets 94, unit_category_icons 826, cheat_sheet 19, ui/skins 12075. Check with:
 
 ```bash
 uv run python -c "import json,sys; from pathlib import Path; from twwiki.load import latest_build; m=json.loads((latest_build(Path('raw'))/'manifest.json').read_text(encoding='utf-8')); print(m['build_id'], len(m['tables']), m['undecodable'], m['images'])"
@@ -1754,6 +1833,16 @@ def test_unit_card_and_ability_icon_images(model):
     assert by_type["unit"]["wh_main_emp_inf_greatswords"]["card_image"] == "ui/units/icons/wh_main_emp_greatswords.png"
     assert by_type["ability"]["wh2_dlc09_army_abilities_barrage_of_the_legion"]["icon_image"] == \
         "ui/battle ui/ability_icons/wh2_dlc09_army_abilities_barrage_of_the_legion.png"
+
+
+def test_item_icon_faction_flag_and_unit_portrait_images(model):
+    ctx, by_type = model
+    require_images(ctx)
+    assert by_type["item"]["wh2_dlc09_anc_magic_standard_banner_of_the_hidden_dead"]["icon_image"] == \
+        "ui/campaign ui/ancillaries/wh2_dlc09_anc_magic_standard_banner_of_the_hidden_dead.png"
+    assert by_type["faction"]["wh_main_emp_empire"]["flag_image"] == "ui/flags/wh_main_emp_empire/mon_64.png"
+    assert by_type["unit"]["wh3_dlc26_ogr_cha_paymaster"]["portrait_image"] == \
+        "ui/portraits/portholes/no_culture/ogr_paymaster_campaign_01_0.png"
 
 
 def test_missing_images_do_not_exceed_baseline(model):
@@ -1810,8 +1899,11 @@ manifest and extraction carries on.
 The model resolves each image reference in the tables (bare names, names with
 `.png`, full paths with backslashes) against those files, copies only the
 referenced ones to `model/<build_id>/images/`, and writes
-`images/inline.json` mapping every `[[img:…]]` text icon to a file or null.
-Image fields end in `_image`. The manifest's `images` section counts
+`images/inline.json` mapping every `[[img:…]]` text icon to a file or null
+(a tag is looked up in the `ui_tagged_images` table; anything else is treated
+as a path). Image fields end in `_image`; `unit.portrait_image` is the
+custom-battle portrait, which stands in for characters that have no
+`card_image`. The manifest's `images` section counts
 referenced, resolved, missing and ambiguous references per field. Without
 `raw/<build_id>/images` the build still succeeds with every image field null.
 ```
