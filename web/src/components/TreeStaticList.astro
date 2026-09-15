@@ -1,0 +1,26 @@
+---
+import type { TreeLayout } from "../lib/treeLayout";
+
+interface Props {
+  layout: TreeLayout;
+  title: string;
+}
+
+const { layout, title } = Astro.props;
+---
+<details class="tree-static">
+  <summary>{title} (text list)</summary>
+  {layout.groups.map((group, index) => (
+    <div>
+      <h3>Line {index + 1}</h3>
+      <ul class="plain-list">
+        {group.nodes.map((node) => (
+          <li>
+            <strong>{node.url ? <a href={node.url}>{node.label}</a> : node.label}</strong>
+            <div set:html={node.detailHtml} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  ))}
+</details>

@@ -1,8 +1,11 @@
 ---
 import { getSite } from "../../data/model";
+import { technologyTreeLayout } from "../../data/trees";
+import TreeView from "../../islands/TreeView.tsx";
 import EntityLink from "../EntityLink.astro";
 import Section from "../Section.astro";
 import StatTable from "../StatTable.astro";
+import TreeStaticList from "../TreeStaticList.astro";
 
 interface Props {
   entityKey: string;
@@ -10,6 +13,7 @@ interface Props {
 
 const site = await getSite();
 const tree = site.model.entities.technology_tree.get(Astro.props.entityKey)!;
+const layout = technologyTreeLayout(site, tree);
 ---
 <Section title="Scope">
   <StatTable rows={[["Campaign", tree.campaign], ["Technologies", tree.nodes.length]]} />
@@ -17,13 +21,8 @@ const tree = site.model.entities.technology_tree.get(Astro.props.entityKey)!;
   {tree.subculture && <p>Subculture: <EntityLink link={tree.subculture} /></p>}
   {tree.faction && <p>Faction: <EntityLink link={tree.faction} /></p>}
 </Section>
-<Section title="Technologies">
-  <table>
-    <thead><tr><th>Technology</th><th>Tier</th><th>Row</th><th>Research points</th></tr></thead>
-    <tbody>
-      {tree.nodes.map((n) => (
-        <tr><td><EntityLink link={n.technology} /></td><td>{n.tier}</td><td>{n.indent}</td><td>{n.research_points_required}</td></tr>
-      ))}
-    </tbody>
-  </table>
-</Section>
+<section class="panel wide-panel">
+  <h2>Technologies</h2>
+  <TreeView client:visible layout={layout} ariaLabel={`Technology tree ${tree.key}`} />
+  <TreeStaticList layout={layout} title="All technologies" />
+</section>
