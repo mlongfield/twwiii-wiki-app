@@ -96,7 +96,7 @@ Verified against game build `fb20553df5af` and rpfm_server 5.0.6.
 | `building_culture_variants.icon` (folder `ui/buildings/icons`) | 1,177 | 1,176 |
 | `resources.icon_filepath` (full path, backslashes) | 29 | 29 |
 | `settlement_types.icon` (full path) | 16 | 16 |
-| inline `[[img:…]]` targets | 235 | 124 |
+| inline `[[img:…]]` targets in all loc text (folder `ui/skins/default`, then unique file name) | 659 | 251 |
 
 - `unit_variants` maps a land unit (`unit`) to `unit_card`, with an optional
   `faction` override; Greatswords map to `wh_main_emp_greatswords`.
@@ -291,7 +291,7 @@ Manifest `images` section:
 | Image file name matches several files | Field null; counted as `ambiguous` for that field |
 | `raw/<build_id>/images` absent | All image fields null; manifest `images.available: false`; build succeeds |
 | Region's `owning_faction` id does not resolve | `starting_owner` null; counted as missing link `region.starting_owner->faction` |
-| Region has no province row | `province` null; counted as missing link `region.province->province` |
+| Settlement (`is_settlement` true) has no province row | `province` null; counted as missing link `region.province->province` (seas and rivers never have one and are not counted) |
 | Special slot template matches no region | Counted in manifest `regions.special_templates_unmatched` |
 | Chain-set cycle | Cycle broken; no error (guarded recursion) |
 | Copying an image fails | Build fails; nothing is published |
