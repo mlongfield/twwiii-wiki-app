@@ -449,3 +449,36 @@ class TechnologyTree(Strict):
     colour: str | None
     nodes: list[TreeNode]
     links: list[TreeLink]
+
+
+# ---- Buildings -------------------------------------------------------------
+
+@entity("building_level")
+class BuildingLevel(Strict):
+    key: str
+    name: str | None
+    short_description: str | None
+    chain: Link | None
+    level: int
+    create_time: int
+    create_cost: int
+    upkeep_cost: int
+    development_point_cost: int
+    food_cost: int
+    only_in_capital: bool
+    faction_unique: bool
+    can_convert: bool
+    visible_in_ui: bool
+    resource_cost: ResourceCost | None
+    cultures: list[str]
+    effects: list[EffectApplication]
+    units_recruited: list[Link]
+
+
+@entity("building_chain")
+class BuildingChain(Strict):
+    key: str
+    name: str | None
+    category: str | None
+    in_encyclopedia: bool
+    levels: list[Link]
