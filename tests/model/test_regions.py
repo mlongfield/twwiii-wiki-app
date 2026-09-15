@@ -186,3 +186,10 @@ def test_resource_icon_image_resolves_when_images_exist():
     by_region, _ = built(ctx)
     assert by_region[ALTDORF]["slot_templates"][2]["resource"]["icon_image"] == \
         "ui/campaign ui/effect_bundles/resource_oil.png"
+
+
+def test_manifest_section_defaults_when_regions_table_absent():
+    ctx = make_context({"provinces": [{"key": "p"}]})
+    regions.build(ctx)
+    assert ctx.manifest_sections["regions"] == {"special_templates_unmatched": 0}
+    assert ctx.partial["region"] == ["regions"]

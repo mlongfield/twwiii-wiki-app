@@ -101,6 +101,7 @@ def catalog(ctx: Context) -> dict[str, dict[str, str | None]]:
 def build(ctx: Context) -> dict[str, list[dict]]:
     out: dict[str, list[dict]] = {"region": [], "province": []}
     start = by_key(ctx, "start_pos_regions", "region")
+    ctx.manifest_sections["regions"] = {"special_templates_unmatched": 0}
     if ctx.require("region", "regions"):
         out["region"] = _regions(ctx, start)
     if ctx.require("province", "provinces"):

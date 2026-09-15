@@ -5,7 +5,7 @@ them into a typed DuckDB database, and generate pages from the result.
 
 ```
 rpfm_server (WS) → raw/<build_id>/{files,images}/ → twwiki.duckdb → model/<build_id>/ → web app
-     extract.py            (immutable)               load.py        model (Python)
+                 extract.py  (immutable)          load.py         model (Python)
 ```
 
 ## Why this shape
@@ -117,6 +117,22 @@ custom-battle portrait, which stands in for characters that have no
 referenced, resolved, missing and ambiguous references per field. Without
 `raw/<build_id>/images` the build still succeeds with every image field null.
 
+The `build_id` is derived from the packs holding the exported images, not from
+`images.folders` itself. If you add or remove a folder whose files sit in an
+already-covered pack (almost any `ui/...` folder), the `build_id` does not
+change, so `extract.py` sees the build as already extracted, logs "nothing to
+do", and the new folder's images never land on disk. After changing
+`images.folders` for a game build you have already extracted, move or rename
+the existing `raw/<build_id>/` directory (the pipeline never deletes raw
+builds) and run extract again so it re-exports under that id.
+
+Raw images are large and `raw/` is append-only, so every game patch adds this
+cost again. For build `1eb25ce70f3a`, `raw/<build_id>/images` is 836 MB total;
+`ui/skins` alone is 456 MB across 12,075 files but feeds only a few hundred
+inline targets, and `ui/flags` is 183 MB. Those two folders dominate the
+per-build footprint and are the first candidates to narrow if raw storage
+becomes a problem.
+
 ## Game data model
 
 `python -m twwiki.model` turns `twwiki.duckdb` into curated entities in
@@ -137,8 +153,12 @@ referenced, resolved, missing and ambiguous references per field. Without
 - `index/<type>.json`: key, name and filter fields for browsing.
 - `schema/<type>.schema.json`: JSON Schemas exported from the Pydantic models
   in `twwiki/model/schemas.py`; the web app generates TypeScript types from them.
-- `manifest.json`: counts, missing names, missing links, unresolved text tokens
-  and partial entity types.
+- `images/`: referenced image files copied under their in-game paths, plus
+  `images/inline.json` mapping `[[img:…]]` text tokens to a file or null.
+- `manifest.json`: counts, missing names, missing links, unresolved text tokens,
+  partial entity types, an `images` section (per-field referenced/resolved/
+  missing/ambiguous counts, plus `available` and `files_copied`), and a
+  `regions` section (`special_templates_unmatched`).
 
 The model never calculates final stats or research turns; that is the stat
 engine's job. Gaps in game data are counted in the manifest; an entity that
