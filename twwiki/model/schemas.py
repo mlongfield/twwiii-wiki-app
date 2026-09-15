@@ -372,3 +372,80 @@ class Skill(Strict):
     is_background_skill: bool
     levels: list[SkillLevel]
     characters: list[Link] = []
+
+
+# ---- Technologies ----------------------------------------------------------
+
+class PooledResourceCost(Strict):
+    pooled_resource_factor: str
+    amount: int
+    context: str
+
+
+class ResourceCost(Strict):
+    key: str
+    treasury_cost: int
+    pooled_resources: list[PooledResourceCost]
+    trade_resources: list[str]
+
+
+class Placement(Strict):
+    tree: Link
+    node_key: str
+    tier: int
+    indent: int
+    research_points_required: int
+    cost_per_round: int
+    resource_cost: ResourceCost | None
+
+
+class TreeNode(Strict):
+    key: str
+    technology: Link
+    tier: int
+    indent: int
+    research_points_required: int
+    cost_per_round: int
+    resource_cost: ResourceCost | None
+    required_parents: int
+    ui_group: str | None
+    pixel_offset_x: int
+    pixel_offset_y: int
+
+
+class TreeLink(Strict):
+    parent: str
+    child: str
+    initial_descent_tiers: int
+    visible_in_ui: bool
+
+
+@entity("technology")
+class Technology(Strict):
+    key: str
+    name: str | None
+    description: str | None
+    long_description: str | None
+    icon: str
+    is_civil: bool
+    is_engineering: bool
+    is_military: bool
+    is_hidden: bool
+    unlocked_by_building: Link | None
+    required_technologies: list[Link]
+    required_buildings: list[Link]
+    effects: list[EffectApplication]
+    placements: list[Placement]
+
+
+@entity("technology_tree")
+class TechnologyTree(Strict):
+    key: str
+    name: str | None
+    culture: Link | None
+    subculture: Link | None
+    faction: Link | None
+    campaign: str | None
+    colour: str | None
+    nodes: list[TreeNode]
+    links: list[TreeLink]
