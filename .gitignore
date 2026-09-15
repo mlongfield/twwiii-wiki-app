@@ -4,9 +4,13 @@ __pycache__/
 *.pyc
 
 # Pipeline output: regenerated from the game install, too large for git
-raw/
-model/
-site/
+/raw/
+/model/
+/site/
 *.duckdb
 *.duckdb.wal
 *.partial/
+
+# Agent workspaces
+.superpowers/
+.worktrees/

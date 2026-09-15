@@ -4,8 +4,8 @@ Extract game DB tables and loc text via `rpfm_server`, land them raw, load
 them into a typed DuckDB database, and generate pages from the result.
 
 ```
-rpfm_server (WS)  →  raw/<build_id>/files/**.jsonl  →  twwiki.duckdb  →  site/*.md
-     extract.py              (immutable)                  load.py          render.py
+rpfm_server (WS) → raw/<build_id>/files/**.jsonl → twwiki.duckdb → model/<build_id>/ → web app
+     extract.py            (immutable)                load.py         model (Python)
 ```
 
 ## Why this shape
@@ -39,6 +39,7 @@ server exits by itself once its last session closes.
 uv sync                          # or: pip install -e .
 uv run python -m twwiki.extract  # needs RPFM open
 uv run python -m twwiki.load
+uv run python -m twwiki.model   # curated entities for the web app
 uv run python -m twwiki.render
 ```
 
@@ -96,6 +97,32 @@ one JSON array per row:
 Values are in `fields` order (RPFM's *processed* field order) with RPFM's type
 tags stripped. `load.py` maps the types onto DuckDB: integers to `BIGINT`,
 floats to `DOUBLE`, booleans to `BOOLEAN`, everything else to `VARCHAR`.
+
+## Game data model
+
+`python -m twwiki.model` turns `twwiki.duckdb` into curated entities in
+`model/<build_id>/` (design: `docs/superpowers/specs/2026-09-15-game-data-model-design.md`):
+
+- `entities/<type>.jsonl`: one entity per line for 17 types (units, characters
+  with skill trees, skills, abilities, effects and bundles, buildings,
+  technologies and trees, items, traits, factions, cultures, subcultures,
+  difficulty levels, campaign variables). References are links
+  `{type, key, name, missing}`; effects are applied through one
+  `EffectApplication` shape everywhere.
+- `index/<type>.json`: key, name and filter fields for browsing.
+- `schema/<type>.schema.json`: JSON Schemas exported from the Pydantic models
+  in `twwiki/model/schemas.py`; the web app generates TypeScript types from them.
+- `manifest.json`: counts, missing names, missing links, unresolved text tokens
+  and partial entity types.
+
+The model never calculates final stats or research turns; that is the stat
+engine's job. Gaps in game data are counted in the manifest; an entity that
+fails schema validation stops the build.
+
+Tests: `uv run pytest`. Tests against the real database skip when
+`twwiki.duckdb` is absent. After a game patch, rebuild, review any failing
+expected values, and regenerate `tests/model/missing_links_baseline.json` only
+after checking why links went missing.
 
 ## Mapping the server surface
 
