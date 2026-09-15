@@ -31,6 +31,8 @@
 - A character's `name` is its associated unit's onscreen name (e.g. "Emperor Karl Franz"); `agent_subtypes_onscreen_name_override_<key>` becomes `title` (e.g. "Legendary Lord").
 - Mounts, armour, shields, weapons, projectiles and unit attributes are not entity types, so units store them as keys or embedded records rather than links.
 - A bonus target whose referenced table is not an entity type (for example `unit_sets`) has `target: null` and carries `target_table` and `target_key`. Targets that point at the combined tables `unit_set_unit_ability_junctions`, `unit_set_unit_attribute_junctions` and `unit_set_special_ability_phase_junctions` are expanded into `unit_set` plus the ability, attribute or phase.
+- Cultures and subcultures do not carry their own unit, lord and hero lists; the web app derives them through `subculture.factions` → `faction.units` / `faction.characters`, which the model already provides.
+- Ability activation's `spawned_unit`, `activated_projectile`, `bombardment` and `vortex` are stored as keys, not links, because `land_units`, `projectiles`, `projectile_bombardments` and `battle_vortexs` are not entity types.
 
 ## Data facts used by the code (verified against build `fb20553df5af`)
 
