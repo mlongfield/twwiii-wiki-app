@@ -4,8 +4,8 @@ Extract game DB tables and loc text via `rpfm_server`, land them raw, load
 them into a typed DuckDB database, and generate pages from the result.
 
 ```
-rpfm_server (WS) → raw/<build_id>/files/**.jsonl → twwiki.duckdb → model/<build_id>/ → web app
-     extract.py            (immutable)                load.py         model (Python)
+rpfm_server (WS) → raw/<build_id>/{files,images}/ → twwiki.duckdb → model/<build_id>/ → web app
+     extract.py            (immutable)               load.py        model (Python)
 ```
 
 ## Why this shape
@@ -19,7 +19,8 @@ actually changed.
 **Everything is keyed by `build_id`.** `raw/` is append-only per build. Never
 overwrite a previous build's dump; that history is the most valuable thing the
 pipeline produces. The id is derived from the size and mtime of the packs the
-data came from (currently `db.pack` and `local_en.pack`).
+data came from
+(`db.pack`, `local_en.pack`, and the UI packs holding the exported images).
 
 ## Before you run it
 
@@ -98,17 +99,41 @@ Values are in `fields` order (RPFM's *processed* field order) with RPFM's type
 tags stripped. `load.py` maps the types onto DuckDB: integers to `BIGINT`,
 floats to `DOUBLE`, booleans to `BOOLEAN`, everything else to `VARCHAR`.
 
+## Images
+
+`config.yaml` `images.folders` lists in-game folders exported as they are to
+`raw/<build_id>/images/<in-game path>` (all PNG for what the wiki uses). A
+folder that fails to export is listed under `images.failed_folders` in the raw
+manifest and extraction carries on.
+
+The model resolves each image reference in the tables (bare names, names with
+`.png`, full paths with backslashes) against those files, copies only the
+referenced ones to `model/<build_id>/images/`, and writes
+`images/inline.json` mapping every `[[img:…]]` text icon to a file or null
+(a tag is looked up in the `ui_tagged_images` table; anything else is treated
+as a path). Image fields end in `_image`; `unit.portrait_image` is the
+custom-battle portrait, which stands in for characters that have no
+`card_image`. The manifest's `images` section counts
+referenced, resolved, missing and ambiguous references per field. Without
+`raw/<build_id>/images` the build still succeeds with every image field null.
+
 ## Game data model
 
 `python -m twwiki.model` turns `twwiki.duckdb` into curated entities in
 `model/<build_id>/` (design: `docs/superpowers/specs/2026-09-15-game-data-model-design.md`):
 
-- `entities/<type>.jsonl`: one entity per line for 17 types (units, characters
+- `entities/<type>.jsonl`: one entity per line for 19 types (units, characters
   with skill trees, skills, abilities, effects and bundles, buildings,
   technologies and trees, items, traits, factions, cultures, subcultures,
-  difficulty levels, campaign variables). References are links
+  difficulty levels, campaign variables, regions, provinces). References are links
   `{type, key, name, missing}`; effects are applied through one
   `EffectApplication` shape everywhere.
+- Regions and provinces come from the start-position tables: owner at
+  campaign start, capitals, slot cap and province. Slot templates, resources
+  and permitted building chains are known only for special settlements (their
+  templates are named after the region); every other settlement is marked
+  `template_source: "generic"`. Exact slots for those need `startpos.esf`,
+  which is not decoded.
 - `index/<type>.json`: key, name and filter fields for browsing.
 - `schema/<type>.schema.json`: JSON Schemas exported from the Pydantic models
   in `twwiki/model/schemas.py`; the web app generates TypeScript types from them.
@@ -123,6 +148,8 @@ Tests: `uv run pytest`. Tests against the real database skip when
 `twwiki.duckdb` is absent. After a game patch, rebuild, review any failing
 expected values, and regenerate `tests/model/missing_links_baseline.json` only
 after checking why links went missing.
+Regenerate `tests/model/missing_images_baseline.json` the same way, only after
+checking why images went missing.
 
 ## Mapping the server surface
 
