@@ -8,6 +8,7 @@ from pathlib import Path
 
 import duckdb
 
+from .images import ImageIndex
 from .links import LinkRegistry
 from .text import LocResolver
 
@@ -24,6 +25,7 @@ class Context:
     links: LinkRegistry = field(default_factory=LinkRegistry)
     missing_names: Counter = field(default_factory=Counter)
     partial: dict[str, list[str]] = field(default_factory=dict)
+    images: ImageIndex = field(default_factory=ImageIndex.unavailable)
 
     @classmethod
     def open(cls, db_path: str | Path) -> "Context":
