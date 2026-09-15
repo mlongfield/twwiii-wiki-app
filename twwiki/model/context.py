@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections import Counter
+from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -52,3 +52,19 @@ class Context:
         if text is None:
             self.missing_names[entity_type] += 1
         return text
+
+
+def by_key(ctx: "Context", table: str, key_col: str) -> dict[str, dict]:
+    """All rows of an optional table, indexed by one column."""
+    if not ctx.table_exists(table):
+        return {}
+    return {r[key_col]: r for r in ctx.rows(f'SELECT * FROM "{table}"')}
+
+
+def grouped(ctx: "Context", table: str, key_col: str, order: str) -> dict[str, list[dict]]:
+    """All rows of an optional table, grouped by one column, in `order`."""
+    out: dict[str, list[dict]] = defaultdict(list)
+    if ctx.table_exists(table):
+        for r in ctx.rows(f'SELECT * FROM "{table}" ORDER BY {order}'):
+            out[r[key_col]].append(r)
+    return out

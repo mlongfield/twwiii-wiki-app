@@ -80,3 +80,87 @@ class EffectBundle(Strict):
     icon: str | None
     is_global_effect: bool
     effects: list[EffectApplication]
+
+
+# ---- Abilities -------------------------------------------------------------
+
+class Activation(Strict):
+    passive: bool
+    active_time: float
+    recharge_time: float
+    initial_recharge: float
+    num_uses: int
+    effect_range: float
+    min_range: float
+    mana_cost: float
+    wind_up_time: float
+    miscast_chance: float
+    target_self: bool
+    target_friends: bool
+    target_enemies: bool
+    target_ground: bool
+    affect_self: bool
+    num_effected_friendly_units: int
+    num_effected_enemy_units: int
+    spawned_unit: str | None
+    activated_projectile: str | None
+    bombardment: str | None
+    vortex: str | None
+
+
+class StatEffect(Strict):
+    stat: str
+    stat_name: str | None
+    value: float
+    how: str
+
+
+class AttributeEffect(Strict):
+    attribute: str
+    attribute_type: str
+
+
+class Phase(Strict):
+    key: str
+    order: int
+    target_self: bool
+    target_friends: bool
+    target_enemies: bool
+    duration: float
+    effect_type: str
+    stat_effects: list[StatEffect]
+    attribute_effects: list[AttributeEffect]
+    damage_amount: int
+    max_damaged_entities: int
+    heal_amount: float
+    hp_change_frequency: float
+    resurrect: bool
+    imbue_magical: bool
+    imbue_ignition: int
+    replenish_ammo: float
+    fatigue_change_ratio: float
+    ability_recharge_change: float
+    mana_regen_mod: float
+    cant_move: bool
+    execute_ratio: float
+    is_hidden_in_ui: bool
+
+
+@entity("ability")
+class Ability(Strict):
+    key: str
+    name: str | None
+    description: str | None
+    type: str
+    type_name: str | None
+    source_type: str
+    source_type_name: str | None
+    icon: str
+    is_hidden_in_ui: bool
+    is_unit_upgrade: bool
+    requires_effect_enabling: bool
+    activation: Activation | None
+    phases: list[Phase]
+    units: list[Link] = []
+    characters: list[Link] = []
+    modified_by_effects: list[Link] = []
