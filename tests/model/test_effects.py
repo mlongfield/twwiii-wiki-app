@@ -91,6 +91,41 @@ def test_missing_effects_table_is_partial():
     assert ctx.partial == {"effect": ["effects"], "effect_bundle": ["effect_bundles", "effect_bundles_to_effects_junctions"]}
 
 
+def test_missing_columns_table_is_reported_and_bonus_targets_stay_empty():
+    ctx = make_context({
+        "effects": [{"effect": "e_attack", "icon": "a.png", "priority": 1, "icon_negative": "",
+                    "category": "battle", "is_positive_value_good": True}],
+    })
+    register_catalogs(ctx, effects)
+    built = effects.build(ctx)
+    assert built["effect"][0]["bonus_targets"] == []
+    assert ctx.partial["effect"] == ["_columns"]
+    schemas.ENTITY_MODELS["effect"].model_validate(built["effect"][0])
+
+
+def test_direct_unit_attribute_and_phase_targets_fill_attribute_and_phase():
+    ctx = effects_context(
+        effect_bonus_value_unit_attribute_junctions=[
+            {"effect": "e_attack", "bonus_value_id": "toughen", "unit_attribute": "unbreakable"}
+        ],
+        _columns=(
+            columns("effect_bonus_value_basic_junction", ("effect", "effects"), ("bonus_value_id", "campaign_bonus_value_ids_basic"))
+            + columns("effect_bonus_value_ids_unit_sets", ("bonus_value_id", "x"), ("effect", "effects"), ("unit_set", "unit_sets"))
+            + columns("effect_bonus_value_unit_ability_junctions", ("effect", "effects"), ("bonus_value_id", "x"), ("unit_ability", "unit_abilities"))
+            + columns("effect_bonus_value_unit_set_unit_ability_junctions", ("bonus_value_id", "x"), ("effect", "effects"),
+                      ("unit_set_ability", "unit_set_unit_ability_junctions"))
+            + columns("effect_bonus_value_unit_attribute_junctions", ("effect", "effects"), ("bonus_value_id", "x"),
+                      ("unit_attribute", "unit_attributes"))
+        )
+    )
+    built = {e["key"]: e for e in effects.build(ctx)["effect"]}
+    attack = {t["source_table"]: t for t in built["e_attack"]["bonus_targets"]}
+    direct = attack["effect_bonus_value_unit_attribute_junctions"]
+    assert direct["attribute"] == "unbreakable"
+    assert direct["target_key"] == "unbreakable" and direct["target"] is None
+    schemas.ENTITY_MODELS["effect"].model_validate(built["e_attack"])
+
+
 def test_unrecognised_bonus_table_is_skipped_and_recorded():
     ctx = effects_context(
         effect_bonus_value_weird_junction=[

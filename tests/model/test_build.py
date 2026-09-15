@@ -3,7 +3,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from twwiki.model import build
+from twwiki.model import build, schemas
 from tests.model.fixtures import make_context
 
 
@@ -71,3 +71,28 @@ def test_write_output_replaces_previous_model(tmp_path):
     (tmp_path / "abc123" / "old.json").write_text("{}")
     out = build.write_output(ctx, entities, tmp_path, "abc123")
     assert not (out / "old.json").exists() and (out / "manifest.json").exists()
+
+
+def test_write_output_cleans_up_stale_old_directory(tmp_path):
+    ctx = make_context({"dummy": [{"a": 1}]})
+    entities = build.build_all(ctx, modules=[fake_module()])
+    (tmp_path / "abc123").mkdir()
+    (tmp_path / "abc123" / "old.json").write_text("{}")
+    (tmp_path / "abc123.old").mkdir()
+    (tmp_path / "abc123.old" / "stale_from_a_previous_failed_build.json").write_text("{}")
+
+    out = build.write_output(ctx, entities, tmp_path, "abc123")
+
+    assert not (out / "old.json").exists() and (out / "manifest.json").exists()
+    assert not (tmp_path / "abc123.old").exists()
+
+
+def test_schema_marks_reverse_links_and_conditional_fields_required():
+    ability_schema = schemas.ENTITY_MODELS["ability"].model_json_schema(mode="serialization")
+    assert "units" in ability_schema["required"]
+    assert "characters" in ability_schema["required"]
+    assert "modified_by_effects" in ability_schema["required"]
+
+    bundle_schema = schemas.ENTITY_MODELS["effect_bundle"].model_json_schema(mode="serialization")
+    app_schema = bundle_schema["$defs"]["EffectApplication"]
+    assert "value_damaged" in app_schema["required"]

@@ -106,7 +106,7 @@ def write_output(ctx: Context, entities: dict[str, list[dict]], out_root: Path, 
 
     for entity_type, model in sorted(ENTITY_MODELS.items()):
         (staging / "schema" / f"{entity_type}.schema.json").write_text(
-            json.dumps(model.model_json_schema(), indent=2), encoding="utf-8")
+            json.dumps(model.model_json_schema(mode="serialization"), indent=2), encoding="utf-8")
 
     manifest = {
         "build_id": build_id,
@@ -120,9 +120,22 @@ def write_output(ctx: Context, entities: dict[str, list[dict]], out_root: Path, 
     }
     (staging / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
 
+    # a model is always rebuilt from the database, never patched; keep the old
+    # one under a .old suffix until the new one is safely in place, so a
+    # failed rename never leaves us with no model at all.
+    old = out_root / f"{build_id}.old"
+    if old.exists():
+        shutil.rmtree(old)
     if final.exists():
-        shutil.rmtree(final)  # a model is always rebuilt from the database, never patched
-    staging.rename(final)
+        final.rename(old)
+    try:
+        staging.rename(final)
+    except Exception:
+        if old.exists():
+            old.rename(final)
+        raise
+    if old.exists():
+        shutil.rmtree(old)
     return final
 
 

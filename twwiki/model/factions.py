@@ -83,7 +83,8 @@ def build(ctx: Context) -> dict[str, list[dict]]:
             out["difficulty_level"].append({"key": str(level), "level": level, **levels[level]})
 
     if ctx.require("campaign_variable", "campaign_variables"):
-        overrides = grouped(ctx, "campaigns_campaign_variables_junctions", "variable_key", "campaign_name, difficulty")
+        overrides = grouped(ctx, "campaigns_campaign_variables_junctions", "variable_key",
+                            "campaign_name, difficulty, campaign_type, value")
         for r in ctx.rows("SELECT * FROM campaign_variables ORDER BY variable_key"):
             key = r["variable_key"]
             out["campaign_variable"].append({

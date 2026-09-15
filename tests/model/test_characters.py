@@ -16,10 +16,14 @@ def skill_node(key, skill, tier, indent, **o):
     return row
 
 
-def character_context(extra_items=None):
+def character_context(extra_items=None, extra_links=None):
     items = [{"set": "kf_tree", "item": "n_leader"}, {"set": "kf_tree", "item": "n_mentor"}]
     if extra_items:
         items.extend(extra_items)
+    node_links = [{"parent_key": "n_leader", "child_key": "n_mentor", "link_type": "REQUIRED",
+                   "initial_descent_tiers": 0}]
+    if extra_links:
+        node_links.extend(extra_links)
     ctx = make_context({
         "agent_subtypes": [subtype(), subtype(key="wizard", associated_unit_override="wiz_unit",
                                              magic_lore="lore_fire", is_caster=True)],
@@ -39,9 +43,9 @@ def character_context(extra_items=None):
         ],
         "character_skill_node_set_items": items,
         "character_skill_nodes": [skill_node("n_leader", "leader_of_men", 7, 0),
-                                  skill_node("n_mentor", "mentor", 30, 0, subculture="wh_main_sc_emp_empire")],
-        "character_skill_node_links": [{"parent_key": "n_leader", "child_key": "n_mentor", "link_type": "REQUIRED",
-                                        "initial_descent_tiers": 0}],
+                                  skill_node("n_mentor", "mentor", 30, 0, subculture="wh_main_sc_emp_empire"),
+                                  skill_node("n_other", "leader_of_men", 7, 0)],
+        "character_skill_node_links": node_links,
         "character_skill_nodes_skill_locks": [{"character_skill": "mentor", "character_skill_node": "n_mentor", "level": 2}],
         "character_skills": [
             {"key": "leader_of_men", "image_path": "leader.png", "unlocked_at_rank": 7, "is_background_skill": False},
@@ -114,6 +118,18 @@ def test_skill_levels_and_effects():
     assert [(l["level"], l["unlocked_at_rank"]) for l in mentor["levels"]] == [(1, None), (2, 12)]
     for skill in skills.values():
         schemas.ENTITY_MODELS["skill"].model_validate(skill)
+
+
+def test_skill_tree_links_to_a_node_outside_the_tree_are_dropped_and_counted():
+    ctx = character_context(extra_links=[{"parent_key": "n_leader", "child_key": "n_other",
+                                          "link_type": "REQUIRED", "initial_descent_tiers": 0}])
+    built = characters.build(ctx)
+    kf = {c["key"]: c for c in built["character"]}["kf"]
+    tree = kf["skill_trees"][0]
+    assert tree["links"] == [{"parent": "n_leader", "child": "n_mentor", "link_type": "REQUIRED",
+                              "initial_descent_tiers": 0}]
+    assert ctx.links.missing["skill_tree.link_outside_tree"] == 1
+    schemas.ENTITY_MODELS["character"].model_validate(kf)
 
 
 def test_skill_tree_items_pointing_at_missing_nodes_are_counted():

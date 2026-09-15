@@ -103,6 +103,10 @@ def _bonus_target(ctx: Context, table: str, target_table: str | None, raw_key, b
         target["target"] = ctx.links.link(entity_type, key, source=source, relation="bonus_target")
     if target_table == "unit_sets":
         target["unit_set"] = key
+    elif target_table == "unit_attributes":
+        target["attribute"] = key
+    elif target_table == "special_ability_phases":
+        target["phase"] = key
     elif target_table in combined and key in combined[target_table]:
         row = combined[target_table][key]
         target["unit_set"] = row["unit_set"]
@@ -120,7 +124,11 @@ def build(ctx: Context) -> dict[str, list[dict]]:
     out: dict[str, list[dict]] = {"effect": [], "effect_bundle": []}
 
     if ctx.require("effect", "effects"):
-        targets = bonus_targets(ctx) if ctx.table_exists("_columns") else {}
+        if ctx.table_exists("_columns"):
+            targets = bonus_targets(ctx)
+        else:
+            ctx.partial.setdefault("effect", []).append("_columns")
+            targets = {}
         for r in ctx.rows("SELECT * FROM effects ORDER BY effect"):
             key = r["effect"]
             out["effect"].append({

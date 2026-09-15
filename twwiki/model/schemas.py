@@ -12,7 +12,7 @@ ENTITY_MODELS: dict[str, type["Strict"]] = {}
 
 
 class Strict(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", json_schema_serialization_defaults_required=True)
 
 
 def entity(type_name: str):

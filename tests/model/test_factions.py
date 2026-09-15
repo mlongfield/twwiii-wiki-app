@@ -53,6 +53,32 @@ def test_difficulty_levels_split_ai_and_human():
     schemas.ENTITY_MODELS["difficulty_level"].model_validate(level)
 
 
+def test_campaign_variable_overrides_ordered_deterministically_on_ties():
+    ctx = make_context({
+        "factions": [{"key": "reikland", "subculture": "sc_empire", "category": "", "is_rebel": False,
+                      "is_quest_faction": False, "flags_path": "ui/flags/reikland", "primary_colour_hex": "#ffcc00"}],
+        "cultures": [{"key": "empire"}],
+        "cultures_subcultures": [{"subculture": "sc_empire", "culture": "empire"}],
+        "campaign_variables": [{"variable_key": "minimum_research_rate", "value": 5.0}],
+        "campaigns_campaign_variables_junctions": [
+            {"variable_key": "minimum_research_rate", "campaign_name": "wh3_main_chaos",
+             "value": 9.0, "difficulty": "", "campaign_type": "campaign_type_multiplayer"},
+            {"variable_key": "minimum_research_rate", "campaign_name": "wh3_main_chaos",
+             "value": 7.0, "difficulty": "", "campaign_type": "campaign_type_default"},
+        ],
+    }, loc={
+        "factions_screen_name_reikland": "Reikland",
+        "cultures_name_empire": "The Empire",
+        "cultures_subcultures_name_sc_empire": "The Empire",
+    })
+    for entity_type, names in factions.catalog(ctx).items():
+        ctx.links.register(entity_type, names)
+    variable = {v["key"]: v for v in factions.build(ctx)["campaign_variable"]}["minimum_research_rate"]
+    assert [o["campaign_type"] for o in variable["overrides"]] == [
+        "campaign_type_default", "campaign_type_multiplayer"]
+    schemas.ENTITY_MODELS["campaign_variable"].model_validate(variable)
+
+
 def test_campaign_variables_with_overrides():
     variables = {v["key"]: v for v in factions.build(factions_context())["campaign_variable"]}
     assert variables["base_research_points_per_turn"]["value"] == 100.0

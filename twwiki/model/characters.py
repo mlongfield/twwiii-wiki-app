@@ -97,10 +97,17 @@ def _skill_trees(ctx: Context) -> dict[str, list[dict]]:
         node_rows = sorted((nodes[i["item"]] for i in set_items if i["item"] in nodes),
                            key=lambda n: (n["indent"], n["tier"], n["key"]))
         node_keys = {n["key"] for n in node_rows}
+        tree_links = []
+        for k in sorted(node_keys):
+            for l in links.get(k, []):
+                if l["child_key"] in node_keys:
+                    tree_links.append(l)
+                else:
+                    ctx.links.missing["skill_tree.link_outside_tree"] += 1
         by_character[subtype].append({
             "set": s,
             "nodes": node_rows,
-            "links": [l for k in sorted(node_keys) for l in links.get(k, [])],
+            "links": tree_links,
             "locks": [l for k in sorted(node_keys) for l in locks.get(k, [])],
         })
     return by_character
