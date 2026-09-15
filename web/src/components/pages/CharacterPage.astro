@@ -1,0 +1,45 @@
+---
+import { getSite } from "../../data/model";
+import EntityLink from "../EntityLink.astro";
+import GameText from "../GameText.astro";
+import LinkList from "../LinkList.astro";
+import Section from "../Section.astro";
+import StatTable from "../StatTable.astro";
+
+interface Props {
+  entityKey: string;
+}
+
+const site = await getSite();
+const character = site.model.entities.character.get(Astro.props.entityKey)!;
+---
+<Section title="Overview">
+  {character.title && <p class="muted"><GameText text={character.title} /></p>}
+  <GameText text={character.description} block />
+  <StatTable rows={[
+    ["Agent types", character.agent_types.join(", ")],
+    ["Lore of magic", character.lore_of_magic?.name ?? character.lore_of_magic?.key],
+    ["Spellcaster", character.is_caster],
+    ["Can equip items", character.can_equip_ancillaries],
+    ["Recruitable", character.recruitable],
+    ["Gains experience", character.can_gain_xp],
+    ["Cost", character.cost],
+    ["Cap", character.cap >= 0 ? character.cap : null],
+  ]} />
+  {character.associated_unit && <p>Unit: <EntityLink link={character.associated_unit} /></p>}
+</Section>
+<Section title="Abilities" show={character.abilities.length > 0}><LinkList links={character.abilities} /></Section>
+<Section title="Factions" show={character.factions.length > 0}><LinkList links={character.factions} /></Section>
+<Section title="Items" show={character.items.length > 0}><LinkList links={character.items} /></Section>
+{character.skill_trees.map((tree) => (
+  <Section title={`Skill tree: ${tree.key}`}>
+    <table>
+      <thead><tr><th>Skill</th><th>Tier</th><th>Line</th></tr></thead>
+      <tbody>
+        {tree.nodes.filter((n) => n.visible_in_ui).map((n) => (
+          <tr><td><EntityLink link={n.skill} /></td><td>{n.tier}</td><td>{n.indent}</td></tr>
+        ))}
+      </tbody>
+    </table>
+  </Section>
+))}

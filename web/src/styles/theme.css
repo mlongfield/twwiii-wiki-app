@@ -79,3 +79,10 @@ th { color: var(--muted); font-weight: normal; }
 .effect-note { font-size: 0.8rem; }
 .skill-level + .skill-level { margin-top: 0.75rem; }
 .phase-stats { margin-top: 0.5rem; }
+
+.table-wrap { overflow-x: auto; }
+table.browse td, table.browse th { white-space: nowrap; }
+.browse-filter { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; align-items: center; margin: 0.5rem 0 1rem; }
+input[type="search"], select {
+  background: var(--panel); color: var(--text); border: 1px solid var(--border-accent); padding: 0.35rem 0.5rem; font: inherit;
+}

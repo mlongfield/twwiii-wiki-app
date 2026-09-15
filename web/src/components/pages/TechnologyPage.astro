@@ -1,0 +1,46 @@
+---
+import { getSite } from "../../data/model";
+import EffectList from "../EffectList.astro";
+import EntityLink from "../EntityLink.astro";
+import GameText from "../GameText.astro";
+import LinkList from "../LinkList.astro";
+import ResourceCost from "../ResourceCost.astro";
+import Section from "../Section.astro";
+import StatTable from "../StatTable.astro";
+
+interface Props {
+  entityKey: string;
+}
+
+const site = await getSite();
+const tech = site.model.entities.technology.get(Astro.props.entityKey)!;
+---
+<Section title="Overview">
+  <GameText text={tech.description} block />
+  <GameText text={tech.long_description} block />
+  <StatTable rows={[
+    ["Civil", tech.is_civil],
+    ["Engineering", tech.is_engineering],
+    ["Military", tech.is_military],
+    ["Hidden", tech.is_hidden],
+  ]} />
+  {tech.unlocked_by_building && <p>Unlocked by: <EntityLink link={tech.unlocked_by_building} /></p>}
+</Section>
+<Section title="Effects" show={tech.effects.length > 0}><EffectList applications={tech.effects} /></Section>
+<Section title="Research" show={tech.placements.length > 0}>
+  <table>
+    <thead><tr><th>Tree</th><th>Research points</th><th>Cost per turn</th><th>Resource cost</th></tr></thead>
+    <tbody>
+      {tech.placements.map((p) => (
+        <tr>
+          <td><EntityLink link={p.tree} /></td>
+          <td>{p.research_points_required}</td>
+          <td>{p.cost_per_round || ""}</td>
+          <td><ResourceCost cost={p.resource_cost} /></td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</Section>
+<Section title="Requires technologies" show={tech.required_technologies.length > 0}><LinkList links={tech.required_technologies} /></Section>
+<Section title="Requires buildings" show={tech.required_buildings.length > 0}><LinkList links={tech.required_buildings} /></Section>

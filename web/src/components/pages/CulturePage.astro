@@ -1,0 +1,14 @@
+---
+import { getSite } from "../../data/model";
+import LinkList from "../LinkList.astro";
+import Section from "../Section.astro";
+
+interface Props {
+  entityKey: string;
+}
+
+const site = await getSite();
+const culture = site.model.entities.culture.get(Astro.props.entityKey)!;
+---
+<Section title="Subcultures" show={culture.subcultures.length > 0}><LinkList links={culture.subcultures} /></Section>
+<Section title="Factions" show={culture.factions.length > 0}><LinkList links={culture.factions} /></Section>

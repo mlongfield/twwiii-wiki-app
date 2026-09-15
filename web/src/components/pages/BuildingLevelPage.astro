@@ -1,0 +1,37 @@
+---
+import { getSite } from "../../data/model";
+import EffectList from "../EffectList.astro";
+import EntityLink from "../EntityLink.astro";
+import GameText from "../GameText.astro";
+import LinkList from "../LinkList.astro";
+import ResourceCost from "../ResourceCost.astro";
+import Section from "../Section.astro";
+import StatTable from "../StatTable.astro";
+
+interface Props {
+  entityKey: string;
+}
+
+const site = await getSite();
+const level = site.model.entities.building_level.get(Astro.props.entityKey)!;
+---
+<Section title="Overview">
+  <GameText text={level.short_description} block />
+  {level.chain && <p>Chain: <EntityLink link={level.chain} /></p>}
+  <StatTable rows={[
+    ["Level", level.level],
+    ["Construction time", level.create_time],
+    ["Construction cost", level.create_cost],
+    ["Upkeep", level.upkeep_cost || null],
+    ["Development points", level.development_point_cost || null],
+    ["Food", level.food_cost || null],
+    ["Capital only", level.only_in_capital],
+    ["Faction unique", level.faction_unique],
+    ["Can convert", level.can_convert],
+    ["Shown in game UI", level.visible_in_ui],
+    ["Cultures", level.cultures.join(", ")],
+  ]} />
+  <ResourceCost cost={level.resource_cost} />
+</Section>
+<Section title="Effects" show={level.effects.length > 0}><EffectList applications={level.effects} /></Section>
+<Section title="Recruits" show={level.units_recruited.length > 0}><LinkList links={level.units_recruited} /></Section>

@@ -1,0 +1,19 @@
+---
+import { getSite } from "../../data/model";
+import EntityLink from "../EntityLink.astro";
+import LinkList from "../LinkList.astro";
+import Section from "../Section.astro";
+import StatTable from "../StatTable.astro";
+
+interface Props {
+  entityKey: string;
+}
+
+const site = await getSite();
+const province = site.model.entities.province.get(Astro.props.entityKey)!;
+---
+<Section title="Overview">
+  <StatTable rows={[["Campaign", province.campaign], ["Regions", province.regions.length]]} />
+  {province.capital && <p>Capital: <EntityLink link={province.capital} /></p>}
+</Section>
+<Section title="Regions" show={province.regions.length > 0}><LinkList links={province.regions} /></Section>
