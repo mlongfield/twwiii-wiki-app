@@ -4,8 +4,9 @@
   "type": "module",
   "engines": { "node": ">=22.12.0" },
   "scripts": {
+    "prebuild": "tsx scripts/prebuild.ts",
     "build": "astro build",
-    "dev": "astro dev",
+    "dev": "tsx scripts/prebuild.ts && astro dev",
     "preview": "astro preview",
     "test": "vitest run",
     "fixtures": "tsx scripts/make-fixtures.ts"

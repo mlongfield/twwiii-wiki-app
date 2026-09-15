@@ -1,5 +1,6 @@
 ---
 import "../styles/theme.css";
+import { buildInfo } from "../data/model";
 import { PAGE_TYPES } from "../data/pageTypes";
 
 interface Props {
@@ -32,7 +33,7 @@ const { title, description = "Total War: WARHAMMER III game data wiki" } = Astro
     </main>
     <footer class="site-footer">
       <div class="inner">
-        <slot name="footer">Game data extracted from Total War: WARHAMMER III.</slot>
+        <slot name="footer">Game build <code>{buildInfo.buildId}</code> · data model generated {buildInfo.generatedAt.slice(0, 10)} · Total War: WARHAMMER III</slot>
       </div>
     </footer>
   </body>
