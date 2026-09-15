@@ -484,6 +484,13 @@ class BuildingLevel(Strict):
     units_recruited: list[Link]
 
 
+class ChainAvailability(Strict):
+    culture: Link | None
+    subculture: Link | None
+    faction: Link | None
+    campaign: str | None
+
+
 @entity("building_chain")
 class BuildingChain(Strict):
     key: str
@@ -491,6 +498,7 @@ class BuildingChain(Strict):
     category: str | None
     in_encyclopedia: bool
     levels: list[Link]
+    availability: list[ChainAvailability]
 
 
 # ---- Items and traits ------------------------------------------------------

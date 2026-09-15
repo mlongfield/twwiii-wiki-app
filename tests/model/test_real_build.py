@@ -78,6 +78,11 @@ def test_training_field(model):
     assert tf["cultures"] == ["wh_main_emp_empire"]
 
 
+def test_empire_settlement_chain_availability(model):
+    chain = model[1]["building_chain"]["wh_main_EMPIRE_settlement_major"]
+    assert "wh_main_emp_empire" in {a["culture"]["key"] for a in chain["availability"] if a["culture"]}
+
+
 def test_research_costs(model):
     by_type = model[1]
     tech = by_type["technology"]["wh2_dlc13_tech_emp_infantry_1_c"]
