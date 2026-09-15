@@ -531,3 +531,64 @@ class Trait(Strict):
     no_going_back_level: int
     levels: list[TraitLevel]
     antitraits: list[Link]
+
+
+# ---- Factions, cultures, difficulty, campaign variables ---------------------
+
+@entity("faction")
+class Faction(Strict):
+    key: str
+    name: str | None
+    adjective: str | None
+    subculture: Link | None
+    culture: Link | None
+    category: str | None
+    is_rebel: bool
+    is_quest_faction: bool
+    flags_path: str
+    primary_colour: str | None
+    units: list[Link] = []
+    characters: list[Link] = []
+
+
+@entity("culture")
+class Culture(Strict):
+    key: str
+    name: str | None
+    subcultures: list[Link] = []
+    factions: list[Link] = []
+
+
+@entity("subculture")
+class Subculture(Strict):
+    key: str
+    name: str | None
+    culture: Link | None
+    factions: list[Link] = []
+
+
+class DifficultyEffect(Strict):
+    application: EffectApplication
+    campaign: str | None
+
+
+@entity("difficulty_level")
+class DifficultyLevel(Strict):
+    key: str
+    level: int
+    ai: list[DifficultyEffect]
+    human: list[DifficultyEffect]
+
+
+class CampaignVariableOverride(Strict):
+    campaign: str
+    difficulty: str | None
+    campaign_type: str | None
+    value: float
+
+
+@entity("campaign_variable")
+class CampaignVariable(Strict):
+    key: str
+    value: float
+    overrides: list[CampaignVariableOverride]
