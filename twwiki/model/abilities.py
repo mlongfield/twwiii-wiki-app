@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from .context import Context, by_key, grouped, opt
+from .images import ABILITY_ICONS
 
 ACTIVATION_FIELDS = (
     "passive", "active_time", "recharge_time", "initial_recharge", "num_uses", "effect_range",
@@ -57,6 +58,7 @@ def build(ctx: Context) -> dict[str, list[dict]]:
             "source_type": r["source_type"],
             "source_type_name": ctx.loc.text(f"unit_ability_source_types_name_{r['source_type']}"),
             "icon": r["icon_name"],
+            "icon_image": ctx.images.resolve("ability.icon_image", r["icon_name"], ABILITY_ICONS),
             "is_hidden_in_ui": r["is_hidden_in_ui"],
             "is_unit_upgrade": r["is_unit_upgrade"],
             "requires_effect_enabling": r["requires_effect_enabling"],

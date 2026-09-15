@@ -64,6 +64,8 @@ class Effect(Strict):
     category: str
     icon: str | None
     icon_negative: str | None
+    icon_image: str | None
+    icon_negative_image: str | None
     priority: int
     is_positive_value_good: bool
     bonus_targets: list[BonusTarget]
@@ -78,6 +80,7 @@ class EffectBundle(Strict):
     target: str
     priority: int
     icon: str | None
+    icon_image: str | None
     is_global_effect: bool
     effects: list[EffectApplication]
 
@@ -156,6 +159,7 @@ class Ability(Strict):
     source_type: str
     source_type_name: str | None
     icon: str
+    icon_image: str | None
     is_hidden_in_ui: bool
     is_unit_upgrade: bool
     requires_effect_enabling: bool
@@ -271,6 +275,8 @@ class Unit(Strict):
     is_naval: bool
     tier: int
     land_unit: str | None
+    card_image: str | None
+    portrait_image: str | None
     recruitment_cost: int
     upkeep_cost: int
     multiplayer_cost: int
@@ -368,6 +374,7 @@ class Skill(Strict):
     name: str | None
     description: str | None
     image: str
+    icon_image: str | None
     unlocked_at_rank: int
     is_background_skill: bool
     levels: list[SkillLevel]
@@ -427,6 +434,7 @@ class Technology(Strict):
     description: str | None
     long_description: str | None
     icon: str
+    icon_image: str | None
     is_civil: bool
     is_engineering: bool
     is_military: bool
@@ -458,6 +466,7 @@ class BuildingLevel(Strict):
     key: str
     name: str | None
     short_description: str | None
+    icon_image: str | None
     chain: Link | None
     level: int
     create_time: int
@@ -497,6 +506,7 @@ class Item(Strict):
     name: str | None
     description: str | None
     explanation: str | None
+    icon_image: str | None
     type: str
     category: str
     subcategory: str | None
@@ -528,6 +538,7 @@ class Trait(Strict):
     hidden: bool
     precedence: int
     icon: str
+    icon_image: str | None
     no_going_back_level: int
     levels: list[TraitLevel]
     antitraits: list[Link]
@@ -546,6 +557,7 @@ class Faction(Strict):
     is_rebel: bool
     is_quest_faction: bool
     flags_path: str
+    flag_image: str | None
     primary_colour: str | None
     units: list[Link] = []
     characters: list[Link] = []

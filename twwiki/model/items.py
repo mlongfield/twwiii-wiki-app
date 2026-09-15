@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from .context import Context, grouped, opt
+from .context import Context, by_key, grouped, opt
 from .effects import effect_application
 
 
@@ -39,6 +39,7 @@ def _items(ctx: Context) -> list[dict]:
     agents = grouped(ctx, "ancillary_to_included_agents", "ancillary", "agent")
     subtypes = grouped(ctx, "ancillaries_included_agent_subtypes", "ancillary", "agent_subtype")
     required = grouped(ctx, "ancillaries_required_skills", "ancillary", "required_skill")
+    types = by_key(ctx, "ancillary_types", "type")
 
     out = []
     for r in ctx.rows("SELECT * FROM ancillaries ORDER BY key"):
@@ -49,6 +50,8 @@ def _items(ctx: Context) -> list[dict]:
             "name": ctx.links.name("item", key),
             "description": ctx.loc.text(f"ancillaries_colour_text_{key}"),
             "explanation": ctx.loc.text(f"ancillaries_explanation_text_{key}"),
+            "icon_image": ctx.images.resolve(
+                "item.icon_image", types[r["type"]]["ui_icon"] if r["type"] in types else None),
             "type": r["type"],
             "category": r["category"],
             "subcategory": opt(r["subcategory"]),
@@ -75,6 +78,7 @@ def _traits(ctx: Context) -> list[dict]:
     levels = _trait_levels(ctx)
     effect_rows = grouped(ctx, "trait_level_effects", "trait_level", "effect")
     antitraits = grouped(ctx, "trait_to_antitraits", "trait", "antitrait")
+    categories = by_key(ctx, "trait_categories", "category")
 
     out = []
     for r in ctx.rows("SELECT * FROM character_traits ORDER BY key"):
@@ -86,6 +90,8 @@ def _traits(ctx: Context) -> list[dict]:
             "hidden": r["hidden"],
             "precedence": r["precedence"],
             "icon": r["icon"],
+            "icon_image": ctx.images.resolve(
+                "trait.icon_image", categories[r["icon"]]["icon_path"] if r["icon"] in categories else None),
             "no_going_back_level": r["no_going_back_level"],
             "levels": [{
                 "key": l["key"],

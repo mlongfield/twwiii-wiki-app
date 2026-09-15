@@ -10,6 +10,7 @@ from collections import defaultdict
 
 from .context import Context, by_key, grouped, opt
 from .effects import effect_application
+from .images import TECHNOLOGY_ICONS
 
 
 def load_resource_costs(ctx: Context) -> dict[str, dict]:
@@ -74,6 +75,7 @@ def build(ctx: Context) -> dict[str, list[dict]]:
                 "description": ctx.loc.text(f"technologies_short_description_{key}"),
                 "long_description": ctx.loc.text(f"technologies_long_description_{key}"),
                 "icon": r["icon_name"],
+                "icon_image": ctx.images.resolve("technology.icon_image", r["icon_name"], TECHNOLOGY_ICONS),
                 "is_civil": r["is_civil"],
                 "is_engineering": r["is_engineering"],
                 "is_military": r["is_military"],

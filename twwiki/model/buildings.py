@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from .context import Context, grouped, opt
 from .effects import effect_application
+from .images import BUILDING_ICONS
 from .technologies import load_resource_costs
 
 
@@ -16,13 +17,23 @@ def _variant_order(v: dict) -> tuple:
     return (specific, v["culture"] or "", v["subculture"] or "", v["faction"] or "")
 
 
+def _variant_name_key(level_key: str, v: dict) -> str:
+    return ("building_culture_variants_name_" + level_key
+            + (v["culture"] or "") + (v["subculture"] or "") + (v["faction"] or ""))
+
+
+def level_variant(ctx: Context, level_key: str, variants: list[dict]) -> dict | None:
+    """The variant that names a level (generic first); the first variant if none has text."""
+    ordered = sorted(variants, key=_variant_order)
+    for v in ordered:
+        if ctx.loc.text(_variant_name_key(level_key, v)):
+            return v
+    return ordered[0] if ordered else None
+
+
 def level_name(ctx: Context, level_key: str, variants: list[dict]) -> str | None:
-    for v in sorted(variants, key=_variant_order):
-        text = ctx.loc.text("building_culture_variants_name_" + level_key
-                            + (v["culture"] or "") + (v["subculture"] or "") + (v["faction"] or ""))
-        if text:
-            return text
-    return None
+    v = level_variant(ctx, level_key, variants)
+    return ctx.loc.text(_variant_name_key(level_key, v)) if v else None
 
 
 def catalog(ctx: Context) -> dict[str, dict[str, str | None]]:
@@ -60,12 +71,15 @@ def build(ctx: Context) -> dict[str, list[dict]]:
         key = r["level_name"]
         source = ("building_level", key)
         own_variants = sorted(variants.get(key, []), key=_variant_order)
+        variant = level_variant(ctx, key, own_variants)
         short = next((ctx.loc.text(f"building_short_description_texts_short_description_{v['short_description']}")
                       for v in own_variants if opt(v["short_description"])), None)
         out["building_level"].append({
             "key": key,
             "name": ctx.links.name("building_level", key),
             "short_description": short,
+            "icon_image": ctx.images.resolve(
+                "building_level.icon_image", opt(variant["icon"]) if variant else None, BUILDING_ICONS),
             "chain": ctx.links.link("building_chain", r["chain"], source=source, relation="chain"),
             "level": r["level"],
             "create_time": r["create_time"],

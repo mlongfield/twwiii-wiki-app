@@ -11,7 +11,7 @@ def fake_faction(ctx, **overrides):
     faction = {"key": "reikland", "name": "Reikland", "adjective": None, "subculture": None,
                "culture": ctx.links.link("culture", "empire", source=("faction", "reikland"), relation="culture"),
                "category": None, "is_rebel": False, "is_quest_faction": False, "flags_path": "flags/reikland",
-               "primary_colour": None, "units": [], "characters": []}
+               "primary_colour": None, "flag_image": None, "units": [], "characters": []}
     faction.update(overrides)
     return faction
 
