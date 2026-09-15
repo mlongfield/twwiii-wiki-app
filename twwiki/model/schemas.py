@@ -482,3 +482,52 @@ class BuildingChain(Strict):
     category: str | None
     in_encyclopedia: bool
     levels: list[Link]
+
+
+# ---- Items and traits ------------------------------------------------------
+
+class RequiredSkill(Strict):
+    skill: Link
+    level: int
+
+
+@entity("item")
+class Item(Strict):
+    key: str
+    name: str | None
+    description: str | None
+    explanation: str | None
+    type: str
+    category: str
+    subcategory: str | None
+    legendary: bool
+    applies_to: str
+    transferrable: bool
+    unique_to_world: bool
+    unique_to_faction: bool
+    bodyguard_unit: Link | None
+    agent_types: list[str]
+    agent_subtypes: list[Link]
+    required_skills: list[RequiredSkill]
+    effects: list[EffectApplication]
+
+
+class TraitLevel(Strict):
+    key: str
+    level: int
+    name: str | None
+    description: str | None
+    threshold_points: int
+    effects: list[EffectApplication]
+
+
+@entity("trait")
+class Trait(Strict):
+    key: str
+    name: str | None
+    hidden: bool
+    precedence: int
+    icon: str
+    no_going_back_level: int
+    levels: list[TraitLevel]
+    antitraits: list[Link]
