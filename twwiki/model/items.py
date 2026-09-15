@@ -45,13 +45,16 @@ def _items(ctx: Context) -> list[dict]:
     for r in ctx.rows("SELECT * FROM ancillaries ORDER BY key"):
         key = r["key"]
         source = ("item", key)
+        item_type = r["type"]
+        if types and item_type and item_type not in types:
+            ctx.links.missing["item.type->ancillary_types"] += 1
         out.append({
             "key": key,
             "name": ctx.links.name("item", key),
             "description": ctx.loc.text(f"ancillaries_colour_text_{key}"),
             "explanation": ctx.loc.text(f"ancillaries_explanation_text_{key}"),
             "icon_image": ctx.images.resolve(
-                "item.icon_image", types[r["type"]]["ui_icon"] if r["type"] in types else None),
+                "item.icon_image", types[item_type]["ui_icon"] if item_type in types else None),
             "type": r["type"],
             "category": r["category"],
             "subcategory": opt(r["subcategory"]),
@@ -84,14 +87,17 @@ def _traits(ctx: Context) -> list[dict]:
     for r in ctx.rows("SELECT * FROM character_traits ORDER BY key"):
         key = r["key"]
         source = ("trait", key)
+        icon = r["icon"]
+        if categories and icon and icon not in categories:
+            ctx.links.missing["trait.icon->trait_categories"] += 1
         out.append({
             "key": key,
             "name": ctx.links.name("trait", key),
             "hidden": r["hidden"],
             "precedence": r["precedence"],
-            "icon": r["icon"],
+            "icon": icon,
             "icon_image": ctx.images.resolve(
-                "trait.icon_image", categories[r["icon"]]["icon_path"] if r["icon"] in categories else None),
+                "trait.icon_image", categories[icon]["icon_path"] if icon in categories else None),
             "no_going_back_level": r["no_going_back_level"],
             "levels": [{
                 "key": l["key"],

@@ -72,6 +72,18 @@ def test_trait_icon_image_comes_from_its_category():
         schemas.ENTITY_MODELS["trait"].model_validate(t)
 
 
+def test_trait_icon_image_missing_category_is_counted():
+    ctx = with_images(t_items.items_context(), "ui/campaign ui/skills/other.png")
+    ctx.con.execute("CREATE TABLE trait_categories (category VARCHAR, icon_path VARCHAR)")
+    ctx.con.execute("INSERT INTO trait_categories VALUES (?, ?)", ["other", "ui/campaign ui/skills/other.png"])
+    built = {t["key"]: t for t in items.build(ctx)["trait"]}
+    assert built["brave"]["icon_image"] is None
+    assert built["coward"]["icon_image"] is None
+    assert ctx.links.missing["trait.icon->trait_categories"] == 2
+    for t in built.values():
+        schemas.ENTITY_MODELS["trait"].model_validate(t)
+
+
 def test_unit_card_uses_the_default_variant_and_portrait_the_first_by_faction():
     ctx = with_images(t_units.unit_context({
         "unit_variants": [
@@ -104,6 +116,19 @@ def test_item_icon_image_comes_from_its_type():
                     ["wh_main_anc_arcane_item", "ui/campaign ui/ancillaries/arcane_item.png"])
     built = {i["key"]: i for i in items.build(ctx)["item"]}
     assert built["blue_khepra"]["icon_image"] == "ui/campaign ui/ancillaries/arcane_item.png"
+    for i in built.values():
+        schemas.ENTITY_MODELS["item"].model_validate(i)
+
+
+def test_item_icon_image_missing_type_is_counted():
+    ctx = with_images(t_items.items_context(), "ui/campaign ui/ancillaries/other.png")
+    ctx.con.execute("CREATE TABLE ancillary_types (type VARCHAR, ui_icon VARCHAR)")
+    ctx.con.execute("INSERT INTO ancillary_types VALUES (?, ?)",
+                    ["wh_main_anc_other", "ui/campaign ui/ancillaries/other.png"])
+    built = {i["key"]: i for i in items.build(ctx)["item"]}
+    assert built["blue_khepra"]["icon_image"] is None
+    assert built["banner"]["icon_image"] is None
+    assert ctx.links.missing["item.type->ancillary_types"] == 2
     for i in built.values():
         schemas.ENTITY_MODELS["item"].model_validate(i)
 
