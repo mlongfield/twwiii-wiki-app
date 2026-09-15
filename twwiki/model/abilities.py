@@ -79,18 +79,23 @@ def _activation(row: dict | None) -> dict | None:
 
 def _phase(ctx: Context, link: dict, phase: dict, stat_effects: dict, attribute_effects: dict,
            stat_loc: dict) -> dict:
+    stat_effects_list = []
+    for s in stat_effects.get(phase["id"], []):
+        stat = s["stat"]
+        if stat not in stat_loc:
+            ctx.links.missing["ability.stat->modifiable_unit_stat"] += 1
+            stat_name = None
+        else:
+            stat_name = ctx.loc.text(f"unit_stat_localisations_onscreen_name_{stat_loc[stat]}")
+        stat_effects_list.append({"stat": stat, "stat_name": stat_name, "value": s["value"], "how": s["how"]})
+
     built = {
         "key": phase["id"],
         "order": link["order"],
         "target_self": link["target_self"],
         "target_friends": link["target_friends"],
         "target_enemies": link["target_enemies"],
-        "stat_effects": [
-            {"stat": s["stat"],
-             "stat_name": ctx.loc.text(f"unit_stat_localisations_onscreen_name_{stat_loc.get(s['stat'], s['stat'])}"),
-             "value": s["value"], "how": s["how"]}
-            for s in stat_effects.get(phase["id"], [])
-        ],
+        "stat_effects": stat_effects_list,
         "attribute_effects": [
             {"attribute": a["attribute"], "attribute_type": a["attribute_type"]}
             for a in attribute_effects.get(phase["id"], [])

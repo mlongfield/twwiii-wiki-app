@@ -2,7 +2,7 @@ import pytest
 from pydantic import ValidationError
 
 from twwiki.model import schemas
-from twwiki.model.context import opt
+from twwiki.model.context import opt, by_key, grouped
 from tests.model.fixtures import make_context
 
 
@@ -56,3 +56,22 @@ def test_entity_decorator_registers_model():
 
     assert schemas.ENTITY_MODELS["test_only_type"] is Thing
     del schemas.ENTITY_MODELS["test_only_type"]
+
+
+def test_by_key_and_grouped_read_rows():
+    ctx = make_context({"things": [{"key": "b", "grp": "x", "n": 2}, {"key": "a", "grp": "x", "n": 1}]})
+    # by_key indexes rows by the key column
+    by_key_result = by_key(ctx, "things", "key")
+    assert by_key_result["a"]["n"] == 1
+    assert by_key_result["b"]["n"] == 2
+    # grouped groups rows by the key column and maintains order via ORDER BY
+    grouped_result = grouped(ctx, "things", "grp", "n")
+    assert list(grouped_result["x"]) == [{"key": "a", "grp": "x", "n": 1}, {"key": "b", "grp": "x", "n": 2}]
+
+
+def test_by_key_and_grouped_return_empty_for_missing_table():
+    ctx = make_context({"things": [{"key": "a"}]})
+    assert by_key(ctx, "nope", "key") == {}
+    assert dict(grouped(ctx, "nope", "key", "key")) == {}
+    # Optional tables should not add to partial
+    assert ctx.partial == {}

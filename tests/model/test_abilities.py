@@ -85,3 +85,52 @@ def test_ability_without_special_row_has_no_activation():
     assert plain["name"] is None and plain["activation"] is None and plain["phases"] == []
     assert plain["units"] == [] and plain["modified_by_effects"] == []
     schemas.ENTITY_MODELS["ability"].model_validate(plain)
+
+
+def test_stat_without_mapping_row_has_no_name_and_is_counted():
+    ctx = make_context({
+        "unit_abilities": [
+            {"key": "hold", "requires_effect_enabling": False, "icon_name": "hold.png", "type": "wh_type_augment",
+             "is_unit_upgrade": False, "is_hidden_in_ui": False, "source_type": "lord"},
+        ],
+        "unit_special_abilities": [special()],
+        "special_ability_to_special_ability_phase_junctions": [
+            {"order": 0, "phase": "hold_phase", "special_ability": "hold",
+             "target_self": True, "target_friends": True, "target_enemies": False},
+        ],
+        "special_ability_phases": [phase_row()],
+        "special_ability_phase_stat_effects": [
+            {"phase": "hold_phase", "value": 5.0, "stat": "stat_melee_defence", "how": "add"},
+            {"phase": "hold_phase", "value": 4.0, "stat": "stat_morale", "how": "add"},
+            {"phase": "hold_phase", "value": 1.0, "stat": "stat_unmapped", "how": "mult"},
+        ],
+        "special_ability_phase_attribute_effects": [
+            {"attribute": "unbreakable", "phase": "hold_phase", "attribute_type": "positive"}],
+        "modifiable_unit_stats": [{"stat_key": "stat_melee_defence", "localisation": "stat_melee_defence"},
+                                  {"stat_key": "stat_morale", "localisation": "stat_morale"}],
+    }, loc={
+        "unit_abilities_onscreen_name_hold": "Hold the Line!",
+        "unit_abilities_tooltip_text_hold": "Stand firm.",
+        "unit_ability_source_types_name_lord": "Lord Ability",
+        "unit_stat_localisations_onscreen_name_stat_melee_defence": "Melee Defence",
+        "unit_stat_localisations_onscreen_name_stat_morale": "Leadership",
+    })
+    register_catalogs(ctx, abilities)
+
+    built = {a["key"]: a for a in abilities.build(ctx)["ability"]}
+    hold = built["hold"]
+    phase = hold["phases"][0]
+
+    # Check that mapped stats have names
+    assert phase["stat_effects"][0]["stat"] == "stat_melee_defence"
+    assert phase["stat_effects"][0]["stat_name"] == "Melee Defence"
+    assert phase["stat_effects"][1]["stat"] == "stat_morale"
+    assert phase["stat_effects"][1]["stat_name"] == "Leadership"
+
+    # Check that unmapped stat has no name and is counted
+    assert phase["stat_effects"][2]["stat"] == "stat_unmapped"
+    assert phase["stat_effects"][2]["stat_name"] is None
+    assert ctx.links.missing["ability.stat->modifiable_unit_stat"] == 1
+
+    # Validate the ability still validates with the schema
+    schemas.ENTITY_MODELS["ability"].model_validate(hold)
