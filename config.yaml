@@ -1,0 +1,80 @@
+game: warhammer_3
+
+paths:
+  game_dir: "C:/Program Files (x86)/Steam/steamapps/common/Total War WARHAMMER III"
+  raw_dir: "./raw"
+  db_path: "./twwiki.duckdb"
+  site_dir: "./site"
+
+server:
+  url: "ws://127.0.0.1:45127/ws"
+  timeout_s: 120
+
+# No pack list: extract.py reads RPFM's dependency cache for `game`, which
+# already resolves the game's packs into one file set. Regenerate the cache in
+# RPFM (Game Selected -> Generate Dependencies Cache) after every patch.
+
+# DB table names as RPFM spells them (e.g. main_units_tables).
+# Empty list = extract every db table found. Populate to narrow scope.
+tables: []
+
+# Tables that are huge and rarely useful in a wiki. Skipped unless in `tables`.
+skip_tables:
+  - anim_*
+  - "*_animations_tables"
+
+# Page queries run against twwiki.duckdb. Tables drop the `_tables` suffix;
+# `_columns` lists every column with its key and reference flags.
+pages:
+  units:
+    query: |
+      SELECT
+        mu.unit                                   AS key,
+        resolve_loc('land_units_onscreen_name_' || lu.key) AS name,
+        mu.caste,
+        lu.category,
+        lu.class,
+        mu.num_men,
+        mu.recruitment_cost,
+        mu.upkeep_cost,
+        lu.melee_attack,
+        lu.melee_defence,
+        lu.charge_bonus,
+        lu.bonus_hit_points,
+        lu.morale
+      FROM main_units mu
+      LEFT JOIN land_units lu ON lu.key = mu.land_unit
+      ORDER BY name
+    template: entity.md.j2
+    slug: key
+
+  # Building names live on culture variants, keyed by
+  # building || culture || subculture || faction with no separators. A few
+  # levels are named differently per culture; the generic variant wins, then
+  # the first by culture.
+  buildings:
+    query: |
+      SELECT
+        bl.level_name                             AS key,
+        coalesce((
+          SELECT nullif(l.text, '')
+          FROM building_culture_variants bcv
+          JOIN loc l ON l.key = 'building_culture_variants_name_'
+                            || bcv.building || bcv.culture || bcv.subculture || bcv.faction
+          WHERE bcv.building = bl.level_name AND l.text <> ''
+          ORDER BY (bcv.culture || bcv.subculture || bcv.faction) <> '',
+                   bcv.culture, bcv.subculture, bcv.faction
+          LIMIT 1
+        ), bl.level_name)                         AS name,
+        bl.chain,
+        bl.level,
+        bl.create_time,
+        bl.create_cost,
+        bl.upkeep_cost,
+        (SELECT string_agg(DISTINCT bcv.culture, ', ' ORDER BY bcv.culture)
+         FROM building_culture_variants bcv
+         WHERE bcv.building = bl.level_name AND bcv.culture <> '') AS cultures
+      FROM building_levels bl
+      ORDER BY name
+    template: entity.md.j2
+    slug: key

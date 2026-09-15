@@ -1,0 +1,12 @@
+# Python / uv
+.venv/
+__pycache__/
+*.pyc
+
+# Pipeline output: regenerated from the game install, too large for git
+raw/
+model/
+site/
+*.duckdb
+*.duckdb.wal
+*.partial/
