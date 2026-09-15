@@ -24,6 +24,26 @@ skip_tables:
   - anim_*
   - "*_animations_tables"
 
+# Game image folders exported to raw/<build_id>/images/<in-game path>.
+# The packs these come from are part of the build id.
+images:
+  folders:
+    - "ui/battle ui/ability_icons"
+    - "ui/campaign ui/technologies"
+    - "ui/campaign ui/skills"
+    - "ui/campaign ui/effect_bundles"
+    - "ui/campaign ui/ancillaries"
+    - "ui/campaign ui/mounts"
+    - "ui/campaign ui/climate_types"
+    - "ui/units/icons"
+    - "ui/buildings/icons"
+    - "ui/portraits/portholes"
+    - "ui/flags"
+    - "ui/frontend ui/faction_bullets"
+    - "ui/common ui/unit_category_icons"
+    - "ui/cheat_sheet"
+    - "ui/skins"
+
 # Page queries run against twwiki.duckdb. Tables drop the `_tables` suffix;
 # `_columns` lists every column with its key and reference flags.
 pages:
