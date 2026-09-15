@@ -164,3 +164,126 @@ class Ability(Strict):
     units: list[Link] = []
     characters: list[Link] = []
     modified_by_effects: list[Link] = []
+
+
+# ---- Units -----------------------------------------------------------------
+
+class BaseStats(Strict):
+    num_men: int
+    hit_points_per_entity: int | None
+    bonus_hit_points: int
+    walk_speed: float | None
+    run_speed: float | None
+    charge_speed: float | None
+    fly_speed: float | None
+    mass: float | None
+    melee_attack: int
+    melee_defence: int
+    charge_bonus: int
+    morale: int
+    accuracy: int
+    reload: int
+    armour: int | None
+    primary_ammo: int
+    secondary_ammo: int
+    damage_mod_physical: int
+    damage_mod_magic: int
+    damage_mod_flame: int
+    damage_mod_missile: int
+    damage_mod_all: int
+    healing_power: float
+    spell_mastery: float
+    num_mounts: int
+    rank_depth: int
+
+
+class MeleeWeapon(Strict):
+    key: str
+    damage: int
+    ap_damage: int
+    bonus_v_large: int
+    bonus_v_infantry: int
+    is_magical: bool
+    splash_attack_target_size: str | None
+    splash_attack_max_attacks: int
+    splash_attack_power_multiplier: float
+    melee_attack_interval: float
+    building_damage_multiplier: float
+    ignition_amount: float
+
+
+class Projectile(Strict):
+    key: str
+    category: str
+    damage: int
+    ap_damage: int
+    bonus_v_large: int
+    bonus_v_infantry: int
+    effective_range: int
+    minimum_range: int
+    base_reload_time: float
+    projectile_number: int
+    shots_per_volley: int
+    burst_size: int
+    marksmanship_bonus: float
+    is_magical: bool
+    ignition_amount: float
+    shockwave_radius: float
+    explosion_type: str | None
+
+
+class MissileWeapon(Strict):
+    key: str
+    projectile: Projectile | None
+
+
+class Shield(Strict):
+    key: str
+    shield_defence_value: int
+    shield_armour_value: int
+    missile_block_chance: int
+
+
+class UnitAttribute(Strict):
+    key: str
+    name: str | None
+    description: str | None
+
+
+class UnitSetMembership(Strict):
+    key: str
+    conditional: bool
+    min_exp_level: int | None
+    max_exp_level: int | None
+
+
+@entity("unit")
+class Unit(Strict):
+    key: str
+    name: str | None
+    short_description: str | None
+    caste: str
+    caste_name: str | None
+    category: str | None
+    category_name: str | None
+    unit_class: str | None
+    class_name: str | None
+    is_naval: bool
+    tier: int
+    land_unit: str | None
+    recruitment_cost: int
+    upkeep_cost: int
+    multiplayer_cost: int
+    campaign_cap: int
+    multiplayer_cap: int
+    base_stats: BaseStats | None
+    melee_weapon: MeleeWeapon | None
+    missile_weapon: MissileWeapon | None
+    shield: Shield | None
+    mount: str | None
+    attributes: list[UnitAttribute]
+    abilities: list[Link]
+    characters: list[Link]
+    unit_sets: list[UnitSetMembership]
+    custom_battle_factions: list[Link]
+    recruited_by_buildings: list[Link]
