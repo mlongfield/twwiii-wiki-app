@@ -1,0 +1,118 @@
+"""Known entities and whole-build checks against the real twwiki.duckdb.
+
+Expected values were verified against build fb20553df5af. After a game patch
+some may change legitimately; update them deliberately, never to make a
+failing build pass unexamined.
+"""
+
+import json
+from pathlib import Path
+
+import pytest
+
+from twwiki.model.build import build_all
+from twwiki.model.context import Context
+from twwiki.model.schemas import ENTITY_MODELS
+
+DB = Path("twwiki.duckdb")
+BASELINE = Path(__file__).parent / "missing_links_baseline.json"
+
+pytestmark = pytest.mark.skipif(not DB.exists(), reason="twwiki.duckdb not found; run extract and load first")
+
+EXPECTED_COUNTS = {
+    "unit": 2609, "character": 613, "skill": 5944, "ability": 2899, "effect": 15064,
+    "effect_bundle": 5855, "building_level": 5259, "building_chain": 1943, "technology": 1869,
+    "technology_tree": 33, "item": 2671, "trait": 744, "faction": 717, "culture": 27,
+    "subculture": 32, "difficulty_level": 7, "campaign_variable": 1052,
+}
+
+
+@pytest.fixture(scope="module")
+def model():
+    ctx = Context.open(DB)
+    entities = build_all(ctx)
+    yield ctx, {t: {e["key"]: e for e in rows} for t, rows in entities.items()}
+    ctx.con.close()
+
+
+def test_every_entity_type_is_built_with_expected_counts(model):
+    _, by_type = model
+    assert set(by_type) == set(ENTITY_MODELS)
+    assert {t: len(rows) for t, rows in by_type.items()} == EXPECTED_COUNTS
+
+
+def test_greatswords(model):
+    gs = model[1]["unit"]["wh_main_emp_inf_greatswords"]
+    stats = gs["base_stats"]
+    assert gs["name"] == "Greatswords"
+    assert (stats["num_men"], stats["hit_points_per_entity"], stats["bonus_hit_points"]) == (120, 8, 68)
+    assert (stats["melee_attack"], stats["melee_defence"], stats["armour"]) == (32, 30, 95)
+    assert gs["melee_weapon"]["key"] == "wh_main_emp_greatsword"
+    assert (gs["melee_weapon"]["damage"], gs["melee_weapon"]["ap_damage"]) == (10, 25)
+
+
+def test_karl_franz(model):
+    by_type = model[1]
+    kf = by_type["character"]["wh_main_emp_karl_franz"]
+    assert kf["name"] == "Emperor Karl Franz" and kf["title"] == "Legendary Lord"
+    assert [t["key"] for t in kf["skill_trees"]] == ["wh_main_skill_node_set_emp_karl_franz"]
+    nodes = kf["skill_trees"][0]["nodes"]
+    assert len(nodes) == 51
+    leader = next(by_type["skill"][n["skill"]["key"]] for n in nodes if n["skill"]["name"] == "Leader of Men")
+    aura = [e for e in leader["levels"][0]["effects"] if e["value"] == 50.0]
+    assert aura and aura[0]["effect"]["name"].startswith("Leadership aura size")
+
+
+def test_hold_the_line(model):
+    hold = model[1]["ability"]["wh_main_lord_passive_hold_the_line"]
+    assert hold["activation"]["passive"] is True and hold["activation"]["effect_range"] == 35.0
+    stats = {(s["stat"], s["value"], s["how"]) for p in hold["phases"] for s in p["stat_effects"]}
+    assert {("stat_melee_defence", 5.0, "add"), ("stat_morale", 4.0, "add")} <= stats
+    assert len(hold["units"]) == 18
+
+
+def test_training_field(model):
+    tf = model[1]["building_level"]["wh_main_emp_barracks_1"]
+    assert tf["name"] == "Training Field"
+    assert (tf["chain"]["key"], tf["level"], tf["create_cost"]) == ("wh_main_EMPIRE_barracks", 0, 750)
+    assert tf["cultures"] == ["wh_main_emp_empire"]
+
+
+def test_research_costs(model):
+    by_type = model[1]
+    tech = by_type["technology"]["wh2_dlc13_tech_emp_infantry_1_c"]
+    assert tech["name"] == "Improved Heavy Weapons"
+    assert {(p["tree"]["key"], p["research_points_required"]) for p in tech["placements"]} == {
+        ("emp_civ_reworkd", 900), ("emp_wulfhart", 700)}
+    costs = [p["resource_cost"] for t in by_type["technology"].values() for p in t["placements"]
+             if p["resource_cost"] and p["resource_cost"]["key"] == "wh2_dlc09_tmb_tech_agent_unlock"]
+    assert costs and costs[0]["treasury_cost"] == 0
+    assert {"pooled_resource_factor": "canopic_jars_technology", "amount": -250, "context": "absolute"} in costs[0]["pooled_resources"]
+    assert by_type["campaign_variable"]["base_research_points_per_turn"]["value"] == 100.0
+
+
+def test_text_token_resolution(model):
+    effect = model[1]["effect"]["wh_main_effect_technology_research_points"]
+    assert effect["description"] == "Research rate: %+n"
+
+
+def test_unit_set_membership(model):
+    members = [u for u in model[1]["unit"].values()
+               if any(s["key"] == "dlc14_all_units_excluding_characters" for s in u["unit_sets"])]
+    assert len(members) == 1305
+
+
+def test_factions_and_difficulty(model):
+    by_type = model[1]
+    reikland = by_type["faction"]["wh_main_emp_empire"]
+    assert reikland["name"] == "Reikland" and reikland["culture"]["key"] == "wh_main_emp_empire"
+    assert sorted(d["level"] for d in by_type["difficulty_level"].values()) == [-3, -2, -1, 0, 1, 2, 3]
+    level2 = by_type["difficulty_level"]["2"]
+    assert (len(level2["ai"]), len(level2["human"])) == (49, 0)
+
+
+def test_missing_links_do_not_exceed_baseline(model):
+    ctx, _ = model
+    baseline = json.loads(BASELINE.read_text(encoding="utf-8"))
+    worse = {k: (v, baseline.get(k, 0)) for k, v in ctx.links.missing.items() if v > baseline.get(k, 0)}
+    assert worse == {}, f"missing links above baseline (now, baseline): {worse}"
