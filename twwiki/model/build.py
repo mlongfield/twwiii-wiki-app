@@ -12,12 +12,13 @@ from pathlib import Path
 from pydantic import ValidationError
 
 from . import abilities, buildings, characters, effects, factions, items, regions, technologies, units
-from .context import Context
+from .context import Context, by_key
+from .images import INLINE_ICONS, ImageIndex, inline_targets
 from .schemas import ENTITY_MODELS
 
 log = logging.getLogger(__name__)
 
-MODEL_VERSION = 1
+MODEL_VERSION = 2
 MODULES = [effects, abilities, units, characters, technologies, buildings, items, factions, regions]
 
 # (target type, field, relation, source type or None for any)
@@ -94,7 +95,7 @@ def write_output(ctx: Context, entities: dict[str, list[dict]], out_root: Path, 
     staging = out_root / f"{build_id}.partial"
     if staging.exists():
         shutil.rmtree(staging)
-    for sub in ("entities", "index", "schema"):
+    for sub in ("entities", "index", "schema", "images"):
         (staging / sub).mkdir(parents=True)
 
     for entity_type, rows in sorted(entities.items()):
@@ -110,6 +111,14 @@ def write_output(ctx: Context, entities: dict[str, list[dict]], out_root: Path, 
         (staging / "schema" / f"{entity_type}.schema.json").write_text(
             json.dumps(model.model_json_schema(mode="serialization"), indent=2), encoding="utf-8")
 
+    # [[img:<key>]] names a ui_tagged_images row; anything else is written as a path.
+    tagged = {k: r["image_path"] for k, r in by_key(ctx, "ui_tagged_images", "key").items()}
+    inline = {target: ctx.images.resolve("inline", tagged.get(target.strip(), target), INLINE_ICONS)
+              for target in inline_targets(entities)}
+    (staging / "images" / "inline.json").write_text(
+        json.dumps(inline, ensure_ascii=False, indent=1, sort_keys=True), encoding="utf-8")
+    files_copied = ctx.images.copy_used(staging / "images")
+
     manifest = {
         "build_id": build_id,
         "model_version": MODEL_VERSION,
@@ -119,6 +128,7 @@ def write_output(ctx: Context, entities: dict[str, list[dict]], out_root: Path, 
         "missing_links": dict(sorted(ctx.links.missing.items())),
         "unresolved_text_targets": len(ctx.loc.unresolved_targets),
         "partial": ctx.partial,
+        "images": ctx.images.manifest(files_copied),
     }
     manifest.update(ctx.manifest_sections)
     (staging / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
@@ -142,11 +152,14 @@ def write_output(ctx: Context, entities: dict[str, list[dict]], out_root: Path, 
     return final
 
 
-def run(db_path: Path, out_root: Path) -> Path:
+def run(db_path: Path, out_root: Path, raw_root: Path) -> Path:
     started = time.perf_counter()
     ctx = Context.open(db_path)
     try:
         build_id = ctx.con.execute("SELECT build_id FROM _build").fetchone()[0]
+        ctx.images = ImageIndex.scan(Path(raw_root) / build_id / "images")
+        if not ctx.images.available:
+            log.warning("no images at %s; image fields will be null", Path(raw_root) / build_id / "images")
         entities = build_all(ctx)
         absent = sorted(set(ENTITY_MODELS) - set(entities))
         if absent:
@@ -154,7 +167,7 @@ def run(db_path: Path, out_root: Path) -> Path:
         out = write_output(ctx, entities, out_root, build_id)
     finally:
         ctx.con.close()
-    log.info("model %s written to %s in %.0fs; missing names %d, missing links %d, partial types %s",
+    log.info("model %s written to %s in %.0fs; missing names %d, missing links %d, images copied %d, partial types %s",
              build_id, out, time.perf_counter() - started, sum(ctx.missing_names.values()),
-             sum(ctx.links.missing.values()), sorted(ctx.partial) or "none")
+             sum(ctx.links.missing.values()), len(ctx.images.used), sorted(ctx.partial) or "none")
     return out

@@ -1,9 +1,11 @@
 import json
 from types import SimpleNamespace
 
+import duckdb
 import pytest
 
 from twwiki.model import build, schemas
+from twwiki.model.images import ImageIndex
 from tests.model.fixtures import make_context
 
 
@@ -105,3 +107,73 @@ def test_schema_marks_reverse_links_and_conditional_fields_required():
     bundle_schema = schemas.ENTITY_MODELS["effect_bundle"].model_json_schema(mode="serialization")
     app_schema = bundle_schema["$defs"]["EffectApplication"]
     assert "value_damaged" in app_schema["required"]
+
+
+def write_images(root, *paths):
+    for rel in paths:
+        (root / rel).parent.mkdir(parents=True, exist_ok=True)
+        (root / rel).write_bytes(b"png")
+
+
+def test_write_output_copies_used_images_and_writes_inline_map(tmp_path):
+    raw = tmp_path / "raw_images"
+    write_images(raw, "ui/units/icons/gs.png", "ui/units/icons/unused.png", "ui/skins/default/icon_agent_small.png",
+                 "ui/battle ui/ability_icons/causes_fear.png")
+    ctx = make_context({"dummy": [{"a": 1}], "ui_tagged_images": [
+        {"key": "icon_hero", "image_path": "UI\\Skins\\default\\icon_agent_small.png"}]})
+    ctx.images = ImageIndex.scan(raw)
+    assert ctx.images.resolve("unit.card_image", "gs", ("ui/units/icons",)) == "ui/units/icons/gs.png"
+    entities = build.build_all(ctx, modules=[fake_module(
+        flags_path="[[img:icon_hero]] [[img:icon_gone]] [[img:ui/Battle UI/ability_icons/causes_fear.png]]")])
+
+    out = build.write_output(ctx, entities, tmp_path / "model", "abc123")
+
+    assert (out / "images" / "ui/units/icons/gs.png").read_bytes() == b"png"
+    assert (out / "images" / "ui/skins/default/icon_agent_small.png").exists()
+    assert not (out / "images" / "ui/units/icons/unused.png").exists()
+    assert json.loads((out / "images" / "inline.json").read_text(encoding="utf-8")) == {
+        "icon_gone": None,
+        "icon_hero": "ui/skins/default/icon_agent_small.png",
+        "ui/Battle UI/ability_icons/causes_fear.png": "ui/battle ui/ability_icons/causes_fear.png",
+    }
+    images = json.loads((out / "manifest.json").read_text(encoding="utf-8"))["images"]
+    assert images["available"] is True and images["files_copied"] == 3
+    assert images["fields"]["unit.card_image"] == {"referenced": 1, "resolved": 1, "missing": 0, "ambiguous": 0}
+    assert images["fields"]["inline"] == {"referenced": 3, "resolved": 2, "missing": 1, "ambiguous": 0}
+
+
+def test_write_output_without_images_marks_them_unavailable(tmp_path):
+    ctx = make_context({"dummy": [{"a": 1}]})
+    entities = build.build_all(ctx, modules=[fake_module(flags_path="[[img:icon_hero]]")])
+    out = build.write_output(ctx, entities, tmp_path, "abc123")
+    assert json.loads((out / "images" / "inline.json").read_text(encoding="utf-8")) == {"icon_hero": None}
+    assert json.loads((out / "manifest.json").read_text(encoding="utf-8"))["images"] == {
+        "available": False, "files_copied": 0, "fields": {}}
+
+
+def test_image_copy_failure_fails_the_build_and_publishes_nothing(tmp_path):
+    raw = tmp_path / "raw_images"
+    write_images(raw, "ui/units/icons/gs.png")
+    ctx = make_context({"dummy": [{"a": 1}]})
+    ctx.images = ImageIndex.scan(raw)
+    ctx.images.resolve("unit.card_image", "ui/units/icons/gs.png")
+    (raw / "ui/units/icons/gs.png").unlink()
+    entities = build.build_all(ctx, modules=[fake_module()])
+    with pytest.raises(OSError):
+        build.write_output(ctx, entities, tmp_path / "model", "abc123")
+    assert not (tmp_path / "model" / "abc123").exists()
+
+
+def test_run_reads_images_from_the_raw_build(tmp_path):
+    db = tmp_path / "t.duckdb"
+    con = duckdb.connect(str(db))
+    con.execute("CREATE TABLE loc (key VARCHAR, text VARCHAR)")
+    con.execute("CREATE TABLE _build AS SELECT 'abc123' AS build_id")
+    con.close()
+    write_images(tmp_path / "raw" / "abc123" / "images", "ui/skins/default/x.png")
+
+    out = build.run(db, tmp_path / "model", tmp_path / "raw")
+
+    assert out == tmp_path / "model" / "abc123"
+    manifest = json.loads((out / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["images"]["available"] is True and manifest["model_version"] == 2
