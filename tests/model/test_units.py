@@ -22,8 +22,8 @@ def land_unit(**o):
     return row
 
 
-def unit_context():
-    ctx = make_context({
+def unit_context(extra_tables: dict | None = None):
+    tables = {
         "main_units": [main_unit(),
                        main_unit(unit="ship", land_unit="", caste="warship", is_naval=True),
                        main_unit(unit="archers", land_unit="arch_land", caste="missile_infantry")],
@@ -49,7 +49,10 @@ def unit_context():
         "agent_subtypes": [{"key": "captain", "associated_unit_override": "gs"}],
         "units_custom_battle_permissions": [{"faction": "reikland", "unit": "gs"}, {"faction": "reikland", "unit": "gs"}],
         "building_units_allowed": [{"building": "barracks_2", "unit": "gs"}],
-    }, loc={
+    }
+    if extra_tables:
+        tables.update(extra_tables)
+    ctx = make_context(tables, loc={
         "land_units_onscreen_name_gs_land": "Greatswords",
         "unit_description_short_texts_text_gs_short": "Elite melee.",
         "unit_castes_localised_name_melee_infantry": "Melee Infantry",
@@ -106,4 +109,26 @@ def test_naval_unit_without_land_unit():
     ship = built["ship"]
     assert ship["name"] is None and ship["land_unit"] is None and ship["base_stats"] is None
     assert ship["category"] is None and ship["attributes"] == [] and ship["unit_sets"] == []
+    schemas.ENTITY_MODELS["unit"].model_validate(ship)
+
+
+def test_units_carry_resolved_unit_sets():
+    ctx = unit_context(extra_tables={
+        "unit_sets": [{"key": "all_inf_melee", "use_unit_exp_level_range": False, "min_unit_exp_level_inclusive": 0, "max_unit_exp_level_inclusive": 0},
+                      {"key": "veteran_gs", "use_unit_exp_level_range": True, "min_unit_exp_level_inclusive": 3, "max_unit_exp_level_inclusive": 9}],
+        "unit_set_to_unit_junctions": [{"unit_set": "all_inf_melee", "exclude": False, "unit_record": "", "unit_caste": "", "unit_category": "inf_melee", "unit_class": ""},
+                                       {"unit_set": "veteran_gs", "exclude": False, "unit_record": "gs", "unit_caste": "", "unit_category": "", "unit_class": ""}],
+    })
+    built = {u["key"]: u for u in units.build(ctx)["unit"]}
+    gs = built["gs"]
+    archers = built["archers"]
+    ship = built["ship"]
+
+    assert gs["unit_sets"] == [{"key": "all_inf_melee", "conditional": False, "min_exp_level": None, "max_exp_level": None},
+                                {"key": "veteran_gs", "conditional": True, "min_exp_level": 3, "max_exp_level": 9}]
+    assert archers["unit_sets"] == [{"key": "all_inf_melee", "conditional": False, "min_exp_level": None, "max_exp_level": None}]
+    assert ship["unit_sets"] == []
+    assert "unit" not in ctx.partial
+    schemas.ENTITY_MODELS["unit"].model_validate(gs)
+    schemas.ENTITY_MODELS["unit"].model_validate(archers)
     schemas.ENTITY_MODELS["unit"].model_validate(ship)
