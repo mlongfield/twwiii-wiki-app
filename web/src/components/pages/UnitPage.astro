@@ -1,0 +1,119 @@
+---
+import { getSite } from "../../data/model";
+import GameText from "../GameText.astro";
+import LinkList from "../LinkList.astro";
+import Section from "../Section.astro";
+import StatTable from "../StatTable.astro";
+
+interface Props {
+  entityKey: string;
+}
+
+const site = await getSite();
+const unit = site.model.entities.unit.get(Astro.props.entityKey)!;
+const s = unit.base_stats;
+const melee = unit.melee_weapon;
+const missile = unit.missile_weapon;
+const projectile = missile?.projectile ?? null;
+const shield = unit.shield;
+---
+<Section title="Overview">
+  <GameText text={unit.short_description} block />
+  <StatTable rows={[
+    ["Caste", unit.caste_name ?? unit.caste],
+    ["Category", unit.category_name ?? unit.category],
+    ["Class", unit.class_name ?? unit.unit_class],
+    ["Tier", unit.tier],
+    ["Naval", unit.is_naval],
+    ["Recruitment cost", unit.recruitment_cost],
+    ["Upkeep", unit.upkeep_cost],
+    ["Multiplayer cost", unit.multiplayer_cost],
+    ["Campaign cap", unit.campaign_cap >= 0 ? unit.campaign_cap : null],
+    ["Mount", unit.mount],
+  ]} />
+</Section>
+{s && (
+  <Section title="Base stats">
+    <StatTable rows={[
+      ["Men", s.num_men],
+      ["Hit points per entity", s.hit_points_per_entity],
+      ["Bonus hit points", s.bonus_hit_points],
+      ["Melee attack", s.melee_attack],
+      ["Melee defence", s.melee_defence],
+      ["Charge bonus", s.charge_bonus],
+      ["Armour", s.armour],
+      ["Leadership", s.morale],
+      ["Walk speed", s.walk_speed],
+      ["Run speed", s.run_speed],
+      ["Charge speed", s.charge_speed],
+      ["Fly speed", s.fly_speed || null],
+      ["Mass", s.mass],
+      ["Accuracy", s.accuracy || null],
+      ["Reload", s.reload || null],
+      ["Ammunition", s.primary_ammo || null],
+      ["Physical resistance", s.damage_mod_physical || null],
+      ["Magic resistance", s.damage_mod_magic || null],
+      ["Fire resistance", s.damage_mod_flame || null],
+      ["Missile resistance", s.damage_mod_missile || null],
+      ["Ward save", s.damage_mod_all || null],
+      ["Healing power", s.healing_power],
+      ["Spell mastery", s.spell_mastery],
+      ["Rank depth", s.rank_depth],
+    ]} />
+  </Section>
+)}
+{melee && (
+  <Section title="Melee weapon">
+    <StatTable rows={[
+      ["Weapon", melee.key],
+      ["Base damage", melee.damage],
+      ["Armour-piercing damage", melee.ap_damage],
+      ["Bonus vs large", melee.bonus_v_large || null],
+      ["Bonus vs infantry", melee.bonus_v_infantry || null],
+      ["Magical", melee.is_magical],
+      ["Attack interval", melee.melee_attack_interval],
+      ["Splash target size", melee.splash_attack_target_size],
+      ["Splash attacks", melee.splash_attack_max_attacks || null],
+      ["Building damage multiplier", melee.building_damage_multiplier],
+      ["Ignition", melee.ignition_amount || null],
+    ]} />
+  </Section>
+)}
+{missile && (
+  <Section title="Missile weapon">
+    <StatTable rows={[
+      ["Weapon", missile.key],
+      ["Base damage", projectile?.damage],
+      ["Armour-piercing damage", projectile?.ap_damage],
+      ["Bonus vs large", projectile?.bonus_v_large || null],
+      ["Bonus vs infantry", projectile?.bonus_v_infantry || null],
+      ["Range", projectile?.effective_range],
+      ["Minimum range", projectile?.minimum_range || null],
+      ["Reload time", projectile?.base_reload_time],
+      ["Projectiles per shot", projectile?.projectile_number],
+      ["Shots per volley", projectile?.shots_per_volley],
+      ["Burst size", projectile?.burst_size],
+      ["Magical", projectile?.is_magical],
+      ["Ignition", projectile?.ignition_amount || null],
+      ["Explosion", projectile?.explosion_type],
+    ]} />
+  </Section>
+)}
+{shield && (
+  <Section title="Shield">
+    <StatTable rows={[
+      ["Defence", shield.shield_defence_value],
+      ["Armour", shield.shield_armour_value],
+      ["Missile block chance", shield.missile_block_chance],
+    ]} />
+  </Section>
+)}
+<Section title="Attributes" show={unit.attributes.length > 0}>
+  <ul class="plain-list">
+    {unit.attributes.map((a) => <li><GameText text={a.name ?? a.key} />{a.description && <> — <GameText text={a.description} /></>}</li>)}
+  </ul>
+</Section>
+<Section title="Abilities" show={unit.abilities.length > 0}><LinkList links={unit.abilities} /></Section>
+<Section title="Characters" show={unit.characters.length > 0}><LinkList links={unit.characters} /></Section>
+<Section title="Recruited at" show={unit.recruited_by_buildings.length > 0}><LinkList links={unit.recruited_by_buildings} /></Section>
+<Section title="Custom battle factions" show={unit.custom_battle_factions.length > 0}><LinkList links={unit.custom_battle_factions} /></Section>

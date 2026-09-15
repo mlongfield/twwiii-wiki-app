@@ -1,0 +1,31 @@
+---
+import { getSite } from "../../data/model";
+import EffectList from "../EffectList.astro";
+import GameText from "../GameText.astro";
+import LinkList from "../LinkList.astro";
+import Section from "../Section.astro";
+import StatTable from "../StatTable.astro";
+
+interface Props {
+  entityKey: string;
+}
+
+const site = await getSite();
+const skill = site.model.entities.skill.get(Astro.props.entityKey)!;
+---
+<Section title="Overview">
+  <GameText text={skill.description} block />
+  <StatTable rows={[
+    ["Unlocks at rank", skill.unlocked_at_rank || null],
+    ["Background skill", skill.is_background_skill],
+  ]} />
+</Section>
+<Section title="Levels" show={skill.levels.length > 0}>
+  {skill.levels.map((level) => (
+    <div class="skill-level">
+      <h3>Level {level.level}{level.unlocked_at_rank != null && <span class="muted"> · unlocks at rank {level.unlocked_at_rank}</span>}</h3>
+      <EffectList applications={level.effects} />
+    </div>
+  ))}
+</Section>
+<Section title="Characters" show={skill.characters.length > 0}><LinkList links={skill.characters} /></Section>

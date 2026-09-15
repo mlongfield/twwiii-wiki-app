@@ -1,0 +1,14 @@
+---
+interface Props {
+  title: string;
+  show?: boolean;
+}
+
+const { title, show = true } = Astro.props;
+---
+{show && (
+  <section class="panel">
+    <h2>{title}</h2>
+    <slot />
+  </section>
+)}

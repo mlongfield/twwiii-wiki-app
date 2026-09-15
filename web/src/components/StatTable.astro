@@ -1,0 +1,20 @@
+---
+import { formatNumber } from "../lib/effectText";
+
+interface Props {
+  rows: [string, string | number | boolean | null | undefined][];
+}
+
+const shown = Astro.props.rows.filter(([, value]) => value !== null && value !== undefined && value !== "");
+const display = (value: string | number | boolean) =>
+  typeof value === "number" ? formatNumber(value) : typeof value === "boolean" ? (value ? "Yes" : "No") : value;
+---
+{shown.length > 0 && (
+  <table class="stats">
+    <tbody>
+      {shown.map(([label, value]) => (
+        <tr><th scope="row">{label}</th><td>{display(value!)}</td></tr>
+      ))}
+    </tbody>
+  </table>
+)}

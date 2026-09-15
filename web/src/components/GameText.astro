@@ -1,0 +1,16 @@
+---
+import { getSite } from "../data/model";
+import { imageSrc } from "../data/site";
+import { renderGameTextHtml } from "../lib/gameText";
+
+interface Props {
+  text: string | null | undefined;
+  block?: boolean;
+}
+
+const { text, block = false } = Astro.props;
+const site = await getSite();
+const html = renderGameTextHtml(text, { inline: site.model.inline, src: (p) => imageSrc(site, p) });
+const Tag = block ? "p" : "span";
+---
+{html && <Tag class="game-text" set:html={html} />}

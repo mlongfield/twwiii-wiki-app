@@ -64,3 +64,18 @@ th { color: var(--muted); font-weight: normal; }
 .game-img-card { width: 60px; height: 130px; }
 .game-img-portrait { width: 96px; height: 96px; }
 .game-img-flag { width: 64px; height: 64px; }
+
+.breadcrumbs { font-size: 0.8rem; color: var(--muted); margin: 0.25rem 0 0.75rem; }
+.breadcrumbs a { color: var(--muted); }
+.entity-header { display: flex; gap: 1rem; align-items: flex-start; margin-bottom: 1rem; }
+.entity-header h1 { margin: 0; }
+.entity-meta { margin: 0.2rem 0 0; font-size: 0.85rem; }
+.entity-meta code, .site-footer code { color: var(--muted); }
+.entity-body { display: grid; grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr)); gap: 0 1rem; align-items: start; }
+.entity-link { display: inline-flex; gap: 0.35rem; align-items: center; }
+.link-list, .plain-list, .effect-list, .resource-cost { list-style: none; margin: 0; padding: 0; }
+.link-list li, .plain-list li, .effect-list li { padding: 0.2rem 0; border-bottom: 1px solid #3a2e1d; }
+.effect-list li { display: flex; flex-wrap: wrap; gap: 0.2rem 0.5rem; align-items: center; }
+.effect-note { font-size: 0.8rem; }
+.skill-level + .skill-level { margin-top: 0.75rem; }
+.phase-stats { margin-top: 0.5rem; }

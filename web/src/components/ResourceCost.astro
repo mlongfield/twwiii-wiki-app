@@ -1,0 +1,23 @@
+---
+import { formatNumber } from "../lib/effectText";
+
+interface Props {
+  cost: {
+    key: string;
+    treasury_cost: number;
+    pooled_resources: { pooled_resource_factor: string; amount: number; context: string }[];
+    trade_resources: string[];
+  } | null;
+}
+
+const { cost } = Astro.props;
+---
+{cost && (
+  <ul class="resource-cost">
+    {cost.treasury_cost !== 0 && <li>Treasury: {formatNumber(cost.treasury_cost)}</li>}
+    {cost.pooled_resources.map((r) => (
+      <li>{r.pooled_resource_factor.replace(/_/g, " ")}: {formatNumber(r.amount)} <span class="muted">({r.context})</span></li>
+    ))}
+    {cost.trade_resources.length > 0 && <li>Trade resources: {cost.trade_resources.join(", ")}</li>}
+  </ul>
+)}
