@@ -287,3 +287,88 @@ class Unit(Strict):
     unit_sets: list[UnitSetMembership]
     custom_battle_factions: list[Link]
     recruited_by_buildings: list[Link]
+
+
+# ---- Characters and skills -------------------------------------------------
+
+class LoreOfMagic(Strict):
+    key: str
+    name: str | None
+
+
+class SkillTreeNode(Strict):
+    key: str
+    skill: Link
+    tier: int
+    indent: int
+    points_on_creation: int
+    required_num_parents: int
+    visible_in_ui: bool
+    faction: str | None
+    subculture: str | None
+    campaign: str | None
+
+
+class SkillTreeLink(Strict):
+    parent: str
+    child: str
+    link_type: str
+    initial_descent_tiers: int
+
+
+class SkillLock(Strict):
+    node: str
+    skill: Link
+    level: int
+
+
+class SkillTree(Strict):
+    key: str
+    agent_type: str | None
+    faction: str | None
+    subculture: str | None
+    campaign: str | None
+    for_army: bool
+    for_navy: bool
+    nodes: list[SkillTreeNode]
+    links: list[SkillTreeLink]
+    locks: list[SkillLock]
+
+
+class SkillLevel(Strict):
+    level: int
+    unlocked_at_rank: int | None
+    effects: list[EffectApplication]
+
+
+@entity("character")
+class Character(Strict):
+    key: str
+    name: str | None
+    title: str | None
+    description: str | None
+    agent_types: list[str]
+    associated_unit: Link | None
+    lore_of_magic: LoreOfMagic | None
+    is_caster: bool
+    can_equip_ancillaries: bool
+    recruitable: bool
+    can_gain_xp: bool
+    cost: int
+    cap: int
+    factions: list[Link]
+    abilities: list[Link]
+    skill_trees: list[SkillTree]
+    items: list[Link] = []
+
+
+@entity("skill")
+class Skill(Strict):
+    key: str
+    name: str | None
+    description: str | None
+    image: str
+    unlocked_at_rank: int
+    is_background_skill: bool
+    levels: list[SkillLevel]
+    characters: list[Link] = []
