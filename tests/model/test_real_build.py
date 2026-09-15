@@ -24,6 +24,7 @@ EXPECTED_COUNTS = {
     "effect_bundle": 5855, "building_level": 5259, "building_chain": 1943, "technology": 1869,
     "technology_tree": 33, "item": 2671, "trait": 744, "faction": 717, "culture": 27,
     "subculture": 32, "difficulty_level": 7, "campaign_variable": 1052,
+    "region": 945, "province": 316,
 }
 
 
@@ -114,6 +115,34 @@ def test_factions_and_difficulty(model):
     assert sorted(d["level"] for d in by_type["difficulty_level"].values()) == [-3, -2, -1, 0, 1, 2, 3]
     level2 = by_type["difficulty_level"]["2"]
     assert (len(level2["ai"]), len(level2["human"])) == (49, 0)
+
+
+def test_altdorf_and_reikland(model):
+    by_type = model[1]
+    altdorf = by_type["region"]["wh3_main_combi_region_altdorf"]
+    assert altdorf["name"] == "Altdorf"
+    assert altdorf["province"]["key"] == "wh3_main_combi_province_reikland" and altdorf["is_province_capital"]
+    assert altdorf["starting_owner"]["key"] == "wh_main_emp_empire" and altdorf["is_faction_capital"]
+    assert altdorf["slot_cap"] == 10 and altdorf["template_source"] == "special"
+    templates = {t["key"]: t for t in altdorf["slot_templates"]}
+    assert {"wh_main_special_altdorf_primary", "wh_main_special_altdorf_secondary"} <= set(templates)
+    primary = [c["key"] for c in templates["wh_main_special_altdorf_primary"]["permitted_chains"]]
+    assert len(primary) == 54 and "wh2_dlc17_bst_special_settlement_altdorf" in primary
+    assert len(templates["wh_main_special_altdorf_secondary"]["permitted_chains"]) == 469
+    assert by_type["province"]["wh3_main_combi_province_reikland"]["capital"]["key"] == "wh3_main_combi_region_altdorf"
+
+
+def test_grom_peak_resources(model):
+    grom = model[1]["region"]["wh3_main_combi_region_grom_peak"]
+    resources = {t["key"]: t["resource"] for t in grom["slot_templates"]}
+    assert resources["wh2_dlc15_special_grom_peak_secondary"]["key"] == "res_rom_oil"
+    assert resources["wh3_main_special_grom_peak_primary"]["key"] == "res_stone_trolls"
+    assert resources["wh3_main_special_grom_peak_primary"]["name"] == "Stone Trolls Den"
+
+
+def test_sea_region_is_not_a_settlement(model):
+    sea = model[1]["region"]["wh3_main_chaos_region_kraken_sea"]
+    assert sea["is_settlement"] is False and sea["province"] is None
 
 
 def test_missing_links_do_not_exceed_baseline(model):

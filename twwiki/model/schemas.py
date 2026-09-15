@@ -6,6 +6,8 @@ validate entities and export one JSON Schema per type.
 
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict
 
 ENTITY_MODELS: dict[str, type["Strict"]] = {}
@@ -550,6 +552,48 @@ class Trait(Strict):
     no_going_back_level: int
     levels: list[TraitLevel]
     antitraits: list[Link]
+
+
+# ---- Regions ---------------------------------------------------------------
+
+class SlotResource(Strict):
+    key: str
+    name: str | None
+    icon_image: str | None
+
+
+class SlotTemplate(Strict):
+    key: str
+    role: Literal["primary", "secondary", "port"]
+    variant: str | None
+    resource: SlotResource | None
+    permitted_chains: list[Link]
+
+
+@entity("region")
+class Region(Strict):
+    key: str
+    name: str | None
+    campaign: str | None
+    is_settlement: bool
+    province: Link | None
+    is_province_capital: bool
+    starting_owner: Link | None
+    is_faction_capital: bool
+    slot_cap: int | None
+    cultural_originator: Link | None
+    region_groups: list[str]
+    template_source: Literal["special", "generic"]
+    slot_templates: list[SlotTemplate]
+
+
+@entity("province")
+class Province(Strict):
+    key: str
+    name: str | None
+    campaign: str | None
+    regions: list[Link]
+    capital: Link | None
 
 
 # ---- Factions, cultures, difficulty, campaign variables ---------------------

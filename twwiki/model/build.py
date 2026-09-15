@@ -11,14 +11,14 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
-from . import abilities, buildings, characters, effects, factions, items, technologies, units
+from . import abilities, buildings, characters, effects, factions, items, regions, technologies, units
 from .context import Context
 from .schemas import ENTITY_MODELS
 
 log = logging.getLogger(__name__)
 
 MODEL_VERSION = 1
-MODULES = [effects, abilities, units, characters, technologies, buildings, items, factions]
+MODULES = [effects, abilities, units, characters, technologies, buildings, items, factions, regions]
 
 # (target type, field, relation, source type or None for any)
 REVERSE = [
@@ -50,6 +50,8 @@ INDEX_FIELDS = {
     "trait": ["hidden"],
     "difficulty_level": ["level"],
     "campaign_variable": ["value"],
+    "region": ["campaign", "is_settlement", "template_source"],
+    "province": ["campaign"],
 }
 
 
@@ -118,6 +120,7 @@ def write_output(ctx: Context, entities: dict[str, list[dict]], out_root: Path, 
         "unresolved_text_targets": len(ctx.loc.unresolved_targets),
         "partial": ctx.partial,
     }
+    manifest.update(ctx.manifest_sections)
     (staging / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
 
     # a model is always rebuilt from the database, never patched; keep the old

@@ -26,6 +26,7 @@ class Context:
     missing_names: Counter = field(default_factory=Counter)
     partial: dict[str, list[str]] = field(default_factory=dict)
     images: ImageIndex = field(default_factory=ImageIndex.unavailable)
+    manifest_sections: dict[str, dict] = field(default_factory=dict)
 
     @classmethod
     def open(cls, db_path: str | Path) -> "Context":
