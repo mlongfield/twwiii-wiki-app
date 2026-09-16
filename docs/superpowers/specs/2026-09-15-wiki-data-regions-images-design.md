@@ -4,6 +4,8 @@
 **Status:** Approved in brainstorming, pending written-spec review
 **Sub-project:** 2a of the wiki (sub-project 2)
 
+> **Revised 2026-09-16:** hosting and related decisions changed; see "Decisions revised" in `2026-09-16-firebase-platform-design.md`.
+
 ## Context
 
 Sub-project 1 (game data model) is merged: `python -m twwiki.model` turns
