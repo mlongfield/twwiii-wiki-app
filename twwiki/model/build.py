@@ -14,6 +14,7 @@ from pydantic import ValidationError
 from . import abilities, buildings, characters, effects, factions, items, regions, technologies, units
 from .context import Context, by_key
 from .images import INLINE_ICONS, ImageIndex, inline_targets
+from .link_report import link_report
 from .schemas import ENTITY_MODELS
 
 log = logging.getLogger(__name__)
@@ -132,6 +133,11 @@ def write_output(ctx: Context, entities: dict[str, list[dict]], out_root: Path, 
     }
     manifest.update(ctx.manifest_sections)
     (staging / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+
+    report = link_report(ctx.con, ctx.tables_read)
+    (staging / "link_report.json").write_text(json.dumps(report, ensure_ascii=False, indent=1), encoding="utf-8")
+    if report["available"]:
+        log.info("link report: %s", ", ".join(f"{k} {v}" for k, v in report["summary"].items()))
 
     # a model is always rebuilt from the database, never patched; keep the old
     # one under a .old suffix until the new one is safely in place, so a

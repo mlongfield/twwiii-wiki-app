@@ -13,6 +13,7 @@ import pytest
 from twwiki.model.build import build_all
 from twwiki.model.context import Context
 from twwiki.model.images import ImageIndex
+from twwiki.model.link_report import link_report
 from twwiki.model.schemas import ENTITY_MODELS
 
 DB = Path("twwiki.duckdb")
@@ -191,3 +192,15 @@ def test_missing_images_do_not_exceed_baseline(model):
         if over:
             worse[field] = over
     assert worse == {}, f"image gaps above baseline (now, baseline): {worse}"
+
+
+def test_link_report_labels_known_references(model):
+    ctx, _ = model
+    report = link_report(ctx.con, ctx.tables_read)
+    refs = {(r["source_table"], r["source_column"], r["target_table"]): r for r in report["references"]}
+
+    junction = refs[("land_units_to_unit_abilites_junctions", "ability", "unit_abilities")]
+    assert junction["status"] == "both_read" and junction["rows_with_value"] > 0
+    unread = refs[("battle_context_unit_ability_junctions", "unit_ability", "unit_abilities")]
+    assert unread["status"] == "source_not_read"
+    assert report["summary"]["both_read"] > 100

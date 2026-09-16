@@ -159,6 +159,14 @@ becomes a problem.
   partial entity types, an `images` section (per-field referenced/resolved/
   missing/ambiguous counts, plus `available` and `files_copied`), and a
   `regions` section (`special_templates_unmatched`).
+- `link_report.json`: every schema reference (RPFM's reference marks, kept
+  in the database's `_columns` table) that touches a table the build read,
+  labelled `both_read`, `source_not_read` (a table the model ignores points at
+  one it uses: a possible missed link) or `target_not_read`. For `both_read`
+  references it counts rows whose value matches nothing in the target column,
+  with up to five examples. "Read" means a builder queried the table, not
+  that it follows that column. The report is informational and never fails a
+  build.
 
 The model never calculates final stats or research turns; that is the stat
 engine's job. Gaps in game data are counted in the manifest; an entity that
