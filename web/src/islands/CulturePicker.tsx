@@ -64,7 +64,11 @@ export default function CulturePicker({ cultures, initialCulture, initialGroups,
               <li key={chain.key}>
                 {chain.url ? (
                   <a className="entity-link" href={chain.url}>
-                    {chain.icon && <img className="game-img game-img-icon" src={chain.icon} alt="" />}
+                    {chain.icon ? (
+                      <img className="game-img game-img-icon" src={chain.icon} alt="" />
+                    ) : (
+                      <span className="game-img game-img-icon placeholder" data-placeholder-image="" aria-hidden="true" />
+                    )}
                     <span>{chain.name}</span>
                   </a>
                 ) : (
