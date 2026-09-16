@@ -2,6 +2,7 @@
 import "../styles/theme.css";
 import { buildInfo } from "../data/model";
 import { PAGE_TYPES } from "../data/pageTypes";
+import SearchBox from "../islands/SearchBox.tsx";
 
 interface Props {
   title: string;
@@ -22,7 +23,7 @@ const { title, description = "Total War: WARHAMMER III game data wiki" } = Astro
     <header class="site-header">
       <div class="inner">
         <a class="site-name" href="/">TWW3 Wiki</a>
-        <slot name="header" />
+        <SearchBox client:idle indexUrl="/search-index.json" />
         <nav class="site-nav" aria-label="Entity types">
           {PAGE_TYPES.map((p) => <a href={`/${p.segment}/`}>{p.label}</a>)}
         </nav>

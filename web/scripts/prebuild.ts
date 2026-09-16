@@ -3,9 +3,11 @@ import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { compileFromFile } from "json-schema-to-typescript";
-import { ModelLoadError, type Manifest } from "../src/data/load";
+import { ModelLoadError, type Manifest, loadModel } from "../src/data/load";
 import { findModelDir } from "../src/data/modelDir";
 import { ENTITY_TYPES } from "../src/data/pageTypes";
+import { createSearchIndexJson } from "../src/data/searchIndex";
+import { createSite } from "../src/data/site";
 import { validateModelDir } from "../src/data/validate";
 
 const webRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -70,6 +72,16 @@ async function writeBuildInfo(modelDir: string, manifest: Manifest): Promise<voi
   );
 }
 
+async function writeSearchIndex(modelDir: string): Promise<void> {
+  const site = await createSite(await loadModel(modelDir));
+  const json = createSearchIndexJson(site);
+  await mkdir(path.join(webRoot, "public"), { recursive: true });
+  await writeFile(path.join(webRoot, "public", "search-index.json"), json);
+  const megabytes = Buffer.byteLength(json) / 1024 / 1024;
+  console.log(`prebuild: search index ${megabytes.toFixed(1)} MB`);
+  if (megabytes > 10) console.warn("prebuild: search index is over the 10 MB target");
+}
+
 async function prebuild(): Promise<void> {
   const modelDir = await findModelDir(path.join(webRoot, "..", "model"));
   const manifest = await validateModelDir(modelDir);
@@ -77,6 +89,7 @@ async function prebuild(): Promise<void> {
   await generateTypes(modelDir);
   await copyImages(modelDir, manifest.build_id);
   await writeBuildInfo(modelDir, manifest);
+  await writeSearchIndex(modelDir);
 }
 
 try {
