@@ -127,3 +127,5 @@ input[type="search"], select {
 .search-hit { display: flex; gap: 0.4rem; align-items: center; padding: 0.25rem 0.3rem; color: var(--text); }
 .search-hit.active, .search-hit:hover { background: #3a2e1d; text-decoration: none; }
 .search-hit-blank { display: inline-block; width: 20px; height: 20px; }
+
+.type-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr)); gap: 0.35rem 1rem; }

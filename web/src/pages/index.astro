@@ -1,7 +1,37 @@
 ---
+import LinkList from "../components/LinkList.astro";
+import { buildInfo, getSite } from "../data/model";
+import { PAGE_TYPES } from "../data/pageTypes";
 import Layout from "../layouts/Layout.astro";
+
+const site = await getSite();
+const types = PAGE_TYPES.map((info) => ({ ...info, count: site.model.entities[info.type].size }));
+const trees = [...site.model.entities.technology_tree.values()]
+  .sort((a, b) => (a.name ?? a.key).localeCompare(b.name ?? b.key))
+  .slice(0, 12)
+  .map((tree) => ({ type: "technology_tree", key: tree.key, name: tree.name, missing: false }));
 ---
-<Layout title="Home">
-  <h1>TWW3 Wiki</h1>
-  <p class="muted">Units, characters, skills, buildings, technologies and regions of Total War: WARHAMMER III.</p>
+<Layout title="Home" description="Units, characters, skills, buildings, technologies and regions of Total War: WARHAMMER III">
+  <h1>Total War: WARHAMMER III wiki</h1>
+  <p class="muted">
+    Every unit, character, skill, ability, building, technology and region from game build <code>{buildInfo.buildId}</code>.
+  </p>
+  <section class="panel">
+    <h2>Browse</h2>
+    <ul class="type-grid">
+      {types.map((type) => (
+        <li><a href={`/${type.segment}/`}>{type.label}</a> <span class="muted">{type.count}</span></li>
+      ))}
+    </ul>
+  </section>
+  <section class="panel">
+    <h2>Technology trees</h2>
+    <LinkList links={trees} />
+    <p><a href="/technology-trees/">All technology trees</a></p>
+  </section>
+  <section class="panel">
+    <h2>Region building browser</h2>
+    <p>Open a region to see its special settlement slots, resources, and the building chains each culture can construct there.</p>
+    <p><a href="/regions/">Browse regions</a></p>
+  </section>
 </Layout>

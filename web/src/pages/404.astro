@@ -1,0 +1,11 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { PAGE_TYPES } from "../data/pageTypes";
+---
+<Layout title="Page not found">
+  <h1>Page not found</h1>
+  <p class="muted">That page does not exist in this wiki. Effects, effect bundles, difficulty levels and campaign variables have no pages of their own; they appear on the pages that use them.</p>
+  <ul class="type-grid">
+    {PAGE_TYPES.map((info) => <li><a href={`/${info.segment}/`}>{info.label}</a></li>)}
+  </ul>
+</Layout>
