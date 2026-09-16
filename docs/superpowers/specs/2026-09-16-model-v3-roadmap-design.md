@@ -1,7 +1,7 @@
 # Game Data Model Refinement Roadmap — Design
 
 **Date:** 2026-09-16
-**Status:** Approved in brainstorming, pending written-spec review
+**Status:** Approved
 **Scope:** Roadmap for model versions 3–8. Each area below gets its own detailed spec, plan and pull request.
 
 ## Context
