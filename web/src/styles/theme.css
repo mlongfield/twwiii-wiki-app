@@ -82,6 +82,7 @@ th { color: var(--muted); font-weight: normal; }
 
 .table-wrap { overflow-x: auto; }
 table.browse td, table.browse th { white-space: nowrap; }
+table.browse tbody tr { content-visibility: auto; contain-intrinsic-size: auto 2.5rem; }
 .browse-filter { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; align-items: center; margin: 0.5rem 0 1rem; }
 input[type="search"], select {
   background: var(--panel); color: var(--text); border: 1px solid var(--border-accent); padding: 0.35rem 0.5rem; font: inherit;

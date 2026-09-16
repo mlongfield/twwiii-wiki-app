@@ -95,7 +95,7 @@ export default function SearchBox({ indexUrl }: Props) {
           {status === "error" && <p className="muted">Search is unavailable.</p>}
           {status === "ready" && hits.length === 0 && <p className="muted">No matches.</p>}
           {groups.map((group) => (
-            <div key={group.type} className="search-group">
+            <div key={group.type} className="search-group" role="group">
               <div className="search-group-label">{group.typeLabel}</div>
               {group.items.map((item) => {
                 position += 1;

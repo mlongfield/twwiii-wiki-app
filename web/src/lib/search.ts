@@ -21,6 +21,13 @@ export const SEARCH_OPTIONS: Options<SearchDocument> = {
 
 export const SEARCH_QUERY: SearchOptions = { prefix: true, fuzzy: 0.2, boost: { name: 3 }, combineWith: "AND" };
 
+// minisearch 7.2.0's SearchOptions has no result-count cap (no `maxResults`/`limit` field:
+// `search()` always scores and returns every match), so the bound has to be applied to the
+// results array ourselves. 100 is comfortably above the 8-per-type cap `groupResults` keeps
+// even for a query that matches many types, while still bounding the array a two-character
+// prefix query can build from the 26k+ document index.
+export const MAX_SEARCH_RESULTS = 100;
+
 export interface SearchHit {
   id: string;
   type: string;
@@ -39,7 +46,7 @@ export interface ResultGroup {
 
 export function groupResults(results: SearchResult[], perType = 8): ResultGroup[] {
   const groups = new Map<string, ResultGroup>();
-  for (const result of results) {
+  for (const result of results.slice(0, MAX_SEARCH_RESULTS)) {
     const hit: SearchHit = {
       id: String(result.id),
       type: result.type,

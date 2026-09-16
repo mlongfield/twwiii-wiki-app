@@ -231,8 +231,9 @@ with no data are omitted.
   units.
 - **Building chain:** category, levels in order, availability (culture,
   subculture, faction, campaign).
-- **Item:** icon, type, category, rarity, applies to, bodyguard unit, allowed
-  agent types and characters, required skills, effects.
+- **Item:** icon, type, category, subcategory, legendary, applies to,
+  bodyguard unit, allowed agent types and characters, required skills,
+  effects.
 - **Trait:** icon, levels (threshold, name, description, effects), antitraits.
 - **Faction / culture / subculture:** flag (factions), links between them,
   units and characters (factions).
@@ -301,8 +302,8 @@ category-like fields; without JavaScript the full table is still readable.
   link).
 - Closing tags close the innermost open tag regardless of name; unclosed tags
   close at the end of the text; stray closers are dropped.
-- `\n` → line break; `A||B` at the start of a text → title `A` rendered as a
-  heading-styled line above body `B`.
+- `\n` → line break; `A||B`, split at the first `||` in the text → title `A`
+  rendered as a heading-styled line above body `B`.
 - `{{tr:X}}` and any unrecognised `[[…]]` or `{{…}}` token → rendered as
   plain text with the braces removed (the token content stays visible).
 

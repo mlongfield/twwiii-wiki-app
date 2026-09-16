@@ -14,21 +14,32 @@ interface Props {
 
 export default function BrowseFilter({ tableId, filters, total }: Props) {
   const [text, setText] = useState("");
+  const [debouncedText, setDebouncedText] = useState("");
   const [selected, setSelected] = useState<Record<number, string>>({});
   const [shown, setShown] = useState(total);
 
+  // Debounce the free-text filter (~150ms) so fast typing doesn't force a full
+  // table pass per keystroke; select filters below apply immediately.
   useEffect(() => {
-    const needle = text.trim().toLowerCase();
-    let count = 0;
-    document.querySelectorAll<HTMLTableRowElement>(`#${tableId} tbody tr`).forEach((row) => {
-      const matches =
-        (!needle || (row.dataset.search ?? "").includes(needle)) &&
-        Object.entries(selected).every(([index, value]) => !value || row.getAttribute(`data-f${index}`) === value);
-      row.hidden = !matches;
-      if (matches) count += 1;
+    const timer = window.setTimeout(() => setDebouncedText(text), 150);
+    return () => window.clearTimeout(timer);
+  }, [text]);
+
+  useEffect(() => {
+    const needle = debouncedText.trim().toLowerCase();
+    const frame = requestAnimationFrame(() => {
+      let count = 0;
+      document.querySelectorAll<HTMLTableRowElement>(`#${tableId} tbody tr`).forEach((row) => {
+        const matches =
+          (!needle || (row.dataset.search ?? "").includes(needle)) &&
+          Object.entries(selected).every(([index, value]) => !value || row.getAttribute(`data-f${index}`) === value);
+        row.hidden = !matches;
+        if (matches) count += 1;
+      });
+      setShown(count);
     });
-    setShown(count);
-  }, [text, selected, tableId]);
+    return () => cancelAnimationFrame(frame);
+  }, [debouncedText, selected, tableId]);
 
   return (
     <div className="browse-filter" role="search">

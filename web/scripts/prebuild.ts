@@ -49,10 +49,12 @@ async function copyImages(modelDir: string, buildId: string): Promise<void> {
     return;
   }
   await rm(target, { recursive: true, force: true });
+  const source = path.join(modelDir, "images");
   try {
-    await cp(path.join(modelDir, "images"), target, { recursive: true });
+    await cp(source, target, { recursive: true });
   } catch (e) {
     if ((e as NodeJS.ErrnoException).code !== "ENOENT") throw e;
+    console.warn(`prebuild: no images directory at ${source}; site will render placeholders for every image`);
   }
   await mkdir(target, { recursive: true });
   await writeFile(marker, wanted);
