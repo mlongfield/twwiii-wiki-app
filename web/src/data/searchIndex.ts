@@ -2,7 +2,7 @@ import MiniSearch from "minisearch";
 import { SEARCH_OPTIONS, type SearchDocument } from "../lib/search";
 import { mainImage } from "./images";
 import { PAGE_TYPES, type PageType } from "./pageTypes";
-import { type Site, imageSrc, urlFor } from "./site";
+import { type Site, chainCultureKeys, imageSrc, urlFor } from "./site";
 
 type Entity = Record<string, any>;
 
@@ -19,8 +19,12 @@ function searchCulture(site: Site, type: PageType, e: Entity): string {
       return cultureNames(site, [e.culture?.key]);
     case "building_level":
       return cultureNames(site, e.cultures ?? []);
-    case "building_chain":
-      return cultureNames(site, (e.availability ?? []).map((a: Entity) => a.culture?.key));
+    case "building_chain": {
+      const subcultureCulture = (key: string) => site.model.entities.subculture.get(key)?.culture?.key;
+      const factionCulture = (key: string) => site.model.entities.faction.get(key)?.culture?.key;
+      const keys = chainCultureKeys(e.availability ?? [], subcultureCulture, factionCulture);
+      return cultureNames(site, [...keys]);
+    }
     default:
       return "";
   }

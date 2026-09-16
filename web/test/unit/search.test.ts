@@ -2,7 +2,7 @@ import MiniSearch, { type SearchResult } from "minisearch";
 import path from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
 import { loadModel } from "../../src/data/load";
-import { PAGE_TYPES } from "../../src/data/pageTypes";
+import { ENTITY_TYPES, PAGE_TYPES } from "../../src/data/pageTypes";
 import { buildSearchDocuments, createSearchIndexJson } from "../../src/data/searchIndex";
 import { type Site, createSite } from "../../src/data/site";
 import { SEARCH_OPTIONS, SEARCH_QUERY, groupResults } from "../../src/lib/search";
@@ -13,6 +13,20 @@ let site: Site;
 beforeAll(async () => {
   site = await createSite(await loadModel(FIXTURE));
 });
+
+/**
+ * A minimal Site with empty entity maps for every type except the overrides given, for isolating
+ * one page type's search-document logic without depending on the shared fixture model.
+ */
+function minimalSite(overrides: Record<string, Map<string, any>>): Site {
+  const entities = Object.fromEntries(ENTITY_TYPES.map((t) => [t, overrides[t] ?? new Map()]));
+  return {
+    model: { dir: "", manifest: { build_id: "", model_version: 0, generated_at: "", counts: {} }, inline: {}, entities },
+    slugs: Object.fromEntries(PAGE_TYPES.map((p) => [p.type, new Map()])),
+    chainsByCulture: new Map(),
+    images: new Set(),
+  } as unknown as Site;
+}
 
 describe("buildSearchDocuments", () => {
   it("indexes every entity of every page type", () => {
@@ -31,6 +45,30 @@ describe("buildSearchDocuments", () => {
     expect(chain.culture).toContain("The Empire");
     const faction = docs.find((d) => d.id === "faction:wh_main_emp_empire")!;
     expect(faction.culture).toBe("The Empire");
+  });
+
+  it("resolves a building_chain's culture via subculture and via faction, not just a direct culture ref", () => {
+    const site = minimalSite({
+      culture: new Map([["culture_x", { key: "culture_x", name: "Culture X" }]]),
+      subculture: new Map([["subculture_x", { key: "subculture_x", culture: { key: "culture_x" } }]]),
+      faction: new Map([["faction_x", { key: "faction_x", culture: { key: "culture_x" } }]]),
+      building_chain: new Map([
+        [
+          "chain_x",
+          {
+            key: "chain_x",
+            name: "Chain X",
+            category: "test",
+            availability: [
+              { culture: null, subculture: null, faction: { key: "faction_x" } },
+              { culture: null, subculture: { key: "subculture_x" }, faction: null },
+            ],
+          },
+        ],
+      ]),
+    });
+    const chain = buildSearchDocuments(site).find((d) => d.id === "building_chain:chain_x")!;
+    expect(chain.culture).toBe("Culture X");
   });
 });
 

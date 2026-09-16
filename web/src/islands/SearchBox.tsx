@@ -26,7 +26,7 @@ export default function SearchBox({ indexUrl }: Props) {
   const [active, setActive] = useState(0);
 
   function ensureIndex() {
-    if (status !== "idle") return;
+    if (status === "loading" || status === "ready") return;
     setStatus("loading");
     loadIndex(indexUrl).then(
       (loaded) => {
