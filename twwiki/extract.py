@@ -40,7 +40,8 @@ from pathlib import Path
 
 from .config import load_config
 from .rpfm_client import CMD, RpfmClient, RpfmError
-from .extract_images import extract_images, image_containers
+from .extract_images import column_values, extract_images, image_containers
+from .model.images import normalise
 
 log = logging.getLogger(__name__)
 
@@ -105,7 +106,8 @@ async def extract(cfg) -> Path:
              if f["file_type"] in EXTRACTED_FILE_TYPES),
             key=lambda f: f["path"],
         )
-        image_folders = list(getattr(getattr(cfg, "images", None), "folders", None) or [])
+        images_cfg = getattr(cfg, "images", None)
+        image_folders = list(getattr(images_cfg, "folders", None) or [])
         packs = sorted({f["container_name"] for f in files}
                        | image_containers(deps["vanilla_packed_files"], image_folders))
         bid, pack_stats = build_id(game_dir, packs)
@@ -162,7 +164,21 @@ async def extract(cfg) -> Path:
             if i % 250 == 0:
                 log.info("%d/%d files", i, len(files))
 
-        manifest["images"] = await extract_images(client, image_folders, staging / "images")
+        table_paths, column_problems = _image_paths_from_tables(
+            staging, manifest["tables"], getattr(images_cfg, "path_columns", None))
+        manifest["images"] = await extract_images(
+            client, image_folders, staging / "images", deps["vanilla_packed_files"], table_paths)
+        manifest["images"]["failed_folders"].extend(column_problems)
+        if table_paths:
+            # The build id was fixed before the tables were read, so it cannot
+            # cover packs that only these images come from. Say so if any do.
+            wanted = {normalise(p) for p in table_paths if p}
+            outside = sorted({f["container_name"] for f in deps["vanilla_packed_files"]
+                              if f["container_name"] and normalise(f["path"]) in wanted} - set(packs))
+            manifest["images"]["from_tables"]["packs_outside_build_id"] = outside
+            if outside:
+                log.warning("images named in tables come from packs outside the build id: %s",
+                            ", ".join(outside))
 
     staging.mkdir(parents=True, exist_ok=True)
     (staging / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
@@ -170,7 +186,9 @@ async def extract(cfg) -> Path:
     log.info(
         "extracted build %s: %d tables, %d undecodable, %d skipped, %d image files, %d failed image folders",
         bid, len(manifest["tables"]), len(manifest["undecodable"]), len(manifest["skipped"]),
-        sum(manifest["images"]["folders"].values()), len(manifest["images"]["failed_folders"]),
+        sum(manifest["images"]["folders"].values())
+        + manifest["images"].get("from_tables", {}).get("exported", 0),
+        len(manifest["images"]["failed_folders"]),
     )
     return out
 
@@ -217,6 +235,27 @@ async def _read_file(client: RpfmClient, f: dict, fields_cache: dict) -> tuple[d
         ],
     }
     return header, rows
+
+
+def _image_paths_from_tables(staging: Path, tables: dict, specs: list[str] | None) -> tuple[list | None, list]:
+    """Values of each `table.column` in `images.path_columns`, plus any problems.
+
+    Returns None for the paths when no columns are configured.
+    """
+    if not specs:
+        return None, []
+    paths, problems = [], []
+    for spec in specs:
+        table, _, column = spec.partition(".")
+        try:
+            staged = tables.get(f"{table}_tables")
+            if not staged:
+                raise ValueError(f"table {table} was not extracted")
+            paths.extend(column_values(staging, staged, column))
+        except ValueError as e:
+            log.error("image path column failed: %s (%s)", spec, e)
+            problems.append({"folder": spec, "error": str(e)})
+    return paths, problems
 
 
 def _cell(cell):

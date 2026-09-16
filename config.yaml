@@ -24,14 +24,23 @@ skip_tables:
   - anim_*
   - "*_animations_tables"
 
-# Game image folders exported to raw/<build_id>/images/<in-game path>.
-# The build id is derived from the packs these folders' files come from, NOT
-# from this folder list. Adding or removing a folder whose files sit in an
-# already-covered pack (almost any ui/... folder) leaves the build id
-# unchanged, so extract.py will think the build is already extracted and skip
-# it. After changing this list for a game build you have already extracted,
-# move or rename the existing raw/<build_id>/ directory (raw builds are never
-# deleted by the pipeline) and run extract again.
+# Game images exported to raw/<build_id>/images/<in-game path>.
+# `folders`: each entry is a folder (exported whole) or a pattern whose `*`
+# matches one path segment (exported file by file).
+# `path_columns`: table.column pairs whose values are exact image paths; those
+# files are exported too, wherever they live. This is how narrow patterns stay
+# safe: text icons (ui_tagged_images) and item icons (ancillary_types) point
+# into skin subfolders the patterns leave out.
+#
+# The build id is derived from the packs the `folders` entries' files come
+# from, NOT from this section (files named by path_columns do not feed it; the
+# raw manifest lists any pack they come from outside it). Adding, removing or
+# narrowing an entry whose files sit in an already-covered pack (almost any
+# ui/... folder) leaves the build id unchanged, so extract.py will think the
+# build is already extracted and skip it. After changing this section for a
+# game build you have already extracted, move or rename the existing
+# raw/<build_id>/ directory (raw builds are never deleted by the pipeline) and
+# run extract again.
 images:
   folders:
     - "ui/battle ui/ability_icons"
@@ -44,14 +53,19 @@ images:
     - "ui/units/icons"
     - "ui/buildings/icons"
     - "ui/portraits/portholes"
-    # ~183 MB per build; one of the two biggest contributors to raw size.
-    - "ui/flags"
+    # Faction flags (mon_64) and small flags used as text icons (mon_24): about
+    # 5 MB, against 183 MB for the whole ui/flags folder.
+    - "ui/flags/*/mon_64.png"
+    - "ui/flags/*/mon_24.png"
     - "ui/frontend ui/faction_bullets"
     - "ui/common ui/unit_category_icons"
     - "ui/cheat_sheet"
-    # ~456 MB / 12,000+ files per build, feeding only a few hundred inline
-    # targets; the single biggest contributor to raw size.
-    - "ui/skins"
+    # Text icons named without a folder resolve here (about 76 MB, against
+    # 439 MB for all of ui/skins).
+    - "ui/skins/default/*.png"
+  path_columns:
+    - "ui_tagged_images.image_path"
+    - "ancillary_types.ui_icon"
 
 # Page queries run against twwiki.duckdb. Tables drop the `_tables` suffix;
 # `_columns` lists every column with its key and reference flags.

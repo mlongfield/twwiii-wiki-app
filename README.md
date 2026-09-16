@@ -101,10 +101,21 @@ floats to `DOUBLE`, booleans to `BOOLEAN`, everything else to `VARCHAR`.
 
 ## Images
 
-`config.yaml` `images.folders` lists in-game folders exported as they are to
-`raw/<build_id>/images/<in-game path>` (all PNG for what the wiki uses). A
-folder that fails to export is listed under `images.failed_folders` in the raw
-manifest and extraction carries on.
+`config.yaml` `images.folders` lists what is exported as it is to
+`raw/<build_id>/images/<in-game path>` (all PNG for what the wiki uses). An
+entry is either a folder, exported whole, or a pattern whose `*` matches one
+path segment (`ui/flags/*/mon_64.png`), exported file by file from the game's
+file list. `images.path_columns` lists `table.column` pairs whose values are
+exact image paths (`ui_tagged_images.image_path`, `ancillary_types.ui_icon`);
+those files are exported too, read from the tables extracted earlier in the
+same run, unless an entry already covers them. They keep the narrow patterns
+safe: text icons and item icons point into skin subfolders the patterns leave
+out, and without the exact file the model would fall back to a different image
+with the same file name. An entry or column that fails, or a pattern that
+matches nothing, is listed under `images.failed_folders` in the raw manifest
+and extraction carries on. The raw manifest's `images.from_tables` section
+counts paths listed, not in the game files, already covered and exported, and
+names any pack they come from outside the build id.
 
 The model resolves each image reference in the tables (bare names, names with
 `.png`, full paths with backslashes) against those files, copies only the
@@ -117,21 +128,20 @@ custom-battle portrait, which stands in for characters that have no
 referenced, resolved, missing and ambiguous references per field. Without
 `raw/<build_id>/images` the build still succeeds with every image field null.
 
-The `build_id` is derived from the packs holding the exported images, not from
-`images.folders` itself. If you add or remove a folder whose files sit in an
+The `build_id` is derived from the packs holding the files `images.folders`
+selects, not from the section itself (files named by `path_columns` do not
+feed it). If you add, remove or narrow an entry whose files sit in an
 already-covered pack (almost any `ui/...` folder), the `build_id` does not
 change, so `extract.py` sees the build as already extracted, logs "nothing to
-do", and the new folder's images never land on disk. After changing
-`images.folders` for a game build you have already extracted, move or rename
-the existing `raw/<build_id>/` directory (the pipeline never deletes raw
-builds) and run extract again so it re-exports under that id.
+do", and the new images never land on disk. After changing `images` for a game
+build you have already extracted, move or rename the existing
+`raw/<build_id>/` directory (the pipeline never deletes raw builds) and run
+extract again so it re-exports under that id.
 
 Raw images are large and `raw/` is append-only, so every game patch adds this
-cost again. For build `1eb25ce70f3a`, `raw/<build_id>/images` is 836 MB total;
-`ui/skins` alone is 456 MB across 12,075 files but feeds only a few hundred
-inline targets, and `ui/flags` is 183 MB. Those two folders dominate the
-per-build footprint and are the first candidates to narrow if raw storage
-becomes a problem.
+cost again. For build `1eb25ce70f3a`, exporting all of `ui/flags` and
+`ui/skins` made `raw/<build_id>/images` 836 MB; the patterns and path columns
+bring it to 286 MB (16,561 files) with an identical model.
 
 ## Game data model
 
