@@ -296,8 +296,9 @@ Setup (once, by the project owner):
    lives in `config.yaml` (`firebase.project_id`) and `.firebaserc`.
 3. Create a deploy service account with Firebase Hosting Admin, Firebase Rules
    Admin, Cloud Datastore Index Admin, Cloud Datastore Viewer, Storage Object
-   Viewer, Service Usage Consumer and Firebase Storage Viewer; store its JSON
-   key as the repository secret `FIREBASE_SERVICE_ACCOUNT`, and set repository
+   Viewer, Service Usage Consumer, Firebase Storage Viewer and Firebase Viewer
+   (without Firebase Viewer the Storage rules deploy fails with "Firebase
+   Storage has not been set up"); store its JSON key as the repository secret `FIREBASE_SERVICE_ACCOUNT`, and set repository
    variables `FIREBASE_PROJECT_ID` and `FIREBASE_STORAGE_BUCKET`. Keyless
    Workload Identity Federation is a more secure alternative to a JSON key.
 4. Create a fine-grained GitHub token for this repository with Actions read
