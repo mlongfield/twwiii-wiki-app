@@ -10,7 +10,7 @@ The pipeline extracts DB tables and loc text through rpfm_server into `raw/<buil
 
 On 2026-09-16 five audits compared the model and wiki with what a useful wiki and planning tool need. The reports are in `docs/superpowers/audits/`:
 
-- `2026-09-16-model-audit.md`: builders, schemas, `twwiki.duckdb` and the link report, checked against the owner's research guide ("Mining Total War: Warhammer 3 Game Files to Build a Claude Knowledge Base").
+- `2026-09-16-model-audit.md`: builders, schemas, `twwiki.duckdb` and the link report, checked against the owner's research guide, `docs/superpowers/research/2026-09-16-tww3-game-data-pipeline-guide.md` ("Mining Total War: Warhammer 3 Game Files to Build a Claude Knowledge Base").
 - `2026-09-16-wiki-page-code-audit.md`: consistency across the 15 page types, and which model fields the pages show.
 - `2026-09-16-live-site-review.md`: the live site on desktop and at 375 px.
 - `2026-09-16-game-docs-audit.md`: `documentation/` in `data.pack`, and the Lua campaign scripts in `data_script.pack`.
