@@ -89,3 +89,16 @@ class FakeEntityStore:
         self.calls.append(("delete_tree", path))
         for doc_path in [p for p in self.docs if p == path or p.startswith(path + "/")]:
             del self.docs[doc_path]
+
+
+class FakePost:
+    def __init__(self, status: int = 204, error: Exception | None = None):
+        self.status = status
+        self.error = error
+        self.requests: list[tuple[str, dict[str, str], bytes]] = []
+
+    def __call__(self, url: str, headers: dict[str, str], body: bytes) -> int:
+        self.requests.append((url, headers, body))
+        if self.error is not None:
+            raise self.error
+        return self.status
