@@ -7,6 +7,9 @@ import logging
 import os
 import sys
 
+from google.api_core.exceptions import GoogleAPIError
+from google.auth.exceptions import GoogleAuthError
+
 from ..config import load_config
 from . import PublishError
 from .indexes import write_indexes
@@ -55,7 +58,7 @@ def main(argv: list[str] | None = None) -> int:
             log.info("deploy started: %s", deploy_only(settings, services, build_id=args.build_id))
         else:
             publish(settings, services, build_id=args.build_id, deploy=not args.no_deploy)
-    except PublishError as e:
+    except (PublishError, GoogleAPIError, GoogleAuthError) as e:
         log.error("%s", e)
         return 1
     return 0

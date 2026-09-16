@@ -183,3 +183,29 @@ def test_cli_reports_publish_errors_with_exit_code_1(tmp_path, monkeypatch, capl
     monkeypatch.setattr(cli, "real_services", lambda settings: make_services())
     assert cli.main(["--config", str(config), "--no-deploy"]) == 1
     assert "no model found" in caplog.text
+
+
+def test_cli_reports_google_errors_with_exit_code_1(tmp_path, monkeypatch, caplog):
+    """CLI catches and reports Google API errors (not just PublishError) without a traceback."""
+    from google.api_core.exceptions import PermissionDenied as GooglePermissionDenied
+
+    config = tmp_path / "config.yaml"
+    config.write_text(
+        "game: warhammer_3\n"
+        f"paths:\n  model_dir: '{(tmp_path / 'models').as_posix()}'\n"
+        "firebase:\n  project_id: p\n  storage_bucket: bkt\n"
+        "  deploy_workflow: {repo: o/r, workflow: deploy.yml, ref: main}\n",
+        encoding="utf-8")
+    make_model(tmp_path / "models", "b1")
+
+    class FailingSnapshotStore(FakeSnapshotStore):
+        def upload(self, local_path, name):
+            raise GooglePermissionDenied("upload denied")
+
+    def real_services_with_error(settings):
+        return Services(entities=FakeEntityStore(), snapshots=FailingSnapshotStore(),
+                        post=FakePost(), token="tok")
+
+    monkeypatch.setattr(cli, "real_services", real_services_with_error)
+    assert cli.main(["--config", str(config), "--no-deploy"]) == 1
+    assert "upload denied" in caplog.text

@@ -27,15 +27,26 @@ MAX_WRITE_ATTEMPTS = 15
 
 class FirestoreEntityStore:
     def __init__(self, project: str):
-        # The client picks up FIRESTORE_EMULATOR_HOST itself.
-        self._db = firestore.Client(project=project)
+        self._project = project
+        self._db = None
+
+    def _client(self) -> firestore.Client:
+        """Lazily create and cache the Firestore client.
+
+        The client picks up FIRESTORE_EMULATOR_HOST itself.
+        Credentials are validated only on first use, allowing preflight
+        to catch DefaultCredentialsError with a helpful error message.
+        """
+        if self._db is None:
+            self._db = firestore.Client(project=self._project)
+        return self._db
 
     def get(self, path: str) -> dict | None:
-        snapshot = self._db.document(path).get()
+        snapshot = self._client().document(path).get()
         return snapshot.to_dict() if snapshot.exists else None
 
     def set(self, path: str, data: dict) -> None:
-        self._db.document(path).set(data)
+        self._client().document(path).set(data)
 
     def bulk_set(self, collection: str, docs: Iterable[tuple[str, dict]]) -> int:
         return self._bulk(collection, ((doc_id, data) for doc_id, data in docs))
@@ -54,9 +65,9 @@ class FirestoreEntityStore:
             failures.append(f"{failure.operation.reference.path}: {failure.message}")
             return False
 
-        writer = self._db.bulk_writer()
+        writer = self._client().bulk_writer()
         writer.on_write_error(on_error)
-        target = self._db.collection(collection)
+        target = self._client().collection(collection)
         done = 0
         try:
             for doc_id, data in operations:
@@ -73,14 +84,14 @@ class FirestoreEntityStore:
         return done
 
     def list_ids(self, collection: str) -> set[str]:
-        return {snapshot.id for snapshot in self._db.collection(collection).select(["__name__"]).stream()}
+        return {snapshot.id for snapshot in self._client().collection(collection).select(["__name__"]).stream()}
 
     def count(self, collection: str) -> int:
-        result = self._db.collection(collection).count().get()
+        result = self._client().collection(collection).count().get()
         return int(result[0][0].value)
 
     def delete_tree(self, path: str) -> None:
-        self._db.recursive_delete(self._db.document(path))
+        self._client().recursive_delete(self._client().document(path))
 
 
 class GcsSnapshotStore:
