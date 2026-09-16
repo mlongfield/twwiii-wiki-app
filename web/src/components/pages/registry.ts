@@ -6,6 +6,7 @@ import CulturePage from "./CulturePage.astro";
 import FactionPage from "./FactionPage.astro";
 import ItemPage from "./ItemPage.astro";
 import ProvincePage from "./ProvincePage.astro";
+import RegionPage from "./RegionPage.astro";
 import SkillPage from "./SkillPage.astro";
 import SubculturePage from "./SubculturePage.astro";
 import TechnologyPage from "./TechnologyPage.astro";
@@ -28,5 +29,6 @@ export const PAGE_BODIES = {
   faction: FactionPage,
   culture: CulturePage,
   subculture: SubculturePage,
+  region: RegionPage,
   province: ProvincePage,
 };
