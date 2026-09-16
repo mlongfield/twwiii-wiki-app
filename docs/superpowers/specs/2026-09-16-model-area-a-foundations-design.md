@@ -1,7 +1,7 @@
 # Model Area A: Foundations and Text — Design
 
 **Date:** 2026-09-16
-**Status:** Approved in brainstorming, pending written-spec review
+**Status:** Approved
 **Model version:** 3
 **Roadmap:** `docs/superpowers/specs/2026-09-16-model-v3-roadmap-design.md`, area A. The roadmap's shared conventions apply.
 
