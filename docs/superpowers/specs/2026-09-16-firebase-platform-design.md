@@ -420,8 +420,10 @@ listing.
 **Service account roles** (owner creates; confirmed against the first
 deploy): Firebase Hosting Admin, Firebase Rules Admin, Cloud Datastore Index
 Admin, Cloud Datastore Viewer, Storage Object Viewer, Service Usage Consumer
-(`firebase deploy` checks enabled APIs) and Firebase Storage Viewer (it reads
-the default Storage bucket).
+(`firebase deploy` checks enabled APIs), Firebase Storage Viewer and Firebase
+Viewer. The Storage rules deploy asks the Firebase Storage API for the default
+bucket; without Firebase Viewer that call returns 404 and `firebase-tools`
+reports "Firebase Storage has not been set up" (found on the first deploy).
 
 ## Error handling summary
 
@@ -498,7 +500,7 @@ unit tests only.
 2. Confirm Firestore (Native mode) and the default Storage bucket exist. The
    Firestore location cannot be changed once created.
 3. Create a deploy service account with the roles above, including Service
-   Usage Consumer and Firebase Storage Viewer; store its JSON key
+   Usage Consumer, Firebase Storage Viewer and Firebase Viewer; store its JSON key
    as the `FIREBASE_SERVICE_ACCOUNT` repository secret, and set the
    `FIREBASE_PROJECT_ID` and `FIREBASE_STORAGE_BUCKET` repository variables.
    Workload Identity Federation (keyless) is the more secure alternative.
