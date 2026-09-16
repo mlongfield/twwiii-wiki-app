@@ -280,6 +280,9 @@ Recovering:
   still shows the previous pages. Run `--deploy-only`.
 - A failed workflow run leaves the previous Hosting release live; re-run it
   from the Actions tab, or roll back a bad release in the Firebase console.
+- If a republish of the build that is already current fails, `builds/{id}`
+  stays `loading` and CI deploys refuse it until publish is re-run
+  successfully.
 
 Pushes to `main` that touch `web/`, the Firebase config or the workflow also
 deploy, using the build named by `site/current`.
@@ -289,19 +292,35 @@ Setup (once, by the project owner):
 1. Install the Google Cloud CLI and run `gcloud auth application-default login`
    and `gcloud auth application-default set-quota-project twwiii-wiki`.
 2. Firestore in Native mode and the default Storage bucket must exist. Put the
-   bucket name in `config.yaml` (`firebase.storage_bucket`).
+   bucket name in `config.yaml` (`firebase.storage_bucket`). The project id
+   lives in `config.yaml` (`firebase.project_id`) and `.firebaserc`.
 3. Create a deploy service account with Firebase Hosting Admin, Firebase Rules
-   Admin, Cloud Datastore Index Admin, Cloud Datastore Viewer and Storage
-   Object Viewer; store its JSON key as the repository secret
-   `FIREBASE_SERVICE_ACCOUNT`, and set repository variables
-   `FIREBASE_PROJECT_ID` and `FIREBASE_STORAGE_BUCKET`.
+   Admin, Cloud Datastore Index Admin, Cloud Datastore Viewer, Storage Object
+   Viewer, Service Usage Consumer and Firebase Storage Viewer; store its JSON
+   key as the repository secret `FIREBASE_SERVICE_ACCOUNT`, and set repository
+   variables `FIREBASE_PROJECT_ID` and `FIREBASE_STORAGE_BUCKET`. Keyless
+   Workload Identity Federation is a more secure alternative to a JSON key.
 4. Create a fine-grained GitHub token for this repository with Actions read
    and write, and set it as `TWWIKI_GITHUB_TOKEN` where you publish.
 5. Limit Hosting release retention to 5 in the Firebase console (each release
    is about 633 MB).
+6. Before the first publish, deploy the rules and index exemptions once with
+   your own login:
+
+   ```bash
+   npx --yes firebase-tools@15.30.1 deploy --only firestore:rules,firestore:indexes,storage --project twwiii-wiki
+   ```
+
+   and wait until the Firestore console, under Indexes → Single field →
+   Exemptions, shows the 19 `entity` exemptions as ready. The deploy workflow
+   deploys them too, but it first runs after publish has written about 48,600
+   documents; without the exemptions Firestore would index every `entity`
+   subfield (about 2.87 million index entries), and a database created in
+   test mode would stay writable from browsers until then.
 
 Costs (list prices, approximate): a publish is about 48,600 document writes
-plus a key listing and count queries, roughly 10–15 US cents.
+plus count queries (and a key listing when republishing an existing build),
+roughly 10–15 US cents.
 
 Optional emulator tests (need Java 21+):
 

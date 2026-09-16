@@ -2980,12 +2980,22 @@ This task touches the real Firebase project and GitHub. It is run by the control
 
 **Prerequisites (owner):** the setup steps in the README section above are done; the owner has confirmed the bucket name, and `config.yaml` `firebase.storage_bucket` matches it (commit a correction if it differs).
 
-- [ ] **Step 1: Publish without deploying**
+- [ ] **Step 1: Deploy the rules and index exemptions**
+
+Before anything is written, the owner runs, with their own login:
+
+```bash
+npx --yes firebase-tools@15.30.1 deploy --only firestore:rules,firestore:indexes,storage --project twwiii-wiki
+```
+
+Expected: the deploy completes. Then wait until the Firestore console, under Indexes → Single field → Exemptions, shows the 19 `entity` exemptions as ready. Without them every `entity` subfield of the ~48,600 documents is indexed (about 2.87M index entries), and a database created in test mode stays writable until the merge-triggered workflow deploys the rules.
+
+- [ ] **Step 2: Publish without deploying**
 
 Ask the owner to approve, then run: `uv run python -m twwiki.publish --no-deploy`
 Expected: logs the snapshot upload (about 8,900 files the first time), `firestore:` lines for all 19 types, and `build 1eb25ce70f3a is live: site/current updated`; exit code 0.
 
-- [ ] **Step 2: Check Firestore**
+- [ ] **Step 3: Check Firestore**
 
 Run:
 
@@ -3002,11 +3012,11 @@ print(len(keys), 'wh_main_emp_cha_captain_0' in keys)
 
 Expected: `site/current` names `1eb25ce70f3a`; `18 True`. (Counts were already checked by publish step 4.)
 
-- [ ] **Step 3: Open the pull request and merge**
+- [ ] **Step 4: Open the pull request and merge**
 
 Push the branch and give the owner a pre-filled pull request link (the GitHub CLI is not installed). The owner merges it. The push to `main` changes `.github/workflows/deploy.yml`, so the `Deploy` workflow runs for `site/current`.
 
-- [ ] **Step 4: Check the deploy**
+- [ ] **Step 5: Check the deploy**
 
 Expected, in the Actions run: every step green, including the smoke check. If a step fails on a missing permission, the error names the permission; the owner adds only the role that grants it, then re-runs the workflow.
 
@@ -3015,7 +3025,7 @@ Then check in a browser (or with `curl`):
 - a unit page such as `https://twwiii-wiki.web.app/units/wh_main_emp_inf_greatswords/` loads with its unit card image;
 - `https://twwiii-wiki.web.app/sitemap-index.xml` exists.
 
-- [ ] **Step 5: Check the rules reject browser writes**
+- [ ] **Step 6: Check the rules reject browser writes**
 
 Unauthenticated Firestore REST requests are judged by the security rules, like a browser's:
 
@@ -3023,11 +3033,12 @@ Unauthenticated Firestore REST requests are judged by the security rules, like a
 DOC="https://firestore.googleapis.com/v1/projects/twwiii-wiki/databases/(default)/documents/site/current"
 curl -s "$DOC" | head -c 300; echo
 curl -s -X PATCH -H "Content-Type: application/json" -d '{"fields":{"build_id":{"stringValue":"evil"}}}' "$DOC" | head -c 300; echo
+curl -s -o /dev/null -w "%{http_code}\n" "https://firebasestorage.googleapis.com/v0/b/twwiii-wiki.firebasestorage.app/o/builds%2F1eb25ce70f3a%2Fmanifest.json?alt=media"
 ```
 
-Expected: the first prints the document with `"build_id": {"stringValue": "1eb25ce70f3a"}`; the second prints an error with `"code": 403` and `"status": "PERMISSION_DENIED"`, and `site/current` is unchanged.
+Expected: the first prints the document with `"build_id": {"stringValue": "1eb25ce70f3a"}`; the second prints an error with `"code": 403` and `"status": "PERMISSION_DENIED"`, and `site/current` is unchanged; the third, an unauthenticated Cloud Storage read of the snapshot manifest (bucket from `config.yaml` `firebase.storage_bucket`), prints `403`.
 
-- [ ] **Step 6: Test the dispatch path**
+- [ ] **Step 7: Test the dispatch path**
 
 With the owner's go-ahead: `uv run python -m twwiki.publish --deploy-only`
 Expected: `deploy started: https://github.com/mlongfield/twwiii-wiki-app/actions/workflows/deploy.yml`, and a second green `Deploy` run.

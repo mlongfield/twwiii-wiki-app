@@ -419,7 +419,9 @@ listing.
 
 **Service account roles** (owner creates; confirmed against the first
 deploy): Firebase Hosting Admin, Firebase Rules Admin, Cloud Datastore Index
-Admin, Cloud Datastore Viewer, Storage Object Viewer.
+Admin, Cloud Datastore Viewer, Storage Object Viewer, Service Usage Consumer
+(`firebase deploy` checks enabled APIs) and Firebase Storage Viewer (it reads
+the default Storage bucket).
 
 ## Error handling summary
 
@@ -495,7 +497,8 @@ unit tests only.
 1. Install the gcloud CLI; run `gcloud auth application-default login`.
 2. Confirm Firestore (Native mode) and the default Storage bucket exist. The
    Firestore location cannot be changed once created.
-3. Create a deploy service account with the roles above; store its JSON key
+3. Create a deploy service account with the roles above, including Service
+   Usage Consumer and Firebase Storage Viewer; store its JSON key
    as the `FIREBASE_SERVICE_ACCOUNT` repository secret, and set the
    `FIREBASE_PROJECT_ID` and `FIREBASE_STORAGE_BUCKET` repository variables.
    Workload Identity Federation (keyless) is the more secure alternative.

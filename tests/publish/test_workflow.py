@@ -32,8 +32,9 @@ def test_steps_run_in_order_with_pinned_tools():
     def index(fragment: str) -> int:
         return next(i for i, run in enumerate(runs) if fragment in run)
 
-    assert (index("npm ci") < index("fetch-snapshot.ts") < index("npm run build") < index("npm test")
-            < index("firebase-tools@15.30.1 deploy") < index("curl"))
+    # The service account key is written after `npm ci`, so dependency install scripts never see it.
+    assert (index("npm ci") < index("GOOGLE_APPLICATION_CREDENTIALS") < index("fetch-snapshot.ts")
+            < index("npm run build") < index("npm test") < index("firebase-tools@15.30.1 deploy") < index("curl"))
     assert "--only hosting,firestore:rules,firestore:indexes,storage" in "\n".join(runs)
     assert [step["uses"] for step in steps() if "uses" in step] == ["actions/checkout@v7", "actions/setup-node@v7"]
     cleanup = steps()[-1]
