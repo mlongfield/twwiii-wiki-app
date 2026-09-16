@@ -184,7 +184,10 @@ npm run build      # prebuild (validate model, generate types, copy images,
 npm run preview    # serve web/dist locally
 npm run dev        # prebuild once, then the Astro dev server
 npm test           # unit tests against the committed fixture model
-npm run test:e2e   # Playwright tests against web/dist (needs npm run build)
+npm run test:e2e   # Playwright tests against web/dist (needs npm run build; a cold run
+                   # can fail with "webServer exited early" because astro preview
+                   # daemonizes itself — start `npm run preview -- --port 4321`
+                   # first, then re-run)
 npm run fixtures   # regenerate web/test/fixtures/model from the real model
 ```
 

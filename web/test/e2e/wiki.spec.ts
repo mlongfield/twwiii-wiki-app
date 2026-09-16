@@ -5,6 +5,17 @@ import { expect, test } from "@playwright/test";
 
 const distIndex = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../dist/index.html");
 
+// Astro islands (`client:visible` / `client:idle`) render static SSR markup first and
+// only attach their event handlers once they hydrate. A click or a select fired before
+// that finishes is lost silently (the DOM updates, but no handler is listening yet) and
+// nothing retries it, so tests that interact with an island must wait for it to become
+// interactive first — `ssr` is removed from the <astro-island> element once hydration
+// completes. Just polling the *result* of an interaction (as most `expect(...)` calls
+// already do) isn't enough here, because the one-shot interaction itself can be missed.
+async function waitForHydrated(page: import("@playwright/test").Page, componentUrlPart: string) {
+  await expect(page.locator(`astro-island[component-url*="${componentUrlPart}"][ssr]`)).toHaveCount(0);
+}
+
 test.describe("wiki", () => {
   test.skip(!existsSync(distIndex), "run `npm run build` first");
 
@@ -27,6 +38,7 @@ test.describe("wiki", () => {
     await page.goto("/characters/wh_main_emp_karl_franz/");
     const node = page.locator("button.tree-node", { hasText: "Devastating Charge" }).first();
     await node.scrollIntoViewIfNeeded();
+    await waitForHydrated(page, "TreeView");
     await node.click();
     await expect(page.locator(".tree-panel h3")).toHaveText("Devastating Charge");
   });
@@ -46,6 +58,7 @@ test.describe("wiki", () => {
     await expect(page.getByText("wh_main_special_altdorf_primary")).toBeVisible();
     const picker = page.locator(".culture-picker");
     await picker.scrollIntoViewIfNeeded();
+    await waitForHydrated(page, "CulturePicker");
     const chains = picker.locator(".chain-group li");
     const before = await chains.count();
     expect(before).toBeGreaterThan(0);
@@ -58,6 +71,7 @@ test.describe("wiki", () => {
 
   test("search finds a unit and opens it", async ({ page }) => {
     await page.goto("/");
+    await waitForHydrated(page, "SearchBox");
     const box = page.getByLabel("Search the wiki");
     await box.click();
     await box.fill("greatswords");
