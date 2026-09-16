@@ -1,0 +1,816 @@
+{
+  "$defs": {
+    "BaseStats": {
+      "additionalProperties": false,
+      "properties": {
+        "num_men": {
+          "title": "Num Men",
+          "type": "integer"
+        },
+        "hit_points_per_entity": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Hit Points Per Entity"
+        },
+        "bonus_hit_points": {
+          "title": "Bonus Hit Points",
+          "type": "integer"
+        },
+        "walk_speed": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Walk Speed"
+        },
+        "run_speed": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Run Speed"
+        },
+        "charge_speed": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Charge Speed"
+        },
+        "fly_speed": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Fly Speed"
+        },
+        "mass": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mass"
+        },
+        "melee_attack": {
+          "title": "Melee Attack",
+          "type": "integer"
+        },
+        "melee_defence": {
+          "title": "Melee Defence",
+          "type": "integer"
+        },
+        "charge_bonus": {
+          "title": "Charge Bonus",
+          "type": "integer"
+        },
+        "morale": {
+          "title": "Morale",
+          "type": "integer"
+        },
+        "accuracy": {
+          "title": "Accuracy",
+          "type": "integer"
+        },
+        "reload": {
+          "title": "Reload",
+          "type": "integer"
+        },
+        "armour": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Armour"
+        },
+        "primary_ammo": {
+          "title": "Primary Ammo",
+          "type": "integer"
+        },
+        "secondary_ammo": {
+          "title": "Secondary Ammo",
+          "type": "integer"
+        },
+        "damage_mod_physical": {
+          "title": "Damage Mod Physical",
+          "type": "integer"
+        },
+        "damage_mod_magic": {
+          "title": "Damage Mod Magic",
+          "type": "integer"
+        },
+        "damage_mod_flame": {
+          "title": "Damage Mod Flame",
+          "type": "integer"
+        },
+        "damage_mod_missile": {
+          "title": "Damage Mod Missile",
+          "type": "integer"
+        },
+        "damage_mod_all": {
+          "title": "Damage Mod All",
+          "type": "integer"
+        },
+        "healing_power": {
+          "title": "Healing Power",
+          "type": "number"
+        },
+        "spell_mastery": {
+          "title": "Spell Mastery",
+          "type": "number"
+        },
+        "num_mounts": {
+          "title": "Num Mounts",
+          "type": "integer"
+        },
+        "rank_depth": {
+          "title": "Rank Depth",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "num_men",
+        "hit_points_per_entity",
+        "bonus_hit_points",
+        "walk_speed",
+        "run_speed",
+        "charge_speed",
+        "fly_speed",
+        "mass",
+        "melee_attack",
+        "melee_defence",
+        "charge_bonus",
+        "morale",
+        "accuracy",
+        "reload",
+        "armour",
+        "primary_ammo",
+        "secondary_ammo",
+        "damage_mod_physical",
+        "damage_mod_magic",
+        "damage_mod_flame",
+        "damage_mod_missile",
+        "damage_mod_all",
+        "healing_power",
+        "spell_mastery",
+        "num_mounts",
+        "rank_depth"
+      ],
+      "title": "BaseStats",
+      "type": "object"
+    },
+    "Link": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "title": "Type",
+          "type": "string"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name"
+        },
+        "missing": {
+          "title": "Missing",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "type",
+        "key",
+        "name",
+        "missing"
+      ],
+      "title": "Link",
+      "type": "object"
+    },
+    "MeleeWeapon": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "damage": {
+          "title": "Damage",
+          "type": "integer"
+        },
+        "ap_damage": {
+          "title": "Ap Damage",
+          "type": "integer"
+        },
+        "bonus_v_large": {
+          "title": "Bonus V Large",
+          "type": "integer"
+        },
+        "bonus_v_infantry": {
+          "title": "Bonus V Infantry",
+          "type": "integer"
+        },
+        "is_magical": {
+          "title": "Is Magical",
+          "type": "boolean"
+        },
+        "splash_attack_target_size": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Splash Attack Target Size"
+        },
+        "splash_attack_max_attacks": {
+          "title": "Splash Attack Max Attacks",
+          "type": "integer"
+        },
+        "splash_attack_power_multiplier": {
+          "title": "Splash Attack Power Multiplier",
+          "type": "number"
+        },
+        "melee_attack_interval": {
+          "title": "Melee Attack Interval",
+          "type": "number"
+        },
+        "building_damage_multiplier": {
+          "title": "Building Damage Multiplier",
+          "type": "number"
+        },
+        "ignition_amount": {
+          "title": "Ignition Amount",
+          "type": "number"
+        }
+      },
+      "required": [
+        "key",
+        "damage",
+        "ap_damage",
+        "bonus_v_large",
+        "bonus_v_infantry",
+        "is_magical",
+        "splash_attack_target_size",
+        "splash_attack_max_attacks",
+        "splash_attack_power_multiplier",
+        "melee_attack_interval",
+        "building_damage_multiplier",
+        "ignition_amount"
+      ],
+      "title": "MeleeWeapon",
+      "type": "object"
+    },
+    "MissileWeapon": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "projectile": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Projectile"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "key",
+        "projectile"
+      ],
+      "title": "MissileWeapon",
+      "type": "object"
+    },
+    "Projectile": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "category": {
+          "title": "Category",
+          "type": "string"
+        },
+        "damage": {
+          "title": "Damage",
+          "type": "integer"
+        },
+        "ap_damage": {
+          "title": "Ap Damage",
+          "type": "integer"
+        },
+        "bonus_v_large": {
+          "title": "Bonus V Large",
+          "type": "integer"
+        },
+        "bonus_v_infantry": {
+          "title": "Bonus V Infantry",
+          "type": "integer"
+        },
+        "effective_range": {
+          "title": "Effective Range",
+          "type": "integer"
+        },
+        "minimum_range": {
+          "title": "Minimum Range",
+          "type": "integer"
+        },
+        "base_reload_time": {
+          "title": "Base Reload Time",
+          "type": "number"
+        },
+        "projectile_number": {
+          "title": "Projectile Number",
+          "type": "integer"
+        },
+        "shots_per_volley": {
+          "title": "Shots Per Volley",
+          "type": "integer"
+        },
+        "burst_size": {
+          "title": "Burst Size",
+          "type": "integer"
+        },
+        "marksmanship_bonus": {
+          "title": "Marksmanship Bonus",
+          "type": "number"
+        },
+        "is_magical": {
+          "title": "Is Magical",
+          "type": "boolean"
+        },
+        "ignition_amount": {
+          "title": "Ignition Amount",
+          "type": "number"
+        },
+        "shockwave_radius": {
+          "title": "Shockwave Radius",
+          "type": "number"
+        },
+        "explosion_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Explosion Type"
+        }
+      },
+      "required": [
+        "key",
+        "category",
+        "damage",
+        "ap_damage",
+        "bonus_v_large",
+        "bonus_v_infantry",
+        "effective_range",
+        "minimum_range",
+        "base_reload_time",
+        "projectile_number",
+        "shots_per_volley",
+        "burst_size",
+        "marksmanship_bonus",
+        "is_magical",
+        "ignition_amount",
+        "shockwave_radius",
+        "explosion_type"
+      ],
+      "title": "Projectile",
+      "type": "object"
+    },
+    "Shield": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "shield_defence_value": {
+          "title": "Shield Defence Value",
+          "type": "integer"
+        },
+        "shield_armour_value": {
+          "title": "Shield Armour Value",
+          "type": "integer"
+        },
+        "missile_block_chance": {
+          "title": "Missile Block Chance",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "key",
+        "shield_defence_value",
+        "shield_armour_value",
+        "missile_block_chance"
+      ],
+      "title": "Shield",
+      "type": "object"
+    },
+    "UnitAttribute": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        }
+      },
+      "required": [
+        "key",
+        "name",
+        "description"
+      ],
+      "title": "UnitAttribute",
+      "type": "object"
+    },
+    "UnitSetMembership": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "conditional": {
+          "title": "Conditional",
+          "type": "boolean"
+        },
+        "min_exp_level": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Min Exp Level"
+        },
+        "max_exp_level": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Max Exp Level"
+        }
+      },
+      "required": [
+        "key",
+        "conditional",
+        "min_exp_level",
+        "max_exp_level"
+      ],
+      "title": "UnitSetMembership",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "key": {
+      "title": "Key",
+      "type": "string"
+    },
+    "name": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Name"
+    },
+    "short_description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Short Description"
+    },
+    "caste": {
+      "title": "Caste",
+      "type": "string"
+    },
+    "caste_name": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Caste Name"
+    },
+    "category": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Category"
+    },
+    "category_name": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Category Name"
+    },
+    "unit_class": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Unit Class"
+    },
+    "class_name": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Class Name"
+    },
+    "is_naval": {
+      "title": "Is Naval",
+      "type": "boolean"
+    },
+    "tier": {
+      "title": "Tier",
+      "type": "integer"
+    },
+    "land_unit": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Land Unit"
+    },
+    "card_image": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Card Image"
+    },
+    "portrait_image": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Portrait Image"
+    },
+    "recruitment_cost": {
+      "title": "Recruitment Cost",
+      "type": "integer"
+    },
+    "upkeep_cost": {
+      "title": "Upkeep Cost",
+      "type": "integer"
+    },
+    "multiplayer_cost": {
+      "title": "Multiplayer Cost",
+      "type": "integer"
+    },
+    "campaign_cap": {
+      "title": "Campaign Cap",
+      "type": "integer"
+    },
+    "multiplayer_cap": {
+      "title": "Multiplayer Cap",
+      "type": "integer"
+    },
+    "base_stats": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/BaseStats"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "melee_weapon": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/MeleeWeapon"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "missile_weapon": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/MissileWeapon"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "shield": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Shield"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "mount": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Mount"
+    },
+    "attributes": {
+      "items": {
+        "$ref": "#/$defs/UnitAttribute"
+      },
+      "title": "Attributes",
+      "type": "array"
+    },
+    "abilities": {
+      "items": {
+        "$ref": "#/$defs/Link"
+      },
+      "title": "Abilities",
+      "type": "array"
+    },
+    "characters": {
+      "items": {
+        "$ref": "#/$defs/Link"
+      },
+      "title": "Characters",
+      "type": "array"
+    },
+    "unit_sets": {
+      "items": {
+        "$ref": "#/$defs/UnitSetMembership"
+      },
+      "title": "Unit Sets",
+      "type": "array"
+    },
+    "custom_battle_factions": {
+      "items": {
+        "$ref": "#/$defs/Link"
+      },
+      "title": "Custom Battle Factions",
+      "type": "array"
+    },
+    "recruited_by_buildings": {
+      "items": {
+        "$ref": "#/$defs/Link"
+      },
+      "title": "Recruited By Buildings",
+      "type": "array"
+    }
+  },
+  "required": [
+    "key",
+    "name",
+    "short_description",
+    "caste",
+    "caste_name",
+    "category",
+    "category_name",
+    "unit_class",
+    "class_name",
+    "is_naval",
+    "tier",
+    "land_unit",
+    "card_image",
+    "portrait_image",
+    "recruitment_cost",
+    "upkeep_cost",
+    "multiplayer_cost",
+    "campaign_cap",
+    "multiplayer_cap",
+    "base_stats",
+    "melee_weapon",
+    "missile_weapon",
+    "shield",
+    "mount",
+    "attributes",
+    "abilities",
+    "characters",
+    "unit_sets",
+    "custom_battle_factions",
+    "recruited_by_buildings"
+  ],
+  "title": "Unit",
+  "type": "object"
+}

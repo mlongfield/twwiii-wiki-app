@@ -1,0 +1,18 @@
+---
+import type { ImageKind } from "../data/images";
+import { getSite } from "../data/model";
+import { imageSrc } from "../data/site";
+
+interface Props {
+  path: string | null | undefined;
+  kind: ImageKind | "large" | "inline";
+  alt?: string;
+}
+
+const { path, kind, alt = "" } = Astro.props;
+const site = await getSite();
+const src = imageSrc(site, path);
+---
+{src
+  ? <img class={`game-img game-img-${kind}`} src={src} alt={alt} loading="lazy" decoding="async" />
+  : <span class={`game-img game-img-${kind} placeholder`} data-placeholder-image aria-hidden="true"></span>}

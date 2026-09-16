@@ -1,0 +1,72 @@
+{
+  "$defs": {
+    "CampaignVariableOverride": {
+      "additionalProperties": false,
+      "properties": {
+        "campaign": {
+          "title": "Campaign",
+          "type": "string"
+        },
+        "difficulty": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Difficulty"
+        },
+        "campaign_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Campaign Type"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "campaign",
+        "difficulty",
+        "campaign_type",
+        "value"
+      ],
+      "title": "CampaignVariableOverride",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "key": {
+      "title": "Key",
+      "type": "string"
+    },
+    "value": {
+      "title": "Value",
+      "type": "number"
+    },
+    "overrides": {
+      "items": {
+        "$ref": "#/$defs/CampaignVariableOverride"
+      },
+      "title": "Overrides",
+      "type": "array"
+    }
+  },
+  "required": [
+    "key",
+    "value",
+    "overrides"
+  ],
+  "title": "CampaignVariable",
+  "type": "object"
+}

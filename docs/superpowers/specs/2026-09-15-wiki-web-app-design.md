@@ -111,7 +111,7 @@ json-schema-to-typescript 16.0.0, typescript 7.0.2, vitest 5.0.1,
 ```
 model/<build_id>/ ──prebuild──▶ web/src/generated/ (types)
                                 web/public/images/ (copied images)
-                                web/.cache/search-index.json
+                                web/public/search-index.json
                    ──astro build (data layer → pages, islands)──▶ web/dist/
 ```
 
@@ -140,7 +140,7 @@ web/
     fixtures/model/       small committed sample model
 ```
 
-`web/node_modules/`, `web/dist/`, `web/.astro/`, `web/.cache/`,
+`web/node_modules/`, `web/dist/`, `web/.astro/`, `web/public/search-index.json`,
 `web/public/images/` and `web/src/generated/` are git-ignored.
 
 ### Prebuild (`web/scripts/prebuild.ts`)
@@ -156,10 +156,11 @@ web/
    type and an `EntityTypeMap`.
 4. Copy `images/` to `public/images/` (skip when unchanged: same `build_id`
    marker file).
-5. Build the search index (see Search) to `.cache/search-index.json`, which
+5. Build the search index (see Search) to `public/search-index.json`, which
    Astro copies to `dist/search-index.json`.
-6. Write `src/generated/build-info.ts` with `buildId`, `generatedAt` and
-   counts.
+6. Write `src/generated/build-info.ts` with `buildId`, `generatedAt`,
+   counts and the absolute `modelDir`, so the data layer loads exactly the
+   model the prebuild validated.
 
 ### Data layer (`web/src/data/`)
 
@@ -183,14 +184,23 @@ Loaded once per build and memoised; pages never read files.
 | `/<segment>/` | browse page per page type |
 | `/<segment>/<key>` | entity page per page type |
 | `/search-index.json` | search index |
+| `/data/culture-chains.json` | chains available per culture, for the region culture picker |
 | `/images/...` | copied model images |
 | `/404` | not-found page |
 
 URL segments: `units`, `characters`, `skills`, `abilities`, `technologies`,
 `technology-trees`, `buildings` (building levels), `building-chains`,
 `items`, `traits`, `factions`, `cultures`, `subcultures`, `regions`,
-`provinces`. Entity keys are used verbatim in URLs (they are unique; names are
-not). Image URLs are the model's lower-case paths with each segment
+`provinces`. Entity pages are addressed by a slug derived from the key (names
+are not unique). Keys cannot be used verbatim: two skill keys differ only by
+case (`wh2_main_skill_LL_self_defense` / `wh2_main_skill_ll_self_defense`),
+which collide on case-insensitive file systems, and keys contain `&`, `!`,
+`'`, `*` and `-` (`*` is not allowed in Windows file names). Slug rule: lower-
+case the key and replace every character outside `[a-z0-9_-]` with `-`; when
+two keys of the same type produce the same slug, each of them gets `-` plus
+the first 6 hex characters of the SHA-1 of its original key appended. Slugs
+are computed from the full key set of each type at build time. Links use
+trailing slashes (`/units/wh_main_emp_inf_greatswords/`). Image URLs are the model's lower-case paths with each segment
 URL-encoded (paths contain spaces).
 
 ### Pages
@@ -221,8 +231,9 @@ with no data are omitted.
   units.
 - **Building chain:** category, levels in order, availability (culture,
   subculture, faction, campaign).
-- **Item:** icon, type, category, rarity, applies to, bodyguard unit, allowed
-  agent types and characters, required skills, effects.
+- **Item:** icon, type, category, subcategory, legendary, applies to,
+  bodyguard unit, allowed agent types and characters, required skills,
+  effects.
 - **Trait:** icon, levels (threshold, name, description, effects), antitraits.
 - **Faction / culture / subculture:** flag (factions), links between them,
   units and characters (factions).
@@ -271,10 +282,12 @@ category-like fields; without JavaScript the full table is still readable.
   JavaScript.
 - `CulturePicker` — culture selector (defaults to the starting owner's
   culture, or the first culture alphabetically when there is no owner) and
-  the list of chains available to it, grouped by chain category. Data for all
-  cultures is embedded as JSON in the page (chain keys, names, icons,
-  categories). `client:visible`. Without JavaScript the default culture's
-  list is rendered statically.
+  the list of chains available to it, grouped by chain category. The default
+  culture's list is rendered statically in the page; other cultures' lists
+  come from one shared static file, `/data/culture-chains.json` (culture key →
+  groups of chain key, name, URL, icon), fetched on the first culture change.
+  Embedding every culture's chains in each region page was rejected: about
+  230 KB per page across 945 region pages. `client:visible`.
 - `SearchBox` — see Search. `client:idle`.
 - `BrowseFilter` — table filter for browse pages. `client:visible`.
 
@@ -289,8 +302,8 @@ category-like fields; without JavaScript the full table is still readable.
   link).
 - Closing tags close the innermost open tag regardless of name; unclosed tags
   close at the end of the text; stray closers are dropped.
-- `\n` → line break; `A||B` at the start of a text → title `A` rendered as a
-  heading-styled line above body `B`.
+- `\n` → line break; `A||B`, split at the first `||` in the text → title `A`
+  rendered as a heading-styled line above body `B`.
 - `{{tr:X}}` and any unrecognised `[[…]]` or `{{…}}` token → rendered as
   plain text with the braces removed (the token content stays visible).
 
@@ -300,7 +313,8 @@ category-like fields; without JavaScript the full table is still readable.
 `%+n` → value with explicit sign (`+4`, `-5`); `%n` → value without sign;
 `%+n%` / `%n%` keep the trailing percent sign; `%-n%` is treated like `%n%`. Values are formatted without
 trailing `.0`. A description with no placeholder is shown followed by the
-signed value in parentheses. A null description shows the effect key.
+signed value in parentheses. A null description shows the effect key
+followed by the signed value in parentheses.
 
 ### Search
 
@@ -366,8 +380,10 @@ entity files containing Greatswords (`wh_main_emp_inf_greatswords`), Emperor
 Karl Franz (`wh_main_emp_karl_franz`) with all skills in his tree, Hold the
 Line! (`wh_main_lord_passive_hold_the_line`), Empire Civil Tech
 (`emp_civ_reworkd`) with its technologies, Altdorf
-(`wh3_main_combi_region_altdorf`) with Reikland and the building chains its
-templates and cultures reference, the Empire culture/subculture/faction, and
+(`wh3_main_combi_region_altdorf`) with the other regions of Reikland, the
+building chains available to the Empire culture (`wh_main_emp_empire`) with
+the levels of `wh_main_EMPIRE_settlement_major` and `wh_main_EMPIRE_barracks`,
+the item `wh2_dlc09_anc_magic_standard_banner_of_the_hidden_dead`, the Empire culture/subculture/faction, and
 the effects they apply. No images are committed; image tests use null paths
 or stubbed `inline.json` entries.
 

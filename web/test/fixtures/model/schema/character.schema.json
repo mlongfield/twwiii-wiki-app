@@ -1,0 +1,434 @@
+{
+  "$defs": {
+    "Link": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "title": "Type",
+          "type": "string"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name"
+        },
+        "missing": {
+          "title": "Missing",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "type",
+        "key",
+        "name",
+        "missing"
+      ],
+      "title": "Link",
+      "type": "object"
+    },
+    "LoreOfMagic": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name"
+        }
+      },
+      "required": [
+        "key",
+        "name"
+      ],
+      "title": "LoreOfMagic",
+      "type": "object"
+    },
+    "SkillLock": {
+      "additionalProperties": false,
+      "properties": {
+        "node": {
+          "title": "Node",
+          "type": "string"
+        },
+        "skill": {
+          "$ref": "#/$defs/Link"
+        },
+        "level": {
+          "title": "Level",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "node",
+        "skill",
+        "level"
+      ],
+      "title": "SkillLock",
+      "type": "object"
+    },
+    "SkillTree": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "agent_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Agent Type"
+        },
+        "faction": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Faction"
+        },
+        "subculture": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Subculture"
+        },
+        "campaign": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Campaign"
+        },
+        "for_army": {
+          "title": "For Army",
+          "type": "boolean"
+        },
+        "for_navy": {
+          "title": "For Navy",
+          "type": "boolean"
+        },
+        "nodes": {
+          "items": {
+            "$ref": "#/$defs/SkillTreeNode"
+          },
+          "title": "Nodes",
+          "type": "array"
+        },
+        "links": {
+          "items": {
+            "$ref": "#/$defs/SkillTreeLink"
+          },
+          "title": "Links",
+          "type": "array"
+        },
+        "locks": {
+          "items": {
+            "$ref": "#/$defs/SkillLock"
+          },
+          "title": "Locks",
+          "type": "array"
+        }
+      },
+      "required": [
+        "key",
+        "agent_type",
+        "faction",
+        "subculture",
+        "campaign",
+        "for_army",
+        "for_navy",
+        "nodes",
+        "links",
+        "locks"
+      ],
+      "title": "SkillTree",
+      "type": "object"
+    },
+    "SkillTreeLink": {
+      "additionalProperties": false,
+      "properties": {
+        "parent": {
+          "title": "Parent",
+          "type": "string"
+        },
+        "child": {
+          "title": "Child",
+          "type": "string"
+        },
+        "link_type": {
+          "title": "Link Type",
+          "type": "string"
+        },
+        "initial_descent_tiers": {
+          "title": "Initial Descent Tiers",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "parent",
+        "child",
+        "link_type",
+        "initial_descent_tiers"
+      ],
+      "title": "SkillTreeLink",
+      "type": "object"
+    },
+    "SkillTreeNode": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "skill": {
+          "$ref": "#/$defs/Link"
+        },
+        "tier": {
+          "title": "Tier",
+          "type": "integer"
+        },
+        "indent": {
+          "title": "Indent",
+          "type": "integer"
+        },
+        "points_on_creation": {
+          "title": "Points On Creation",
+          "type": "integer"
+        },
+        "required_num_parents": {
+          "title": "Required Num Parents",
+          "type": "integer"
+        },
+        "visible_in_ui": {
+          "title": "Visible In Ui",
+          "type": "boolean"
+        },
+        "faction": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Faction"
+        },
+        "subculture": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Subculture"
+        },
+        "campaign": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Campaign"
+        }
+      },
+      "required": [
+        "key",
+        "skill",
+        "tier",
+        "indent",
+        "points_on_creation",
+        "required_num_parents",
+        "visible_in_ui",
+        "faction",
+        "subculture",
+        "campaign"
+      ],
+      "title": "SkillTreeNode",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "key": {
+      "title": "Key",
+      "type": "string"
+    },
+    "name": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Name"
+    },
+    "title": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Title"
+    },
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Description"
+    },
+    "agent_types": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Agent Types",
+      "type": "array"
+    },
+    "associated_unit": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Link"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "lore_of_magic": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/LoreOfMagic"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "is_caster": {
+      "title": "Is Caster",
+      "type": "boolean"
+    },
+    "can_equip_ancillaries": {
+      "title": "Can Equip Ancillaries",
+      "type": "boolean"
+    },
+    "recruitable": {
+      "title": "Recruitable",
+      "type": "boolean"
+    },
+    "can_gain_xp": {
+      "title": "Can Gain Xp",
+      "type": "boolean"
+    },
+    "cost": {
+      "title": "Cost",
+      "type": "integer"
+    },
+    "cap": {
+      "title": "Cap",
+      "type": "integer"
+    },
+    "factions": {
+      "items": {
+        "$ref": "#/$defs/Link"
+      },
+      "title": "Factions",
+      "type": "array"
+    },
+    "abilities": {
+      "items": {
+        "$ref": "#/$defs/Link"
+      },
+      "title": "Abilities",
+      "type": "array"
+    },
+    "skill_trees": {
+      "items": {
+        "$ref": "#/$defs/SkillTree"
+      },
+      "title": "Skill Trees",
+      "type": "array"
+    },
+    "items": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Link"
+      },
+      "title": "Items",
+      "type": "array"
+    }
+  },
+  "required": [
+    "key",
+    "name",
+    "title",
+    "description",
+    "agent_types",
+    "associated_unit",
+    "lore_of_magic",
+    "is_caster",
+    "can_equip_ancillaries",
+    "recruitable",
+    "can_gain_xp",
+    "cost",
+    "cap",
+    "factions",
+    "abilities",
+    "skill_trees",
+    "items"
+  ],
+  "title": "Character",
+  "type": "object"
+}

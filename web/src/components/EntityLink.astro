@@ -1,0 +1,34 @@
+---
+import { mainImage } from "../data/images";
+import { getSite } from "../data/model";
+import { hasPage } from "../data/pageTypes";
+import { urlFor } from "../data/site";
+import GameImage from "./GameImage.astro";
+import GameText from "./GameText.astro";
+
+interface Props {
+  link: { type: string; key: string; name: string | null; missing: boolean } | null;
+  showIcon?: boolean;
+}
+
+const { link, showIcon = true } = Astro.props;
+const site = await getSite();
+const url = link && !link.missing ? urlFor(site, link.type, link.key) : null;
+// A type with no page (e.g. effects) renders as plain text by design. A type that does
+// have a page but whose key isn't in the model is a real gap, so it gets the same
+// missing-link treatment as `link.missing` — otherwise it would pass silently and go
+// uncounted by the build report.
+const unresolved = Boolean(link && !link.missing && !url && hasPage(link.type));
+const entity = link && url ? (site.model.entities as Record<string, Map<string, Record<string, any>>>)[link.type]?.get(link.key) : undefined;
+const image = link && entity && showIcon ? mainImage(site, link.type, entity) : null;
+---
+{link && (url
+  ? (
+    <a class="entity-link" href={url}>
+      {image && <GameImage path={image.path} kind="icon" />}
+      <span class:list={[{ unnamed: !link.name }]}>{link.name ? <GameText text={link.name} /> : link.key}</span>
+    </a>
+  )
+  : link.missing || unresolved
+    ? <span class="entity-link missing" data-missing-link title="Not in the game data">{link.name ?? link.key}</span>
+    : <span class="entity-link">{link.name ? <GameText text={link.name} /> : link.key}</span>)}

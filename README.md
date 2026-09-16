@@ -171,6 +171,39 @@ after checking why links went missing.
 Regenerate `tests/model/missing_images_baseline.json` the same way, only after
 checking why images went missing.
 
+## Wiki web app
+
+`web/` is an Astro static site built from the newest `model/<build_id>/`
+(design: `docs/superpowers/specs/2026-09-15-wiki-web-app-design.md`).
+
+```bash
+cd web
+npm install
+npm run build      # prebuild (validate model, generate types, copy images,
+                   # build search index) then Astro, then a build report
+npm run preview    # serve web/dist locally
+npm run dev        # prebuild once, then the Astro dev server
+npm test           # unit tests against the committed fixture model
+npm run test:e2e   # Playwright tests against web/dist (needs npm run build; a cold run
+                   # can fail with "webServer exited early" because astro preview
+                   # daemonizes itself — start `npm run preview -- --port 4321`
+                   # first, then re-run)
+npm run fixtures   # regenerate web/test/fixtures/model from the real model
+```
+
+`MODEL_DIR=test/fixtures/model npm run build` builds the small fixture site in
+seconds, which is the quickest way to check a change.
+
+The site has a page for each of the 15 entity types with pages (effects,
+effect bundles, difficulty levels and campaign variables are shown inline on
+the pages that use them), skill and technology tree views, a region building
+browser with a culture picker, and search over names and key facts. Pages are
+addressed by a slug derived from the entity key.
+
+`web/dist/` is plain static files: it deploys to any static host, and no
+server is needed. Everything it serves comes from the model build, so a new
+game build means: extract, load, model, then rebuild the site.
+
 ## Mapping the server surface
 
 `extract.py --discover` selects the game, prints what the dependency cache

@@ -1,0 +1,89 @@
+---
+import { getSite } from "../../data/model";
+import GameText from "../GameText.astro";
+import LinkList from "../LinkList.astro";
+import Section from "../Section.astro";
+import StatTable from "../StatTable.astro";
+
+interface Props {
+  entityKey: string;
+}
+
+const site = await getSite();
+const ability = site.model.entities.ability.get(Astro.props.entityKey)!;
+const act = ability.activation;
+---
+<Section title="Overview">
+  <GameText text={ability.description} block />
+  <StatTable rows={[
+    ["Type", ability.type_name ? null : ability.type],
+    ["Source", ability.source_type_name ?? ability.source_type],
+    ["Unit upgrade", ability.is_unit_upgrade],
+    ["Needs enabling effect", ability.requires_effect_enabling],
+    ["Hidden in game UI", ability.is_hidden_in_ui],
+  ]} />
+  {ability.type_name && <p>Type: <GameText text={ability.type_name} /></p>}
+</Section>
+{act && (
+  <Section title="Activation">
+    <StatTable rows={[
+      ["Passive", act.passive],
+      ["Active time", act.active_time],
+      ["Recharge time", act.recharge_time],
+      ["Initial recharge", act.initial_recharge],
+      ["Uses", act.num_uses],
+      ["Range", act.effect_range],
+      ["Minimum range", act.min_range || null],
+      ["Mana cost", act.mana_cost || null],
+      ["Wind-up time", act.wind_up_time || null],
+      ["Miscast chance", act.miscast_chance || null],
+      ["Targets self", act.target_self],
+      ["Targets allies", act.target_friends],
+      ["Targets enemies", act.target_enemies],
+      ["Targets ground", act.target_ground],
+      ["Affects self", act.affect_self],
+      ["Allied units affected", act.num_effected_friendly_units],
+      ["Enemy units affected", act.num_effected_enemy_units],
+      ["Spawned unit", act.spawned_unit],
+      ["Projectile", act.activated_projectile],
+      ["Bombardment", act.bombardment],
+      ["Vortex", act.vortex],
+    ]} />
+  </Section>
+)}
+{ability.phases.map((phase) => (
+  <Section title={`Phase ${phase.order + 1}`}>
+    <StatTable rows={[
+      ["Phase", phase.key],
+      ["Duration", phase.duration],
+      ["Effect type", phase.effect_type],
+      ["Affects self", phase.target_self],
+      ["Affects allies", phase.target_friends],
+      ["Affects enemies", phase.target_enemies],
+      ["Damage", phase.damage_amount || null],
+      ["Heal amount", phase.heal_amount || null],
+      ["Hit point change frequency", phase.hp_change_frequency || null],
+      ["Resurrects", phase.resurrect || null],
+      ["Imbues magical attacks", phase.imbue_magical || null],
+      ["Replenishes ammunition", phase.replenish_ammo || null],
+      ["Fatigue change", phase.fatigue_change_ratio || null],
+      ["Ability recharge change", phase.ability_recharge_change || null],
+      ["Cannot move", phase.cant_move || null],
+      ["Execute below health", phase.execute_ratio || null],
+    ]} />
+    {phase.stat_effects.length > 0 && (
+      <table class="phase-stats">
+        <thead><tr><th>Stat</th><th>Change</th><th>Value</th></tr></thead>
+        <tbody>
+          {phase.stat_effects.map((e) => <tr><td><GameText text={e.stat_name ?? e.stat} /></td><td>{e.how}</td><td>{e.value}</td></tr>)}
+        </tbody>
+      </table>
+    )}
+    {phase.attribute_effects.length > 0 && (
+      <p>Attributes: {phase.attribute_effects.map((a) => `${a.attribute} (${a.attribute_type})`).join(", ")}</p>
+    )}
+  </Section>
+))}
+<Section title="Units" show={ability.units.length > 0}><LinkList links={ability.units} /></Section>
+<Section title="Characters" show={ability.characters.length > 0}><LinkList links={ability.characters} /></Section>
+<Section title="Modified by effects" show={ability.modified_by_effects.length > 0}><LinkList links={ability.modified_by_effects} /></Section>

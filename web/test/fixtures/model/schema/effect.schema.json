@@ -1,0 +1,257 @@
+{
+  "$defs": {
+    "BonusTarget": {
+      "additionalProperties": false,
+      "properties": {
+        "bonus_value_id": {
+          "title": "Bonus Value Id",
+          "type": "string"
+        },
+        "source_table": {
+          "title": "Source Table",
+          "type": "string"
+        },
+        "target_table": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Target Table"
+        },
+        "target_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Target Key"
+        },
+        "target": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Link"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unit_set": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Unit Set"
+        },
+        "ability": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Link"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "attribute": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Attribute"
+        },
+        "phase": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Phase"
+        }
+      },
+      "required": [
+        "bonus_value_id",
+        "source_table",
+        "target_table",
+        "target_key",
+        "target",
+        "unit_set",
+        "ability",
+        "attribute",
+        "phase"
+      ],
+      "title": "BonusTarget",
+      "type": "object"
+    },
+    "Link": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "title": "Type",
+          "type": "string"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name"
+        },
+        "missing": {
+          "title": "Missing",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "type",
+        "key",
+        "name",
+        "missing"
+      ],
+      "title": "Link",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "key": {
+      "title": "Key",
+      "type": "string"
+    },
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Description"
+    },
+    "additional_tooltip": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Additional Tooltip"
+    },
+    "category": {
+      "title": "Category",
+      "type": "string"
+    },
+    "icon": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Icon"
+    },
+    "icon_negative": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Icon Negative"
+    },
+    "icon_image": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Icon Image"
+    },
+    "icon_negative_image": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Icon Negative Image"
+    },
+    "priority": {
+      "title": "Priority",
+      "type": "integer"
+    },
+    "is_positive_value_good": {
+      "title": "Is Positive Value Good",
+      "type": "boolean"
+    },
+    "bonus_targets": {
+      "items": {
+        "$ref": "#/$defs/BonusTarget"
+      },
+      "title": "Bonus Targets",
+      "type": "array"
+    },
+    "sources": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Link"
+      },
+      "title": "Sources",
+      "type": "array"
+    }
+  },
+  "required": [
+    "key",
+    "description",
+    "additional_tooltip",
+    "category",
+    "icon",
+    "icon_negative",
+    "icon_image",
+    "icon_negative_image",
+    "priority",
+    "is_positive_value_good",
+    "bonus_targets",
+    "sources"
+  ],
+  "title": "Effect",
+  "type": "object"
+}
