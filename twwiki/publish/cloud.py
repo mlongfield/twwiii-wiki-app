@@ -19,10 +19,42 @@ from typing import Iterable
 from google.api_core.exceptions import NotFound
 from google.auth.credentials import AnonymousCredentials
 from google.cloud import firestore, storage
+from google.cloud.firestore_v1.bulk_writer import BulkWriter
+from google.cloud.firestore_v1.types.firestore import BatchWriteResponse
+from google.cloud.firestore_v1.types.write import WriteResult
+from google.rpc import code_pb2, status_pb2
 
 from . import PublishError
 
 MAX_WRITE_ATTEMPTS = 15
+
+
+class SafeBulkWriter(BulkWriter):
+    """A BulkWriter whose failures all reach its write-error callback.
+
+    The library loses an exception raised by a batch commit inside an executor
+    future and never releases that batch's in-flight count, so enough failed
+    batches make it wait forever. Here a failed commit reports every write in
+    the batch as UNAVAILABLE instead, to be retried or given up on like any
+    other failed write.
+
+    close() marks the writer closed before its final flush, so a retry still
+    pending then is rejected with a bare Exception. Flushing first sends those
+    retries while the writer is open; recursive_delete calls close() itself.
+    """
+
+    def _send(self, batch):
+        try:
+            return super()._send(batch)
+        except Exception as e:
+            writes = len(batch)
+            return BatchWriteResponse(
+                write_results=[WriteResult() for _ in range(writes)],
+                status=[status_pb2.Status(code=code_pb2.UNAVAILABLE, message=str(e)) for _ in range(writes)])
+
+    def close(self):
+        self.flush()
+        super().close()
 
 
 class FirestoreEntityStore:
@@ -54,9 +86,13 @@ class FirestoreEntityStore:
     def bulk_delete(self, collection: str, ids: Iterable[str]) -> int:
         return self._bulk(collection, ((doc_id, None) for doc_id in ids))
 
-    def _bulk(self, collection: str, operations: Iterable[tuple[str, dict | None]]) -> int:
-        # BulkWriter retries failed writes but drops them silently once its
-        # error callback returns False, so failures are collected and raised.
+    def _writer(self) -> tuple[SafeBulkWriter, list[str]]:
+        """A bulk writer and the list it fills with the writes it gave up on.
+
+        The writer retries a failed write up to MAX_WRITE_ATTEMPTS times and
+        then drops it without raising, so callers raise PublishError when the
+        list is not empty after close().
+        """
         failures: list[str] = []
 
         def on_error(failure, _writer) -> bool:
@@ -65,8 +101,12 @@ class FirestoreEntityStore:
             failures.append(f"{failure.operation.reference.path}: {failure.message}")
             return False
 
-        writer = self._client().bulk_writer()
+        writer = SafeBulkWriter(client=self._client())
         writer.on_write_error(on_error)
+        return writer, failures
+
+    def _bulk(self, collection: str, operations: Iterable[tuple[str, dict | None]]) -> int:
+        writer, failures = self._writer()
         target = self._client().collection(collection)
         done = 0
         try:
@@ -78,6 +118,9 @@ class FirestoreEntityStore:
                     writer.set(ref, data)
                 done += 1
         finally:
+            # Send retries still pending from the last batches while the
+            # writer accepts operations; a closed writer rejects them.
+            writer.flush()
             writer.close()
         if failures:
             raise PublishError(f"{len(failures)} of {done} writes to {collection} failed; first: {failures[0]}")
@@ -91,7 +134,10 @@ class FirestoreEntityStore:
         return int(result[0][0].value)
 
     def delete_tree(self, path: str) -> None:
-        self._client().recursive_delete(self._client().document(path))
+        writer, failures = self._writer()
+        self._client().recursive_delete(self._client().document(path), bulk_writer=writer)
+        if failures:
+            raise PublishError(f"{len(failures)} deletes under {path} failed; first: {failures[0]}")
 
 
 class GcsSnapshotStore:

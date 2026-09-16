@@ -61,6 +61,9 @@ def main(argv: list[str] | None = None) -> int:
     except (PublishError, GoogleAPIError, GoogleAuthError) as e:
         log.error("%s", e)
         return 1
+    except Exception as e:
+        log.error("unexpected error: %s", e)
+        return 1
     return 0
 
 

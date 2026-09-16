@@ -209,3 +209,21 @@ def test_cli_reports_google_errors_with_exit_code_1(tmp_path, monkeypatch, caplo
     monkeypatch.setattr(cli, "real_services", real_services_with_error)
     assert cli.main(["--config", str(config), "--no-deploy"]) == 1
     assert "upload denied" in caplog.text
+
+
+def test_cli_reports_unexpected_errors_with_exit_code_1(tmp_path, monkeypatch, caplog):
+    """An error outside the Google and publish families still ends with exit code 1, not a traceback."""
+    config = tmp_path / "config.yaml"
+    config.write_text(
+        "game: warhammer_3\n"
+        f"paths:\n  model_dir: '{(tmp_path / 'models').as_posix()}'\n"
+        "firebase:\n  project_id: p\n  storage_bucket: bkt\n"
+        "  deploy_workflow: {repo: o/r, workflow: deploy.yml, ref: main}\n",
+        encoding="utf-8")
+
+    def broken_services(settings):
+        raise RuntimeError("BulkWriter is closed and cannot accept new operations")
+
+    monkeypatch.setattr(cli, "real_services", broken_services)
+    assert cli.main(["--config", str(config), "--no-deploy"]) == 1
+    assert "unexpected error: BulkWriter is closed" in caplog.text
