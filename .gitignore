@@ -24,3 +24,6 @@ __pycache__/
 /web/src/generated/
 /web/test-results/
 /web/playwright-report/
+
+# Firebase CLI debug output
+firebase-debug.log
