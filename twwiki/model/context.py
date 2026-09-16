@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -11,6 +12,8 @@ import duckdb
 from .images import ImageIndex
 from .links import LinkRegistry
 from .text import LocResolver
+
+TABLE_AFTER_FROM_OR_JOIN = re.compile(r'\b(?:FROM|JOIN)\s+"?([A-Za-z0-9_]+)"?', re.IGNORECASE)
 
 
 def opt(value):
@@ -27,6 +30,9 @@ class Context:
     partial: dict[str, list[str]] = field(default_factory=dict)
     images: ImageIndex = field(default_factory=ImageIndex.unavailable)
     manifest_sections: dict[str, dict] = field(default_factory=dict)
+    # Game tables any builder queried, for the link report.
+    tables_read: set[str] = field(default_factory=set)
+    _table_names: set[str] | None = field(default=None, repr=False)
 
     @classmethod
     def open(cls, db_path: str | Path) -> "Context":
@@ -34,9 +40,18 @@ class Context:
         return cls(con=con, loc=LocResolver.from_duckdb(con))
 
     def rows(self, sql: str, params: list | None = None) -> list[dict]:
+        self._record_tables(sql)
         cur = self.con.execute(sql, params or [])
         cols = [d[0] for d in cur.description]
         return [dict(zip(cols, r)) for r in cur.fetchall()]
+
+    def _record_tables(self, sql: str) -> None:
+        if self._table_names is None:
+            self._table_names = {r[0] for r in self.con.execute(
+                "SELECT table_name FROM information_schema.tables").fetchall()}
+        for name in TABLE_AFTER_FROM_OR_JOIN.findall(sql):
+            if name in self._table_names and not name.startswith("_"):
+                self.tables_read.add(name)
 
     def table_exists(self, name: str) -> bool:
         return bool(self.con.execute(

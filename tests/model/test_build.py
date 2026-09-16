@@ -98,6 +98,28 @@ def test_write_output_includes_manifest_sections(tmp_path):
     assert manifest["regions"] == {"special_templates_unmatched": 2}
 
 
+def test_write_output_writes_link_report_for_tables_read(tmp_path):
+    ctx = make_context({"units": [{"ability": "hold"}, {"ability": "gone"}], "abilities": [{"key": "hold"}]})
+    ctx.con.execute("""CREATE TABLE _columns AS SELECT 'units' AS table_name, 0 AS position,
+                       'ability' AS column_name, 'StringU8' AS rpfm_type, false AS is_key,
+                       'abilities' AS ref_table, 'key' AS ref_column""")
+    ctx.rows("SELECT * FROM units JOIN abilities ON true")
+    entities = build.build_all(ctx, modules=[fake_module()])
+
+    out = build.write_output(ctx, entities, tmp_path, "abc123")
+
+    report = json.loads((out / "link_report.json").read_text(encoding="utf-8"))
+    assert report["summary"]["both_read"] == 1 and report["summary"]["with_broken_values"] == 1
+    assert report["references"][0]["examples"] == ["gone"]
+
+
+def test_write_output_without_column_metadata_writes_unavailable_link_report(tmp_path):
+    ctx = make_context({"dummy": [{"a": 1}]})
+    entities = build.build_all(ctx, modules=[fake_module()])
+    out = build.write_output(ctx, entities, tmp_path, "abc123")
+    assert json.loads((out / "link_report.json").read_text(encoding="utf-8"))["available"] is False
+
+
 def test_schema_marks_reverse_links_and_conditional_fields_required():
     ability_schema = schemas.ENTITY_MODELS["ability"].model_json_schema(mode="serialization")
     assert "units" in ability_schema["required"]
