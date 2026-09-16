@@ -24,6 +24,35 @@ skip_tables:
   - anim_*
   - "*_animations_tables"
 
+# Game image folders exported to raw/<build_id>/images/<in-game path>.
+# The build id is derived from the packs these folders' files come from, NOT
+# from this folder list. Adding or removing a folder whose files sit in an
+# already-covered pack (almost any ui/... folder) leaves the build id
+# unchanged, so extract.py will think the build is already extracted and skip
+# it. After changing this list for a game build you have already extracted,
+# move or rename the existing raw/<build_id>/ directory (raw builds are never
+# deleted by the pipeline) and run extract again.
+images:
+  folders:
+    - "ui/battle ui/ability_icons"
+    - "ui/campaign ui/technologies"
+    - "ui/campaign ui/skills"
+    - "ui/campaign ui/effect_bundles"
+    - "ui/campaign ui/ancillaries"
+    - "ui/campaign ui/mounts"
+    - "ui/campaign ui/climate_types"
+    - "ui/units/icons"
+    - "ui/buildings/icons"
+    - "ui/portraits/portholes"
+    # ~183 MB per build; one of the two biggest contributors to raw size.
+    - "ui/flags"
+    - "ui/frontend ui/faction_bullets"
+    - "ui/common ui/unit_category_icons"
+    - "ui/cheat_sheet"
+    # ~456 MB / 12,000+ files per build, feeding only a few hundred inline
+    # targets; the single biggest contributor to raw size.
+    - "ui/skins"
+
 # Page queries run against twwiki.duckdb. Tables drop the `_tables` suffix;
 # `_columns` lists every column with its key and reference flags.
 pages:

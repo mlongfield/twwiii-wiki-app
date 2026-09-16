@@ -1,0 +1,329 @@
+{
+  "$defs": {
+    "EffectApplication": {
+      "additionalProperties": false,
+      "properties": {
+        "effect": {
+          "$ref": "#/$defs/Link"
+        },
+        "scope": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Scope"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        },
+        "source": {
+          "$ref": "#/$defs/Link"
+        },
+        "value_damaged": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value Damaged"
+        },
+        "value_ruined": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value Ruined"
+        },
+        "context_requirement": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Context Requirement"
+        },
+        "advancement_stage": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Advancement Stage"
+        }
+      },
+      "required": [
+        "effect",
+        "scope",
+        "value",
+        "source",
+        "value_damaged",
+        "value_ruined",
+        "context_requirement",
+        "advancement_stage"
+      ],
+      "title": "EffectApplication",
+      "type": "object"
+    },
+    "Link": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "title": "Type",
+          "type": "string"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name"
+        },
+        "missing": {
+          "title": "Missing",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "type",
+        "key",
+        "name",
+        "missing"
+      ],
+      "title": "Link",
+      "type": "object"
+    },
+    "PooledResourceCost": {
+      "additionalProperties": false,
+      "properties": {
+        "pooled_resource_factor": {
+          "title": "Pooled Resource Factor",
+          "type": "string"
+        },
+        "amount": {
+          "title": "Amount",
+          "type": "integer"
+        },
+        "context": {
+          "title": "Context",
+          "type": "string"
+        }
+      },
+      "required": [
+        "pooled_resource_factor",
+        "amount",
+        "context"
+      ],
+      "title": "PooledResourceCost",
+      "type": "object"
+    },
+    "ResourceCost": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "treasury_cost": {
+          "title": "Treasury Cost",
+          "type": "integer"
+        },
+        "pooled_resources": {
+          "items": {
+            "$ref": "#/$defs/PooledResourceCost"
+          },
+          "title": "Pooled Resources",
+          "type": "array"
+        },
+        "trade_resources": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Trade Resources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "key",
+        "treasury_cost",
+        "pooled_resources",
+        "trade_resources"
+      ],
+      "title": "ResourceCost",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "key": {
+      "title": "Key",
+      "type": "string"
+    },
+    "name": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Name"
+    },
+    "short_description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Short Description"
+    },
+    "icon_image": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Icon Image"
+    },
+    "chain": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Link"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "level": {
+      "title": "Level",
+      "type": "integer"
+    },
+    "create_time": {
+      "title": "Create Time",
+      "type": "integer"
+    },
+    "create_cost": {
+      "title": "Create Cost",
+      "type": "integer"
+    },
+    "upkeep_cost": {
+      "title": "Upkeep Cost",
+      "type": "integer"
+    },
+    "development_point_cost": {
+      "title": "Development Point Cost",
+      "type": "integer"
+    },
+    "food_cost": {
+      "title": "Food Cost",
+      "type": "integer"
+    },
+    "only_in_capital": {
+      "title": "Only In Capital",
+      "type": "boolean"
+    },
+    "faction_unique": {
+      "title": "Faction Unique",
+      "type": "boolean"
+    },
+    "can_convert": {
+      "title": "Can Convert",
+      "type": "boolean"
+    },
+    "visible_in_ui": {
+      "title": "Visible In Ui",
+      "type": "boolean"
+    },
+    "resource_cost": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ResourceCost"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "cultures": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Cultures",
+      "type": "array"
+    },
+    "effects": {
+      "items": {
+        "$ref": "#/$defs/EffectApplication"
+      },
+      "title": "Effects",
+      "type": "array"
+    },
+    "units_recruited": {
+      "items": {
+        "$ref": "#/$defs/Link"
+      },
+      "title": "Units Recruited",
+      "type": "array"
+    }
+  },
+  "required": [
+    "key",
+    "name",
+    "short_description",
+    "icon_image",
+    "chain",
+    "level",
+    "create_time",
+    "create_cost",
+    "upkeep_cost",
+    "development_point_cost",
+    "food_cost",
+    "only_in_capital",
+    "faction_unique",
+    "can_convert",
+    "visible_in_ui",
+    "resource_cost",
+    "cultures",
+    "effects",
+    "units_recruited"
+  ],
+  "title": "BuildingLevel",
+  "type": "object"
+}

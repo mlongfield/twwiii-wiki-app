@@ -1,0 +1,45 @@
+---
+import { getSite } from "../data/model";
+import { formatEffect, formatNumber, scopeLabel } from "../lib/effectText";
+import GameImage from "./GameImage.astro";
+import GameText from "./GameText.astro";
+
+interface Application {
+  effect: { key: string };
+  scope: string | null;
+  value: number;
+  value_damaged?: number | null;
+  value_ruined?: number | null;
+  context_requirement?: string | null;
+  advancement_stage?: string | null;
+}
+
+interface Props {
+  applications: Application[];
+}
+
+const site = await getSite();
+const rows = Astro.props.applications.map((application) => {
+  const effect = site.model.entities.effect.get(application.effect.key);
+  return {
+    application,
+    icon: effect?.icon_image ?? null,
+    text: formatEffect(effect?.description ?? null, application.effect.key, application.value),
+  };
+});
+---
+{rows.length > 0 && (
+  <ul class="effect-list">
+    {rows.map(({ application: a, icon, text }) => (
+      <li>
+        <GameImage path={icon} kind="icon" />
+        <span class="effect-text"><GameText text={text} /></span>
+        {scopeLabel(a.scope) && <span class="muted effect-note">{scopeLabel(a.scope)}</span>}
+        {a.value_damaged != null && <span class="muted effect-note">damaged {formatNumber(a.value_damaged)}</span>}
+        {a.value_ruined != null && <span class="muted effect-note">ruined {formatNumber(a.value_ruined)}</span>}
+        {a.context_requirement && <span class="muted effect-note">when {a.context_requirement}</span>}
+        {a.advancement_stage && <span class="muted effect-note">{a.advancement_stage.replace(/_/g, " ")}</span>}
+      </li>
+    ))}
+  </ul>
+)}

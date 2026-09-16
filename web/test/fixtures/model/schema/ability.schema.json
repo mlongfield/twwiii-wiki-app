@@ -1,0 +1,515 @@
+{
+  "$defs": {
+    "Activation": {
+      "additionalProperties": false,
+      "properties": {
+        "passive": {
+          "title": "Passive",
+          "type": "boolean"
+        },
+        "active_time": {
+          "title": "Active Time",
+          "type": "number"
+        },
+        "recharge_time": {
+          "title": "Recharge Time",
+          "type": "number"
+        },
+        "initial_recharge": {
+          "title": "Initial Recharge",
+          "type": "number"
+        },
+        "num_uses": {
+          "title": "Num Uses",
+          "type": "integer"
+        },
+        "effect_range": {
+          "title": "Effect Range",
+          "type": "number"
+        },
+        "min_range": {
+          "title": "Min Range",
+          "type": "number"
+        },
+        "mana_cost": {
+          "title": "Mana Cost",
+          "type": "number"
+        },
+        "wind_up_time": {
+          "title": "Wind Up Time",
+          "type": "number"
+        },
+        "miscast_chance": {
+          "title": "Miscast Chance",
+          "type": "number"
+        },
+        "target_self": {
+          "title": "Target Self",
+          "type": "boolean"
+        },
+        "target_friends": {
+          "title": "Target Friends",
+          "type": "boolean"
+        },
+        "target_enemies": {
+          "title": "Target Enemies",
+          "type": "boolean"
+        },
+        "target_ground": {
+          "title": "Target Ground",
+          "type": "boolean"
+        },
+        "affect_self": {
+          "title": "Affect Self",
+          "type": "boolean"
+        },
+        "num_effected_friendly_units": {
+          "title": "Num Effected Friendly Units",
+          "type": "integer"
+        },
+        "num_effected_enemy_units": {
+          "title": "Num Effected Enemy Units",
+          "type": "integer"
+        },
+        "spawned_unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Spawned Unit"
+        },
+        "activated_projectile": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Activated Projectile"
+        },
+        "bombardment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bombardment"
+        },
+        "vortex": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Vortex"
+        }
+      },
+      "required": [
+        "passive",
+        "active_time",
+        "recharge_time",
+        "initial_recharge",
+        "num_uses",
+        "effect_range",
+        "min_range",
+        "mana_cost",
+        "wind_up_time",
+        "miscast_chance",
+        "target_self",
+        "target_friends",
+        "target_enemies",
+        "target_ground",
+        "affect_self",
+        "num_effected_friendly_units",
+        "num_effected_enemy_units",
+        "spawned_unit",
+        "activated_projectile",
+        "bombardment",
+        "vortex"
+      ],
+      "title": "Activation",
+      "type": "object"
+    },
+    "AttributeEffect": {
+      "additionalProperties": false,
+      "properties": {
+        "attribute": {
+          "title": "Attribute",
+          "type": "string"
+        },
+        "attribute_type": {
+          "title": "Attribute Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "attribute",
+        "attribute_type"
+      ],
+      "title": "AttributeEffect",
+      "type": "object"
+    },
+    "Link": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "title": "Type",
+          "type": "string"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name"
+        },
+        "missing": {
+          "title": "Missing",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "type",
+        "key",
+        "name",
+        "missing"
+      ],
+      "title": "Link",
+      "type": "object"
+    },
+    "Phase": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "order": {
+          "title": "Order",
+          "type": "integer"
+        },
+        "target_self": {
+          "title": "Target Self",
+          "type": "boolean"
+        },
+        "target_friends": {
+          "title": "Target Friends",
+          "type": "boolean"
+        },
+        "target_enemies": {
+          "title": "Target Enemies",
+          "type": "boolean"
+        },
+        "duration": {
+          "title": "Duration",
+          "type": "number"
+        },
+        "effect_type": {
+          "title": "Effect Type",
+          "type": "string"
+        },
+        "stat_effects": {
+          "items": {
+            "$ref": "#/$defs/StatEffect"
+          },
+          "title": "Stat Effects",
+          "type": "array"
+        },
+        "attribute_effects": {
+          "items": {
+            "$ref": "#/$defs/AttributeEffect"
+          },
+          "title": "Attribute Effects",
+          "type": "array"
+        },
+        "damage_amount": {
+          "title": "Damage Amount",
+          "type": "integer"
+        },
+        "max_damaged_entities": {
+          "title": "Max Damaged Entities",
+          "type": "integer"
+        },
+        "heal_amount": {
+          "title": "Heal Amount",
+          "type": "number"
+        },
+        "hp_change_frequency": {
+          "title": "Hp Change Frequency",
+          "type": "number"
+        },
+        "resurrect": {
+          "title": "Resurrect",
+          "type": "boolean"
+        },
+        "imbue_magical": {
+          "title": "Imbue Magical",
+          "type": "boolean"
+        },
+        "imbue_ignition": {
+          "title": "Imbue Ignition",
+          "type": "integer"
+        },
+        "replenish_ammo": {
+          "title": "Replenish Ammo",
+          "type": "number"
+        },
+        "fatigue_change_ratio": {
+          "title": "Fatigue Change Ratio",
+          "type": "number"
+        },
+        "ability_recharge_change": {
+          "title": "Ability Recharge Change",
+          "type": "number"
+        },
+        "mana_regen_mod": {
+          "title": "Mana Regen Mod",
+          "type": "number"
+        },
+        "cant_move": {
+          "title": "Cant Move",
+          "type": "boolean"
+        },
+        "execute_ratio": {
+          "title": "Execute Ratio",
+          "type": "number"
+        },
+        "is_hidden_in_ui": {
+          "title": "Is Hidden In Ui",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "key",
+        "order",
+        "target_self",
+        "target_friends",
+        "target_enemies",
+        "duration",
+        "effect_type",
+        "stat_effects",
+        "attribute_effects",
+        "damage_amount",
+        "max_damaged_entities",
+        "heal_amount",
+        "hp_change_frequency",
+        "resurrect",
+        "imbue_magical",
+        "imbue_ignition",
+        "replenish_ammo",
+        "fatigue_change_ratio",
+        "ability_recharge_change",
+        "mana_regen_mod",
+        "cant_move",
+        "execute_ratio",
+        "is_hidden_in_ui"
+      ],
+      "title": "Phase",
+      "type": "object"
+    },
+    "StatEffect": {
+      "additionalProperties": false,
+      "properties": {
+        "stat": {
+          "title": "Stat",
+          "type": "string"
+        },
+        "stat_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Stat Name"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        },
+        "how": {
+          "title": "How",
+          "type": "string"
+        }
+      },
+      "required": [
+        "stat",
+        "stat_name",
+        "value",
+        "how"
+      ],
+      "title": "StatEffect",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "key": {
+      "title": "Key",
+      "type": "string"
+    },
+    "name": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Name"
+    },
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Description"
+    },
+    "type": {
+      "title": "Type",
+      "type": "string"
+    },
+    "type_name": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Type Name"
+    },
+    "source_type": {
+      "title": "Source Type",
+      "type": "string"
+    },
+    "source_type_name": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Source Type Name"
+    },
+    "icon": {
+      "title": "Icon",
+      "type": "string"
+    },
+    "icon_image": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Icon Image"
+    },
+    "is_hidden_in_ui": {
+      "title": "Is Hidden In Ui",
+      "type": "boolean"
+    },
+    "is_unit_upgrade": {
+      "title": "Is Unit Upgrade",
+      "type": "boolean"
+    },
+    "requires_effect_enabling": {
+      "title": "Requires Effect Enabling",
+      "type": "boolean"
+    },
+    "activation": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Activation"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "phases": {
+      "items": {
+        "$ref": "#/$defs/Phase"
+      },
+      "title": "Phases",
+      "type": "array"
+    },
+    "units": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Link"
+      },
+      "title": "Units",
+      "type": "array"
+    },
+    "characters": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Link"
+      },
+      "title": "Characters",
+      "type": "array"
+    },
+    "modified_by_effects": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Link"
+      },
+      "title": "Modified By Effects",
+      "type": "array"
+    }
+  },
+  "required": [
+    "key",
+    "name",
+    "description",
+    "type",
+    "type_name",
+    "source_type",
+    "source_type_name",
+    "icon",
+    "icon_image",
+    "is_hidden_in_ui",
+    "is_unit_upgrade",
+    "requires_effect_enabling",
+    "activation",
+    "phases",
+    "units",
+    "characters",
+    "modified_by_effects"
+  ],
+  "title": "Ability",
+  "type": "object"
+}

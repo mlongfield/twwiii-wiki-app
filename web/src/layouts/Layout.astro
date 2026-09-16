@@ -1,0 +1,41 @@
+---
+import "../styles/theme.css";
+import { buildInfo } from "../data/model";
+import { PAGE_TYPES } from "../data/pageTypes";
+import SearchBox from "../islands/SearchBox.tsx";
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "Total War: WARHAMMER III game data wiki" } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <title>{`${title} — TWW3 Wiki`}</title>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="inner">
+        <a class="site-name" href="/">TWW3 Wiki</a>
+        <SearchBox client:idle indexUrl="/search-index.json" />
+        <nav class="site-nav" aria-label="Entity types">
+          {PAGE_TYPES.map((p) => <a href={`/${p.segment}/`}>{p.label}</a>)}
+        </nav>
+      </div>
+    </header>
+    <main class="site-main">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="inner">
+        <slot name="footer">Game build <code>{buildInfo.buildId}</code> · data model generated {buildInfo.generatedAt.slice(0, 10)} · Total War: WARHAMMER III</slot>
+      </div>
+    </footer>
+  </body>
+</html>

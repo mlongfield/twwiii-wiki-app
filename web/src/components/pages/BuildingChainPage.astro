@@ -1,0 +1,33 @@
+---
+import { getSite } from "../../data/model";
+import EntityLink from "../EntityLink.astro";
+import LinkList from "../LinkList.astro";
+import Section from "../Section.astro";
+import StatTable from "../StatTable.astro";
+
+interface Props {
+  entityKey: string;
+}
+
+const site = await getSite();
+const chain = site.model.entities.building_chain.get(Astro.props.entityKey)!;
+---
+<Section title="Overview">
+  <StatTable rows={[["Category", chain.category], ["In encyclopedia", chain.in_encyclopedia]]} />
+</Section>
+<Section title="Levels" show={chain.levels.length > 0}><LinkList links={chain.levels} /></Section>
+<Section title="Available to" show={chain.availability.length > 0}>
+  <table>
+    <thead><tr><th>Culture</th><th>Subculture</th><th>Faction</th><th>Campaign</th></tr></thead>
+    <tbody>
+      {chain.availability.map((a) => (
+        <tr>
+          <td><EntityLink link={a.culture} /></td>
+          <td><EntityLink link={a.subculture} /></td>
+          <td><EntityLink link={a.faction} /></td>
+          <td>{a.campaign ?? ""}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</Section>

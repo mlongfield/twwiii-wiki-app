@@ -10,6 +10,7 @@ Output layout mirrors the in-game paths:
         manifest.json
         files/db/main_units_tables/data__.jsonl
         files/text/db/land_units__.loc.jsonl
+        images/ui/units/icons/wh_main_emp_greatswords.png
 
 Each .jsonl file has a header line followed by one line per row:
 
@@ -39,6 +40,7 @@ from pathlib import Path
 
 from .config import load_config
 from .rpfm_client import CMD, RpfmClient, RpfmError
+from .extract_images import extract_images, image_containers
 
 log = logging.getLogger(__name__)
 
@@ -103,7 +105,9 @@ async def extract(cfg) -> Path:
              if f["file_type"] in EXTRACTED_FILE_TYPES),
             key=lambda f: f["path"],
         )
-        packs = sorted({f["container_name"] for f in files})
+        image_folders = list(getattr(getattr(cfg, "images", None), "folders", None) or [])
+        packs = sorted({f["container_name"] for f in files}
+                       | image_containers(deps["vanilla_packed_files"], image_folders))
         bid, pack_stats = build_id(game_dir, packs)
         out = Path(cfg.paths.raw_dir) / bid
 
@@ -158,13 +162,15 @@ async def extract(cfg) -> Path:
             if i % 250 == 0:
                 log.info("%d/%d files", i, len(files))
 
+        manifest["images"] = await extract_images(client, image_folders, staging / "images")
+
     staging.mkdir(parents=True, exist_ok=True)
     (staging / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     staging.rename(out)  # atomic-ish: a build dir either exists complete or not
     log.info(
-        "extracted build %s: %d tables, %d undecodable, %d skipped",
-        bid, len(manifest["tables"]), len(manifest["undecodable"]),
-        len(manifest["skipped"]),
+        "extracted build %s: %d tables, %d undecodable, %d skipped, %d image files, %d failed image folders",
+        bid, len(manifest["tables"]), len(manifest["undecodable"]), len(manifest["skipped"]),
+        sum(manifest["images"]["folders"].values()), len(manifest["images"]["failed_folders"]),
     )
     return out
 

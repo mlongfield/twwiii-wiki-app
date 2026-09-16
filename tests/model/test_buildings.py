@@ -78,3 +78,31 @@ def test_chain_lists_levels_in_order():
     assert chains["tower_chain"]["category"] is None
     for c in chains.values():
         schemas.ENTITY_MODELS["building_chain"].model_validate(c)
+
+
+def test_chain_availability_scopes_sorted_and_deduplicated():
+    ctx = building_context()
+    ctx.con.execute("""CREATE TABLE building_chain_availability_sets AS SELECT * FROM (VALUES
+        ('emp_barracks', 'bas_emp'), ('emp_barracks', 'bas_teb'), ('tower_chain', 'bas_emp')) t(building_chain, id)""")
+    ctx.con.execute("""CREATE TABLE building_chain_availabilities AS SELECT * FROM (VALUES
+        ('bas_teb', 'wh_main_emp_empire', 'wh_main_sc_teb_teb', '', 'wh3_main_combi'),
+        ('bas_emp', 'wh_main_emp_empire', 'wh_main_sc_emp_empire', '', ''),
+        ('bas_emp', 'wh_main_emp_empire', 'wh_main_sc_emp_empire', '', '')) t(set_id, culture, sub_culture, faction, campaign)""")
+    ctx.links.register("culture", {"wh_main_emp_empire": "The Empire"})
+    ctx.links.register("subculture", {"wh_main_sc_emp_empire": "The Empire", "wh_main_sc_teb_teb": "Tilea"})
+    chains = {c["key"]: c for c in buildings.build(ctx)["building_chain"]}
+    assert [(a["culture"]["key"], a["subculture"]["key"], a["faction"], a["campaign"])
+            for a in chains["emp_barracks"]["availability"]] == [
+        ("wh_main_emp_empire", "wh_main_sc_emp_empire", None, None),
+        ("wh_main_emp_empire", "wh_main_sc_teb_teb", None, "wh3_main_combi"),
+    ]
+    assert len(chains["tower_chain"]["availability"]) == 1
+    assert [l["key"] for l in ctx.links.referrers("culture", "wh_main_emp_empire", "availability")] == \
+        ["emp_barracks", "tower_chain"]
+    for c in chains.values():
+        schemas.ENTITY_MODELS["building_chain"].model_validate(c)
+
+
+def test_chain_availability_is_empty_without_tables():
+    chains = buildings.build(building_context())["building_chain"]
+    assert all(c["availability"] == [] for c in chains)

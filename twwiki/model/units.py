@@ -8,6 +8,7 @@ from __future__ import annotations
 from collections import defaultdict
 
 from .context import Context, by_key, opt
+from .images import UNIT_CARDS
 from .unit_sets import resolve_unit_sets
 
 LAND_STAT_FIELDS = (
@@ -67,6 +68,15 @@ def build(ctx: Context) -> dict[str, list[dict]]:
     factions = _distinct(ctx, "units_custom_battle_permissions", "unit", "faction")
     buildings = _distinct(ctx, "building_units_allowed", "unit", "building")
     unit_sets = resolve_unit_sets(ctx)
+    # Faction-specific cards are out of scope; take the unit's default card.
+    cards = {r["unit"]: r["unit_card"] for r in ctx.rows(
+        "SELECT unit, unit_card FROM unit_variants WHERE faction = ''")} if ctx.table_exists("unit_variants") else {}
+    # Characters mostly have no card; their custom-battle portrait stands in.
+    portraits: dict[str, str] = {}
+    if ctx.table_exists("units_custom_battle_permissions"):
+        for p in ctx.rows("SELECT * FROM units_custom_battle_permissions ORDER BY unit, faction"):
+            if opt(p.get("general_portrait")) and p["unit"] not in portraits:
+                portraits[p["unit"]] = p["general_portrait"]
 
     out = []
     for r in ctx.rows("SELECT * FROM main_units ORDER BY unit"):
@@ -87,6 +97,8 @@ def build(ctx: Context) -> dict[str, list[dict]]:
             "is_naval": r["is_naval"],
             "tier": r["tier"],
             "land_unit": lu["key"] if lu else None,
+            "card_image": ctx.images.resolve("unit.card_image", cards.get(lu["key"]) if lu else None, UNIT_CARDS),
+            "portrait_image": ctx.images.resolve("unit.portrait_image", portraits.get(key)),
             "recruitment_cost": r["recruitment_cost"],
             "upkeep_cost": r["upkeep_cost"],
             "multiplayer_cost": r["multiplayer_cost"],

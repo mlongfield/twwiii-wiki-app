@@ -50,6 +50,8 @@ def build(ctx: Context) -> dict[str, list[dict]]:
                 "is_rebel": r["is_rebel"],
                 "is_quest_faction": r["is_quest_faction"],
                 "flags_path": r["flags_path"],
+                "flag_image": ctx.images.resolve(
+                    "faction.flag_image", f"{r['flags_path']}/mon_64.png" if opt(r["flags_path"]) else None),
                 "primary_colour": opt(r["primary_colour_hex"]),
                 "units": [],
                 "characters": [],

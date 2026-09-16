@@ -6,6 +6,8 @@ validate entities and export one JSON Schema per type.
 
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict
 
 ENTITY_MODELS: dict[str, type["Strict"]] = {}
@@ -64,6 +66,8 @@ class Effect(Strict):
     category: str
     icon: str | None
     icon_negative: str | None
+    icon_image: str | None
+    icon_negative_image: str | None
     priority: int
     is_positive_value_good: bool
     bonus_targets: list[BonusTarget]
@@ -78,6 +82,7 @@ class EffectBundle(Strict):
     target: str
     priority: int
     icon: str | None
+    icon_image: str | None
     is_global_effect: bool
     effects: list[EffectApplication]
 
@@ -156,6 +161,7 @@ class Ability(Strict):
     source_type: str
     source_type_name: str | None
     icon: str
+    icon_image: str | None
     is_hidden_in_ui: bool
     is_unit_upgrade: bool
     requires_effect_enabling: bool
@@ -271,6 +277,8 @@ class Unit(Strict):
     is_naval: bool
     tier: int
     land_unit: str | None
+    card_image: str | None
+    portrait_image: str | None
     recruitment_cost: int
     upkeep_cost: int
     multiplayer_cost: int
@@ -368,6 +376,7 @@ class Skill(Strict):
     name: str | None
     description: str | None
     image: str
+    icon_image: str | None
     unlocked_at_rank: int
     is_background_skill: bool
     levels: list[SkillLevel]
@@ -427,6 +436,7 @@ class Technology(Strict):
     description: str | None
     long_description: str | None
     icon: str
+    icon_image: str | None
     is_civil: bool
     is_engineering: bool
     is_military: bool
@@ -458,6 +468,7 @@ class BuildingLevel(Strict):
     key: str
     name: str | None
     short_description: str | None
+    icon_image: str | None
     chain: Link | None
     level: int
     create_time: int
@@ -475,6 +486,13 @@ class BuildingLevel(Strict):
     units_recruited: list[Link]
 
 
+class ChainAvailability(Strict):
+    culture: Link | None
+    subculture: Link | None
+    faction: Link | None
+    campaign: str | None
+
+
 @entity("building_chain")
 class BuildingChain(Strict):
     key: str
@@ -482,6 +500,7 @@ class BuildingChain(Strict):
     category: str | None
     in_encyclopedia: bool
     levels: list[Link]
+    availability: list[ChainAvailability]
 
 
 # ---- Items and traits ------------------------------------------------------
@@ -497,6 +516,7 @@ class Item(Strict):
     name: str | None
     description: str | None
     explanation: str | None
+    icon_image: str | None
     type: str
     category: str
     subcategory: str | None
@@ -528,9 +548,52 @@ class Trait(Strict):
     hidden: bool
     precedence: int
     icon: str
+    icon_image: str | None
     no_going_back_level: int
     levels: list[TraitLevel]
     antitraits: list[Link]
+
+
+# ---- Regions ---------------------------------------------------------------
+
+class SlotResource(Strict):
+    key: str
+    name: str | None
+    icon_image: str | None
+
+
+class SlotTemplate(Strict):
+    key: str
+    role: Literal["primary", "secondary", "port"]
+    variant: str | None
+    resource: SlotResource | None
+    permitted_chains: list[Link]
+
+
+@entity("region")
+class Region(Strict):
+    key: str
+    name: str | None
+    campaign: str | None
+    is_settlement: bool
+    province: Link | None
+    is_province_capital: bool
+    starting_owner: Link | None
+    is_faction_capital: bool
+    slot_cap: int | None
+    cultural_originator: Link | None
+    region_groups: list[str]
+    template_source: Literal["special", "generic"]
+    slot_templates: list[SlotTemplate]
+
+
+@entity("province")
+class Province(Strict):
+    key: str
+    name: str | None
+    campaign: str | None
+    regions: list[Link]
+    capital: Link | None
 
 
 # ---- Factions, cultures, difficulty, campaign variables ---------------------
@@ -546,6 +609,7 @@ class Faction(Strict):
     is_rebel: bool
     is_quest_faction: bool
     flags_path: str
+    flag_image: str | None
     primary_colour: str | None
     units: list[Link] = []
     characters: list[Link] = []

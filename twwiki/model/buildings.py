@@ -6,8 +6,11 @@ Level names live on culture variants, keyed by building + culture + subculture
 
 from __future__ import annotations
 
+from collections import defaultdict
+
 from .context import Context, grouped, opt
 from .effects import effect_application
+from .images import BUILDING_ICONS
 from .technologies import load_resource_costs
 
 
@@ -16,13 +19,46 @@ def _variant_order(v: dict) -> tuple:
     return (specific, v["culture"] or "", v["subculture"] or "", v["faction"] or "")
 
 
+def _variant_name_key(level_key: str, v: dict) -> str:
+    return ("building_culture_variants_name_" + level_key
+            + (v["culture"] or "") + (v["subculture"] or "") + (v["faction"] or ""))
+
+
+def level_variant(ctx: Context, level_key: str, variants: list[dict]) -> dict | None:
+    """The variant that names a level (generic first); the first variant if none has text."""
+    ordered = sorted(variants, key=_variant_order)
+    for v in ordered:
+        if ctx.loc.text(_variant_name_key(level_key, v)):
+            return v
+    return ordered[0] if ordered else None
+
+
 def level_name(ctx: Context, level_key: str, variants: list[dict]) -> str | None:
-    for v in sorted(variants, key=_variant_order):
-        text = ctx.loc.text("building_culture_variants_name_" + level_key
-                            + (v["culture"] or "") + (v["subculture"] or "") + (v["faction"] or ""))
-        if text:
-            return text
-    return None
+    v = level_variant(ctx, level_key, variants)
+    return ctx.loc.text(_variant_name_key(level_key, v)) if v else None
+
+
+def chain_availability(ctx: Context) -> dict[str, list[dict]]:
+    """Which cultures, subcultures, factions and campaigns can build each chain."""
+    if not (ctx.table_exists("building_chain_availability_sets")
+            and ctx.table_exists("building_chain_availabilities")):
+        return {}
+    scopes: dict[str, set[tuple]] = defaultdict(set)
+    for r in ctx.rows("""SELECT s.building_chain, a.culture, a.sub_culture, a.faction, a.campaign
+                         FROM building_chain_availability_sets s
+                         JOIN building_chain_availabilities a ON a.set_id = s.id"""):
+        scopes[r["building_chain"]].add(
+            (opt(r["culture"]), opt(r["sub_culture"]), opt(r["faction"]), opt(r["campaign"])))
+    out: dict[str, list[dict]] = {}
+    for chain, found in scopes.items():
+        source = ("building_chain", chain)
+        out[chain] = [{
+            "culture": ctx.links.link("culture", culture, source=source, relation="availability"),
+            "subculture": ctx.links.link("subculture", subculture, source=source, relation="availability"),
+            "faction": ctx.links.link("faction", faction, source=source, relation="availability"),
+            "campaign": campaign,
+        } for culture, subculture, faction, campaign in sorted(found, key=lambda s: tuple(x or "" for x in s))]
+    return out
 
 
 def catalog(ctx: Context) -> dict[str, dict[str, str | None]]:
@@ -60,12 +96,15 @@ def build(ctx: Context) -> dict[str, list[dict]]:
         key = r["level_name"]
         source = ("building_level", key)
         own_variants = sorted(variants.get(key, []), key=_variant_order)
+        variant = level_variant(ctx, key, own_variants)
         short = next((ctx.loc.text(f"building_short_description_texts_short_description_{v['short_description']}")
                       for v in own_variants if opt(v["short_description"])), None)
         out["building_level"].append({
             "key": key,
             "name": ctx.links.name("building_level", key),
             "short_description": short,
+            "icon_image": ctx.images.resolve(
+                "building_level.icon_image", opt(variant["icon"]) if variant else None, BUILDING_ICONS),
             "chain": ctx.links.link("building_chain", r["chain"], source=source, relation="chain"),
             "level": r["level"],
             "create_time": r["create_time"],
@@ -90,6 +129,7 @@ def build(ctx: Context) -> dict[str, list[dict]]:
 
     if ctx.require("building_chain", "building_chains"):
         chain_levels = grouped(ctx, "building_levels", "chain", "level, level_name")
+        availability = chain_availability(ctx)
         for r in ctx.rows("SELECT * FROM building_chains ORDER BY key"):
             key = r["key"]
             out["building_chain"].append({
@@ -99,5 +139,6 @@ def build(ctx: Context) -> dict[str, list[dict]]:
                 "in_encyclopedia": r["in_encyclopedia"],
                 "levels": [ctx.links.link("building_level", l["level_name"], source=("building_chain", key),
                                           relation="levels") for l in chain_levels.get(key, [])],
+                "availability": availability.get(key, []),
             })
     return out

@@ -1,0 +1,60 @@
+---
+import { getSite } from "../../data/model";
+import CulturePicker from "../../islands/CulturePicker.tsx";
+import { chainGroups, cultureChoices, defaultCulture } from "../../lib/regionCultures";
+import EntityLink from "../EntityLink.astro";
+import GameImage from "../GameImage.astro";
+import LinkList from "../LinkList.astro";
+import Section from "../Section.astro";
+import StatTable from "../StatTable.astro";
+
+interface Props {
+  entityKey: string;
+}
+
+const site = await getSite();
+const region = site.model.entities.region.get(Astro.props.entityKey)!;
+const initialCulture = region.is_settlement ? defaultCulture(site, region) : null;
+---
+<Section title="Overview">
+  <StatTable rows={[
+    ["Campaign", region.campaign],
+    ["Settlement", region.is_settlement],
+    ["Province capital", region.is_province_capital],
+    ["Faction capital at start", region.is_faction_capital],
+    ["Building slots", region.slot_cap],
+    ["Slot templates", region.template_source === "special" ? "Special settlement" : "Generic"],
+    ["Region groups", region.region_groups.join(", ")],
+  ]} />
+  {region.province && <p>Province: <EntityLink link={region.province} /></p>}
+  {region.starting_owner && <p>Starting owner: <EntityLink link={region.starting_owner} /></p>}
+  {region.cultural_originator && <p>Cultural originator: <EntityLink link={region.cultural_originator} /></p>}
+</Section>
+<Section title="Special settlement slots" show={region.slot_templates.length > 0}>
+  {region.slot_templates.map((template) => (
+    <div class="slot-template">
+      <h3>{template.role}{template.variant && <span class="muted"> · {template.variant}</span>}</h3>
+      <p class="muted"><code>{template.key}</code></p>
+      {template.resource && (
+        <p>Resource: <GameImage path={template.resource.icon_image} kind="icon" /> {template.resource.name ?? template.resource.key}</p>
+      )}
+      <details>
+        <summary>{template.permitted_chains.length} permitted building chains</summary>
+        <LinkList links={template.permitted_chains} />
+      </details>
+    </div>
+  ))}
+</Section>
+{initialCulture && (
+  <section class="panel wide-panel">
+    <h2>Buildings by culture</h2>
+    <p class="muted">Building chains each culture can construct. Special settlement slots above apply on top of these.</p>
+    <CulturePicker
+      client:visible
+      cultures={cultureChoices(site)}
+      initialCulture={initialCulture}
+      initialGroups={chainGroups(site, initialCulture)}
+      dataUrl="/data/culture-chains.json"
+    />
+  </section>
+)}

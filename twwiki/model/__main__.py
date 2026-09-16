@@ -14,7 +14,7 @@ def main() -> None:
     args = ap.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     cfg = load_config(args.config)
-    run(Path(cfg.paths.db_path), Path(getattr(cfg.paths, "model_dir", "./model")))
+    run(Path(cfg.paths.db_path), Path(getattr(cfg.paths, "model_dir", "./model")), Path(cfg.paths.raw_dir))
 
 
 if __name__ == "__main__":

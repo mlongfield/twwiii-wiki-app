@@ -1,0 +1,31 @@
+---
+import { getSite } from "../../data/model";
+import EffectList from "../EffectList.astro";
+import GameText from "../GameText.astro";
+import LinkList from "../LinkList.astro";
+import Section from "../Section.astro";
+import StatTable from "../StatTable.astro";
+
+interface Props {
+  entityKey: string;
+}
+
+const site = await getSite();
+const trait = site.model.entities.trait.get(Astro.props.entityKey)!;
+---
+<Section title="Overview">
+  <StatTable rows={[
+    ["Hidden", trait.hidden],
+    ["Precedence", trait.precedence],
+    ["No going back from level", trait.no_going_back_level || null],
+  ]} />
+</Section>
+{trait.levels.map((level) => (
+  <Section title={`Level ${level.level}`}>
+    <h3 class:list={[{ unnamed: !level.name }]}><GameText text={level.name ?? level.key} /></h3>
+    <GameText text={level.description} block />
+    <StatTable rows={[["Threshold points", level.threshold_points]]} />
+    <EffectList applications={level.effects} />
+  </Section>
+))}
+<Section title="Antitraits" show={trait.antitraits.length > 0}><LinkList links={trait.antitraits} /></Section>

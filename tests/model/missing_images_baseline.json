@@ -1,0 +1,54 @@
+{
+  "ability.icon_image": {
+    "missing": 6,
+    "ambiguous": 0
+  },
+  "building_level.icon_image": {
+    "missing": 3,
+    "ambiguous": 0
+  },
+  "effect.icon_image": {
+    "missing": 64,
+    "ambiguous": 10
+  },
+  "effect.icon_negative_image": {
+    "missing": 77,
+    "ambiguous": 10
+  },
+  "effect_bundle.icon_image": {
+    "missing": 112,
+    "ambiguous": 6
+  },
+  "faction.flag_image": {
+    "missing": 0,
+    "ambiguous": 0
+  },
+  "item.icon_image": {
+    "missing": 0,
+    "ambiguous": 0
+  },
+  "region.resource.icon_image": {
+    "missing": 0,
+    "ambiguous": 0
+  },
+  "skill.icon_image": {
+    "missing": 20,
+    "ambiguous": 3
+  },
+  "technology.icon_image": {
+    "missing": 2,
+    "ambiguous": 0
+  },
+  "trait.icon_image": {
+    "missing": 0,
+    "ambiguous": 0
+  },
+  "unit.card_image": {
+    "missing": 674,
+    "ambiguous": 0
+  },
+  "unit.portrait_image": {
+    "missing": 6,
+    "ambiguous": 0
+  }
+}

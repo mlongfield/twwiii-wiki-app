@@ -4,8 +4,8 @@ Extract game DB tables and loc text via `rpfm_server`, land them raw, load
 them into a typed DuckDB database, and generate pages from the result.
 
 ```
-rpfm_server (WS) → raw/<build_id>/files/**.jsonl → twwiki.duckdb → model/<build_id>/ → web app
-     extract.py            (immutable)                load.py         model (Python)
+rpfm_server (WS) → raw/<build_id>/{files,images}/ → twwiki.duckdb → model/<build_id>/ → web app
+                 extract.py  (immutable)          load.py         model (Python)
 ```
 
 ## Why this shape
@@ -19,7 +19,8 @@ actually changed.
 **Everything is keyed by `build_id`.** `raw/` is append-only per build. Never
 overwrite a previous build's dump; that history is the most valuable thing the
 pipeline produces. The id is derived from the size and mtime of the packs the
-data came from (currently `db.pack` and `local_en.pack`).
+data came from
+(`db.pack`, `local_en.pack`, and the UI packs holding the exported images).
 
 ## Before you run it
 
@@ -98,22 +99,66 @@ Values are in `fields` order (RPFM's *processed* field order) with RPFM's type
 tags stripped. `load.py` maps the types onto DuckDB: integers to `BIGINT`,
 floats to `DOUBLE`, booleans to `BOOLEAN`, everything else to `VARCHAR`.
 
+## Images
+
+`config.yaml` `images.folders` lists in-game folders exported as they are to
+`raw/<build_id>/images/<in-game path>` (all PNG for what the wiki uses). A
+folder that fails to export is listed under `images.failed_folders` in the raw
+manifest and extraction carries on.
+
+The model resolves each image reference in the tables (bare names, names with
+`.png`, full paths with backslashes) against those files, copies only the
+referenced ones to `model/<build_id>/images/`, and writes
+`images/inline.json` mapping every `[[img:…]]` text icon to a file or null
+(a tag is looked up in the `ui_tagged_images` table; anything else is treated
+as a path). Image fields end in `_image`; `unit.portrait_image` is the
+custom-battle portrait, which stands in for characters that have no
+`card_image`. The manifest's `images` section counts
+referenced, resolved, missing and ambiguous references per field. Without
+`raw/<build_id>/images` the build still succeeds with every image field null.
+
+The `build_id` is derived from the packs holding the exported images, not from
+`images.folders` itself. If you add or remove a folder whose files sit in an
+already-covered pack (almost any `ui/...` folder), the `build_id` does not
+change, so `extract.py` sees the build as already extracted, logs "nothing to
+do", and the new folder's images never land on disk. After changing
+`images.folders` for a game build you have already extracted, move or rename
+the existing `raw/<build_id>/` directory (the pipeline never deletes raw
+builds) and run extract again so it re-exports under that id.
+
+Raw images are large and `raw/` is append-only, so every game patch adds this
+cost again. For build `1eb25ce70f3a`, `raw/<build_id>/images` is 836 MB total;
+`ui/skins` alone is 456 MB across 12,075 files but feeds only a few hundred
+inline targets, and `ui/flags` is 183 MB. Those two folders dominate the
+per-build footprint and are the first candidates to narrow if raw storage
+becomes a problem.
+
 ## Game data model
 
 `python -m twwiki.model` turns `twwiki.duckdb` into curated entities in
 `model/<build_id>/` (design: `docs/superpowers/specs/2026-09-15-game-data-model-design.md`):
 
-- `entities/<type>.jsonl`: one entity per line for 17 types (units, characters
+- `entities/<type>.jsonl`: one entity per line for 19 types (units, characters
   with skill trees, skills, abilities, effects and bundles, buildings,
   technologies and trees, items, traits, factions, cultures, subcultures,
-  difficulty levels, campaign variables). References are links
+  difficulty levels, campaign variables, regions, provinces). References are links
   `{type, key, name, missing}`; effects are applied through one
   `EffectApplication` shape everywhere.
+- Regions and provinces come from the start-position tables: owner at
+  campaign start, capitals, slot cap and province. Slot templates, resources
+  and permitted building chains are known only for special settlements (their
+  templates are named after the region); every other settlement is marked
+  `template_source: "generic"`. Exact slots for those need `startpos.esf`,
+  which is not decoded.
 - `index/<type>.json`: key, name and filter fields for browsing.
 - `schema/<type>.schema.json`: JSON Schemas exported from the Pydantic models
   in `twwiki/model/schemas.py`; the web app generates TypeScript types from them.
-- `manifest.json`: counts, missing names, missing links, unresolved text tokens
-  and partial entity types.
+- `images/`: referenced image files copied under their in-game paths, plus
+  `images/inline.json` mapping `[[img:…]]` text tokens to a file or null.
+- `manifest.json`: counts, missing names, missing links, unresolved text tokens,
+  partial entity types, an `images` section (per-field referenced/resolved/
+  missing/ambiguous counts, plus `available` and `files_copied`), and a
+  `regions` section (`special_templates_unmatched`).
 
 The model never calculates final stats or research turns; that is the stat
 engine's job. Gaps in game data are counted in the manifest; an entity that
@@ -123,6 +168,41 @@ Tests: `uv run pytest`. Tests against the real database skip when
 `twwiki.duckdb` is absent. After a game patch, rebuild, review any failing
 expected values, and regenerate `tests/model/missing_links_baseline.json` only
 after checking why links went missing.
+Regenerate `tests/model/missing_images_baseline.json` the same way, only after
+checking why images went missing.
+
+## Wiki web app
+
+`web/` is an Astro static site built from the newest `model/<build_id>/`
+(design: `docs/superpowers/specs/2026-09-15-wiki-web-app-design.md`).
+
+```bash
+cd web
+npm install
+npm run build      # prebuild (validate model, generate types, copy images,
+                   # build search index) then Astro, then a build report
+npm run preview    # serve web/dist locally
+npm run dev        # prebuild once, then the Astro dev server
+npm test           # unit tests against the committed fixture model
+npm run test:e2e   # Playwright tests against web/dist (needs npm run build; a cold run
+                   # can fail with "webServer exited early" because astro preview
+                   # daemonizes itself — start `npm run preview -- --port 4321`
+                   # first, then re-run)
+npm run fixtures   # regenerate web/test/fixtures/model from the real model
+```
+
+`MODEL_DIR=test/fixtures/model npm run build` builds the small fixture site in
+seconds, which is the quickest way to check a change.
+
+The site has a page for each of the 15 entity types with pages (effects,
+effect bundles, difficulty levels and campaign variables are shown inline on
+the pages that use them), skill and technology tree views, a region building
+browser with a culture picker, and search over names and key facts. Pages are
+addressed by a slug derived from the entity key.
+
+`web/dist/` is plain static files: it deploys to any static host, and no
+server is needed. Everything it serves comes from the model build, so a new
+game build means: extract, load, model, then rebuild the site.
 
 ## Mapping the server surface
 

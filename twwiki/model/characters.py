@@ -6,6 +6,7 @@ from collections import defaultdict
 
 from .context import Context, by_key, grouped, opt
 from .effects import effect_application
+from .images import SKILL_ICONS
 
 
 def _land_units(ctx: Context) -> dict[str, str | None]:
@@ -170,6 +171,7 @@ def _skills(ctx: Context) -> list[dict]:
             "name": ctx.links.name("skill", key),
             "description": ctx.loc.text(f"character_skills_localised_description_{key}"),
             "image": r["image_path"],
+            "icon_image": ctx.images.resolve("skill.icon_image", r["image_path"], SKILL_ICONS),
             "unlocked_at_rank": r["unlocked_at_rank"],
             "is_background_skill": r["is_background_skill"],
             "levels": [{"level": lvl, "unlocked_at_rank": skill_ranks.get(lvl), "effects": levels[lvl]}

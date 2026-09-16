@@ -1,0 +1,47 @@
+---
+import { getSite } from "../../data/model";
+import { skillTreeLayout } from "../../data/trees";
+import TreeView from "../../islands/TreeView.tsx";
+import EntityLink from "../EntityLink.astro";
+import GameText from "../GameText.astro";
+import LinkList from "../LinkList.astro";
+import Section from "../Section.astro";
+import StatTable from "../StatTable.astro";
+import TreeStaticList from "../TreeStaticList.astro";
+
+interface Props {
+  entityKey: string;
+}
+
+const site = await getSite();
+const character = site.model.entities.character.get(Astro.props.entityKey)!;
+---
+<Section title="Overview">
+  {character.title && <p class="muted"><GameText text={character.title} /></p>}
+  <GameText text={character.description} block />
+  <StatTable rows={[
+    ["Agent types", character.agent_types.join(", ")],
+    ["Lore of magic", character.lore_of_magic?.name ?? character.lore_of_magic?.key],
+    ["Spellcaster", character.is_caster],
+    ["Can equip items", character.can_equip_ancillaries],
+    ["Recruitable", character.recruitable],
+    ["Gains experience", character.can_gain_xp],
+    ["Cost", character.cost],
+    ["Cap", character.cap >= 0 ? character.cap : null],
+  ]} />
+  {character.associated_unit && <p>Unit: <EntityLink link={character.associated_unit} /></p>}
+</Section>
+<Section title="Abilities" show={character.abilities.length > 0}><LinkList links={character.abilities} /></Section>
+<Section title="Factions" show={character.factions.length > 0}><LinkList links={character.factions} /></Section>
+<Section title="Items" show={character.items.length > 0}><LinkList links={character.items} /></Section>
+{character.skill_trees.map((tree) => {
+  const layout = skillTreeLayout(site, tree);
+  return (
+    <section class="panel wide-panel">
+      <h2>Skill tree</h2>
+      <p class="muted"><code>{tree.key}</code></p>
+      <TreeView client:visible layout={layout} ariaLabel={`Skill tree ${tree.key}`} />
+      <TreeStaticList layout={layout} title="All skills" />
+    </section>
+  );
+})}

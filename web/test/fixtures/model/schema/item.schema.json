@@ -1,0 +1,294 @@
+{
+  "$defs": {
+    "EffectApplication": {
+      "additionalProperties": false,
+      "properties": {
+        "effect": {
+          "$ref": "#/$defs/Link"
+        },
+        "scope": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Scope"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        },
+        "source": {
+          "$ref": "#/$defs/Link"
+        },
+        "value_damaged": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value Damaged"
+        },
+        "value_ruined": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value Ruined"
+        },
+        "context_requirement": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Context Requirement"
+        },
+        "advancement_stage": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Advancement Stage"
+        }
+      },
+      "required": [
+        "effect",
+        "scope",
+        "value",
+        "source",
+        "value_damaged",
+        "value_ruined",
+        "context_requirement",
+        "advancement_stage"
+      ],
+      "title": "EffectApplication",
+      "type": "object"
+    },
+    "Link": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "title": "Type",
+          "type": "string"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name"
+        },
+        "missing": {
+          "title": "Missing",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "type",
+        "key",
+        "name",
+        "missing"
+      ],
+      "title": "Link",
+      "type": "object"
+    },
+    "RequiredSkill": {
+      "additionalProperties": false,
+      "properties": {
+        "skill": {
+          "$ref": "#/$defs/Link"
+        },
+        "level": {
+          "title": "Level",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "skill",
+        "level"
+      ],
+      "title": "RequiredSkill",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "key": {
+      "title": "Key",
+      "type": "string"
+    },
+    "name": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Name"
+    },
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Description"
+    },
+    "explanation": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Explanation"
+    },
+    "icon_image": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Icon Image"
+    },
+    "type": {
+      "title": "Type",
+      "type": "string"
+    },
+    "category": {
+      "title": "Category",
+      "type": "string"
+    },
+    "subcategory": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Subcategory"
+    },
+    "legendary": {
+      "title": "Legendary",
+      "type": "boolean"
+    },
+    "applies_to": {
+      "title": "Applies To",
+      "type": "string"
+    },
+    "transferrable": {
+      "title": "Transferrable",
+      "type": "boolean"
+    },
+    "unique_to_world": {
+      "title": "Unique To World",
+      "type": "boolean"
+    },
+    "unique_to_faction": {
+      "title": "Unique To Faction",
+      "type": "boolean"
+    },
+    "bodyguard_unit": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Link"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "agent_types": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Agent Types",
+      "type": "array"
+    },
+    "agent_subtypes": {
+      "items": {
+        "$ref": "#/$defs/Link"
+      },
+      "title": "Agent Subtypes",
+      "type": "array"
+    },
+    "required_skills": {
+      "items": {
+        "$ref": "#/$defs/RequiredSkill"
+      },
+      "title": "Required Skills",
+      "type": "array"
+    },
+    "effects": {
+      "items": {
+        "$ref": "#/$defs/EffectApplication"
+      },
+      "title": "Effects",
+      "type": "array"
+    }
+  },
+  "required": [
+    "key",
+    "name",
+    "description",
+    "explanation",
+    "icon_image",
+    "type",
+    "category",
+    "subcategory",
+    "legendary",
+    "applies_to",
+    "transferrable",
+    "unique_to_world",
+    "unique_to_faction",
+    "bodyguard_unit",
+    "agent_types",
+    "agent_subtypes",
+    "required_skills",
+    "effects"
+  ],
+  "title": "Item",
+  "type": "object"
+}

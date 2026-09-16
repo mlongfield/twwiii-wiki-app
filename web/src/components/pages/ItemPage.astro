@@ -1,0 +1,39 @@
+---
+import { getSite } from "../../data/model";
+import EffectList from "../EffectList.astro";
+import EntityLink from "../EntityLink.astro";
+import GameText from "../GameText.astro";
+import LinkList from "../LinkList.astro";
+import Section from "../Section.astro";
+import StatTable from "../StatTable.astro";
+
+interface Props {
+  entityKey: string;
+}
+
+const site = await getSite();
+const item = site.model.entities.item.get(Astro.props.entityKey)!;
+---
+<Section title="Overview">
+  <GameText text={item.description} block />
+  <GameText text={item.explanation} block />
+  <StatTable rows={[
+    ["Type", item.type],
+    ["Category", item.category],
+    ["Subcategory", item.subcategory],
+    ["Legendary", item.legendary],
+    ["Applies to", item.applies_to],
+    ["Transferable", item.transferrable],
+    ["Unique in the world", item.unique_to_world],
+    ["Unique to faction", item.unique_to_faction],
+    ["Agent types", item.agent_types.join(", ")],
+  ]} />
+  {item.bodyguard_unit && <p>Bodyguard unit: <EntityLink link={item.bodyguard_unit} /></p>}
+</Section>
+<Section title="Effects" show={item.effects.length > 0}><EffectList applications={item.effects} /></Section>
+<Section title="Characters" show={item.agent_subtypes.length > 0}><LinkList links={item.agent_subtypes} /></Section>
+<Section title="Required skills" show={item.required_skills.length > 0}>
+  <ul class="link-list">
+    {item.required_skills.map((r) => <li><EntityLink link={r.skill} /> <span class="muted">level {r.level}</span></li>)}
+  </ul>
+</Section>

@@ -11,6 +11,7 @@ from __future__ import annotations
 from collections import defaultdict
 
 from .context import Context, opt
+from .images import EFFECT_ICONS
 
 ENTITY_TYPE_FOR_TABLE = {
     "main_units": "unit",
@@ -139,6 +140,8 @@ def build(ctx: Context) -> dict[str, list[dict]]:
                 "category": r["category"],
                 "icon": opt(r["icon"]),
                 "icon_negative": opt(r["icon_negative"]),
+                "icon_image": ctx.images.resolve("effect.icon_image", r["icon"], EFFECT_ICONS),
+                "icon_negative_image": ctx.images.resolve("effect.icon_negative_image", r["icon_negative"], EFFECT_ICONS),
                 "priority": r["priority"],
                 "is_positive_value_good": r["is_positive_value_good"],
                 "bonus_targets": targets.get(key, []),
@@ -162,6 +165,7 @@ def build(ctx: Context) -> dict[str, list[dict]]:
                 "target": r["bundle_target"],
                 "priority": r["priority"],
                 "icon": opt(r["ui_icon"]),
+                "icon_image": ctx.images.resolve("effect_bundle.icon_image", r["ui_icon"], EFFECT_ICONS),
                 "is_global_effect": r["is_global_effect"],
                 "effects": apps.get(key, []),
             })

@@ -44,6 +44,10 @@ CMD = {
     "decode": "DecodePackedFile",
     # Definition -> {VecField: [Field, ...]} in the order row cells use.
     "fields_processed": "FieldsProcessed",
+    # [pack_key, {DataSource: [{"File"|"Folder": path}, ...]}, dest_path, as_tsv]
+    #   -> {StringVecPathBuf: [string, [path, ...]]}. With DataSource
+    #   "GameFiles" the pack_key is unused; files land at dest_path/<path>.
+    "extract_files": "ExtractPackedFiles",
 }
 
 

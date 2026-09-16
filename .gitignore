@@ -14,3 +14,13 @@ __pycache__/
 # Agent workspaces
 .superpowers/
 .worktrees/
+
+# Web (Astro)
+/web/node_modules/
+/web/dist/
+/web/.astro/
+/web/public/images/
+/web/public/search-index.json
+/web/src/generated/
+/web/test-results/
+/web/playwright-report/

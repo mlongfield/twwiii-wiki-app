@@ -1,0 +1,27 @@
+---
+import { getSite } from "../../data/model";
+import EntityLink from "../EntityLink.astro";
+import LinkList from "../LinkList.astro";
+import Section from "../Section.astro";
+import StatTable from "../StatTable.astro";
+
+interface Props {
+  entityKey: string;
+}
+
+const site = await getSite();
+const faction = site.model.entities.faction.get(Astro.props.entityKey)!;
+---
+<Section title="Overview">
+  <StatTable rows={[
+    ["Adjective", faction.adjective],
+    ["Category", faction.category],
+    ["Rebels", faction.is_rebel],
+    ["Quest faction", faction.is_quest_faction],
+    ["Colour", faction.primary_colour],
+  ]} />
+  {faction.culture && <p>Culture: <EntityLink link={faction.culture} /></p>}
+  {faction.subculture && <p>Subculture: <EntityLink link={faction.subculture} /></p>}
+</Section>
+<Section title="Units" show={faction.units.length > 0}><LinkList links={faction.units} /></Section>
+<Section title="Characters" show={faction.characters.length > 0}><LinkList links={faction.characters} /></Section>
