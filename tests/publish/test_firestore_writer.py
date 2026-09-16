@@ -63,6 +63,20 @@ def test_write_entities_keeps_published_at_and_deletes_stale_documents(tmp_path)
     assert ("bulk_delete", "builds/b1/skill") not in store.calls
 
 
+def test_write_entities_lists_ids_only_when_the_build_already_exists(tmp_path):
+    model_dir = make_model(tmp_path, "b1", entities={"unit": UNITS})
+    new_build = FakeEntityStore()
+    write_entities(new_build, model_dir, "b1", manifest_of(model_dir))
+    assert not [c for c in new_build.calls if c[0] in ("list_ids", "bulk_delete")]
+
+    existing_build = FakeEntityStore()
+    existing_build.docs["builds/b1"] = {"status": "loading", "published_at": None}
+    existing_build.docs["builds/b1/unit/gone"] = {"key": "gone"}
+    write_entities(existing_build, model_dir, "b1", manifest_of(model_dir))
+    assert [c[1] for c in existing_build.calls if c[0] == "list_ids"] == [f"builds/b1/{t}" for t in ENTITY_TYPES]
+    assert "builds/b1/unit/gone" not in existing_build.docs
+
+
 def test_write_failure_propagates(tmp_path):
     model_dir = make_model(tmp_path, "b1", entities={"unit": UNITS})
     store = FakeEntityStore()

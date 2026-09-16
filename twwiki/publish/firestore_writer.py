@@ -29,6 +29,8 @@ def collection_path(build_id: str, entity_type: str) -> str:
 
 def write_entities(store: EntityStore, model_dir: Path, build_id: str, manifest: dict) -> dict[str, int]:
     existing = store.get(build_path(build_id)) or {}
+    # A new build has no documents to go stale, so skip listing its ids.
+    is_new_build = not existing
     store.set(build_path(build_id), {
         "status": "loading",
         "model_version": manifest["model_version"],
@@ -47,7 +49,7 @@ def write_entities(store: EntityStore, model_dir: Path, build_id: str, manifest:
                 yield entity["key"], entity_document(entity_type, entity)
 
         written[entity_type] = store.bulk_set(collection, documents())
-        stale = sorted(store.list_ids(collection) - keys)
+        stale = [] if is_new_build else sorted(store.list_ids(collection) - keys)
         if stale:
             store.bulk_delete(collection, stale)
         log.info("firestore: %-18s %6d written, %d stale deleted", entity_type, written[entity_type], len(stale))
