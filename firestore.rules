@@ -1,0 +1,23 @@
+rules_version = '2';
+
+// Game data is public and read-only. Publishing uses admin credentials,
+// which bypass these rules.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /site/{doc} {
+      allow read: if true;
+      allow write: if false;
+    }
+    match /builds/{buildId} {
+      allow read: if true;
+      allow write: if false;
+      match /{type}/{key} {
+        allow read: if true;
+        allow write: if false;
+      }
+    }
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

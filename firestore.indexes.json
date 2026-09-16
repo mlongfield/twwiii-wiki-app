@@ -1,0 +1,100 @@
+{
+  "indexes": [],
+  "fieldOverrides": [
+    {
+      "collectionGroup": "ability",
+      "fieldPath": "entity",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "building_chain",
+      "fieldPath": "entity",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "building_level",
+      "fieldPath": "entity",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "campaign_variable",
+      "fieldPath": "entity",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "character",
+      "fieldPath": "entity",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "culture",
+      "fieldPath": "entity",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "difficulty_level",
+      "fieldPath": "entity",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "effect",
+      "fieldPath": "entity",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "effect_bundle",
+      "fieldPath": "entity",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "faction",
+      "fieldPath": "entity",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "item",
+      "fieldPath": "entity",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "province",
+      "fieldPath": "entity",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "region",
+      "fieldPath": "entity",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "skill",
+      "fieldPath": "entity",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "subculture",
+      "fieldPath": "entity",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "technology",
+      "fieldPath": "entity",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "technology_tree",
+      "fieldPath": "entity",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "trait",
+      "fieldPath": "entity",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "unit",
+      "fieldPath": "entity",
+      "indexes": []
+    }
+  ]
+}
