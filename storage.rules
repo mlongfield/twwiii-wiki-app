@@ -1,0 +1,11 @@
+rules_version = '2';
+
+// Snapshots are read only by the publish command and the deploy workflow,
+// both with service credentials. Browsers get no access.
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -11,6 +11,19 @@ server:
   url: "ws://127.0.0.1:45127/ws"
   timeout_s: 120
 
+# Publishing to Firebase (python -m twwiki.publish). No secrets here: Google
+# credentials come from `gcloud auth application-default login`, the GitHub
+# token from the TWWIKI_GITHUB_TOKEN environment variable.
+firebase:
+  project_id: twwiii-wiki
+  # Confirm in the Firebase console under Storage; older projects use
+  # <project id>.appspot.com.
+  storage_bucket: twwiii-wiki.firebasestorage.app
+  deploy_workflow:
+    repo: mlongfield/twwiii-wiki-app
+    workflow: deploy.yml
+    ref: main
+
 # No pack list: extract.py reads RPFM's dependency cache for `game`, which
 # already resolves the game's packs into one file set. Regenerate the cache in
 # RPFM (Game Selected -> Generate Dependencies Cache) after every patch.

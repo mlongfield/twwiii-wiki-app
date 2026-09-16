@@ -1,0 +1,103 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_id:
+        description: "Game build id to deploy (default: the build named by Firestore site/current)"
+        required: false
+        type: string
+  push:
+    branches: [main]
+    paths:
+      - "web/**"
+      - "firebase.json"
+      - ".firebaserc"
+      - "firestore.rules"
+      - "firestore.indexes.json"
+      - "storage.rules"
+      - ".github/workflows/deploy.yml"
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      FIREBASE_PROJECT_ID: ${{ vars.FIREBASE_PROJECT_ID }}
+      FIREBASE_STORAGE_BUCKET: ${{ vars.FIREBASE_STORAGE_BUCKET }}
+      PUBLIC_SITE_URL: https://${{ vars.FIREBASE_PROJECT_ID }}.web.app
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22.12.0
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install web dependencies
+        working-directory: web
+        run: npm ci
+
+      - name: Write the service account key
+        env:
+          SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          key="$RUNNER_TEMP/service-account.json"
+          printf '%s' "$SERVICE_ACCOUNT_JSON" > "$key"
+          chmod 600 "$key"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$key" >> "$GITHUB_ENV"
+
+      - name: Fetch the model snapshot
+        id: snapshot
+        working-directory: web
+        env:
+          REQUESTED_BUILD_ID: ${{ inputs.build_id }}
+        run: |
+          args=(--project "$FIREBASE_PROJECT_ID" --bucket "$FIREBASE_STORAGE_BUCKET" --out "$GITHUB_WORKSPACE/model")
+          if [ -n "$REQUESTED_BUILD_ID" ]; then args+=(--build-id "$REQUESTED_BUILD_ID"); fi
+          npx tsx scripts/fetch-snapshot.ts "${args[@]}" > "$RUNNER_TEMP/model-dir.txt"
+          model_dir="$(tail -n 1 "$RUNNER_TEMP/model-dir.txt")"
+          echo "MODEL_DIR=$model_dir" >> "$GITHUB_ENV"
+          echo "build_id=$(basename "$model_dir")" >> "$GITHUB_OUTPUT"
+
+      - name: Build the site
+        working-directory: web
+        run: npm run build
+
+      # After the build: src/data/model.ts imports src/generated/build-info.ts,
+      # which the prebuild writes and git ignores.
+      - name: Unit tests
+        working-directory: web
+        run: npm test
+
+      - name: Deploy to Firebase
+        env:
+          BUILD_ID: ${{ steps.snapshot.outputs.build_id }}
+        run: >
+          npx --yes firebase-tools@15.30.1 deploy
+          --only hosting,firestore:rules,firestore:indexes,storage
+          --project "$FIREBASE_PROJECT_ID"
+          --message "build $BUILD_ID @ ${GITHUB_SHA::7}"
+          --non-interactive
+
+      - name: Smoke check
+        env:
+          BUILD_ID: ${{ steps.snapshot.outputs.build_id }}
+        run: |
+          body="$(curl --fail --silent --show-error --location "$PUBLIC_SITE_URL/")"
+          if ! grep -q "$BUILD_ID" <<<"$body"; then
+            echo "::error::$PUBLIC_SITE_URL/ does not name build $BUILD_ID"
+            exit 1
+          fi
+
+      - name: Remove the service account key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/service-account.json"
