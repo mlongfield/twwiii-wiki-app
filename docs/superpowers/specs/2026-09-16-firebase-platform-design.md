@@ -1,7 +1,7 @@
 # Firebase Platform — Design
 
 **Date:** 2026-09-16
-**Status:** Approved in brainstorming, pending written-spec review
+**Status:** Approved
 **Sub-project:** 2c (Firebase platform)
 
 ## Context
@@ -21,7 +21,8 @@ and writes a static site to `web/dist`: 35,493 files, 633 MB, of which
 images are 118 MB and `search-index.json` 11.4 MB. Nothing is hosted yet.
 
 This sub-project hosts the project on Firebase. The project owner has an
-existing Firebase project on the Blaze (pay-as-you-go) plan.
+existing Firebase project, `twwiii-wiki`, on the Blaze (pay-as-you-go) plan;
+its default Hosting site is `https://twwiii-wiki.web.app`.
 
 ## Decisions made in brainstorming
 
@@ -264,8 +265,8 @@ bypass rules.
 
 ```yaml
 firebase:
-  project_id: <project id>
-  storage_bucket: <project id>.firebasestorage.app
+  project_id: twwiii-wiki
+  storage_bucket: twwiii-wiki.firebasestorage.app   # confirm in the console
   deploy_workflow:
     repo: mlongfield/twwiii-wiki-app
     workflow: deploy.yml
@@ -402,7 +403,7 @@ listing.
   3. `npm ci` in `web/`.
   4. `npx tsx scripts/fetch-snapshot.ts` with the input build id if given;
      export the printed folder as `MODEL_DIR`.
-  5. `PUBLIC_SITE_URL=https://<project>.web.app npm run build`, then
+  5. `PUBLIC_SITE_URL=https://twwiii-wiki.web.app npm run build`, then
      `npm test`. Tests run after the build because `src/data/model.ts`
      imports `src/generated/build-info.ts`, which the prebuild writes and git
      ignores.
@@ -481,7 +482,7 @@ unit tests only.
 ### Acceptance (first real publish of `1eb25ce70f3a`)
 
 - `python -m twwiki.publish` exits 0 and the deploy workflow succeeds.
-- `https://<project>.web.app/` returns 200 and names `1eb25ce70f3a`; a unit
+- `https://twwiii-wiki.web.app/` returns 200 and names `1eb25ce70f3a`; a unit
   page and an image load.
 - Firestore counts equal the manifest counts for all 19 types.
 - A query on `builds/1eb25ce70f3a/unit` where `abilities_keys` contains
