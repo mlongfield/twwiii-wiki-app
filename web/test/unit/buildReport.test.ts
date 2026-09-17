@@ -15,7 +15,7 @@ describe("summarizeDist", () => {
     await page(dist, ".", "<html>home</html>");
     await page(dist, "units", "<html>browse</html>");
     await page(dist, "units/a", '<span data-missing-link>x</span><span data-placeholder-image></span>');
-    await page(dist, "units/b", '<span data-placeholder-image></span>');
+    await page(dist, "units/b", '<span data-placeholder-image></span><span class="gt-col" data-unknown-colour="blue">x</span>');
     await page(dist, "regions/c", "<html>region</html>");
     await writeFile(path.join(dist, "search-index.json"), "12345");
 
@@ -25,6 +25,7 @@ describe("summarizeDist", () => {
     expect(summary.total).toBe(5);
     expect(summary.missingLinks).toBe(1);
     expect(summary.placeholderImages).toBe(2);
+    expect(summary.unknownColours).toBe(1);
     expect(summary.searchIndexBytes).toBe(5);
   });
 

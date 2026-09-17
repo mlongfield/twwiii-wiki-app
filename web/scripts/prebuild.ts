@@ -9,6 +9,7 @@ import { ENTITY_TYPES } from "../src/data/pageTypes";
 import { createSearchIndexJson } from "../src/data/searchIndex";
 import { createSite } from "../src/data/site";
 import { validateModelDir } from "../src/data/validate";
+import { coloursCss } from "../src/lib/coloursCss";
 
 const webRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const generatedDir = path.join(webRoot, "src", "generated");
@@ -74,6 +75,12 @@ async function writeBuildInfo(modelDir: string, manifest: Manifest): Promise<voi
   );
 }
 
+async function writeColoursCss(modelDir: string): Promise<void> {
+  const colours = JSON.parse(await readFile(path.join(modelDir, "reference", "colours.json"), "utf-8"));
+  await writeFile(path.join(generatedDir, "colours.css"), coloursCss(colours));
+  console.log(`prebuild: ${colours.length} game text colours`);
+}
+
 async function writeSearchIndex(modelDir: string): Promise<void> {
   const site = await createSite(await loadModel(modelDir));
   const json = createSearchIndexJson(site);
@@ -89,6 +96,7 @@ async function prebuild(): Promise<void> {
   const manifest = await validateModelDir(modelDir);
   console.log(`prebuild: model ${manifest.build_id} at ${modelDir}`);
   await generateTypes(modelDir);
+  await writeColoursCss(modelDir);
   await copyImages(modelDir, manifest.build_id);
   await writeBuildInfo(modelDir, manifest);
   await writeSearchIndex(modelDir);

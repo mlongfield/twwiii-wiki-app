@@ -1,3 +1,5 @@
+@import "../generated/colours.css";
+
 :root {
   --bg: #16120d;
   --panel: #241c12;
@@ -7,13 +9,6 @@
   --muted: #a8925f;
   --text: #e8dcc2;
   --missing: #c0705a;
-  --col-yellow: #e8c547;
-  --col-white: #f4efe4;
-  --col-red: #d9644a;
-  --col-green: #8fc26a;
-  --col-magic: #7fb3e8;
-  --col-fe-white: #f4efe4;
-  --col-ancillary-unique: #d68ce0;
   --serif: Georgia, "Times New Roman", serif;
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
@@ -48,13 +43,6 @@ th { color: var(--muted); font-weight: normal; }
 
 .gt-title { display: block; font-family: var(--serif); color: var(--gold); margin-bottom: 0.2rem; }
 .gt-help { color: var(--gold); border-bottom: 1px dotted var(--border-accent); }
-.gt-col-yellow { color: var(--col-yellow); }
-.gt-col-white { color: var(--col-white); }
-.gt-col-red { color: var(--col-red); }
-.gt-col-green { color: var(--col-green); }
-.gt-col-magic { color: var(--col-magic); }
-.gt-col-fe-white { color: var(--col-fe-white); }
-.gt-col-ancillary-unique { color: var(--col-ancillary-unique); }
 
 .game-img { display: inline-block; object-fit: contain; vertical-align: middle; }
 .game-img.placeholder { background: #3a2e1d; border: 1px solid var(--border-accent); }
