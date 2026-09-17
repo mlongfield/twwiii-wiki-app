@@ -20,7 +20,7 @@ const character = site.model.entities.character.get(Astro.props.entityKey)!;
   {character.title && <p class="muted"><GameText text={character.title} /></p>}
   <GameText text={character.description} block />
   <StatTable rows={[
-    ["Agent types", character.agent_types.join(", ")],
+    ["Agent types", character.agent_types.map((a) => a.name ?? a.key).join(", ")],
     ["Lore of magic", character.lore_of_magic?.name ?? character.lore_of_magic?.key],
     ["Spellcaster", character.is_caster],
     ["Can equip items", character.can_equip_ancillaries],

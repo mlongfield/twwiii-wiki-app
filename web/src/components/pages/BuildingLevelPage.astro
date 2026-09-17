@@ -29,9 +29,9 @@ const level = site.model.entities.building_level.get(Astro.props.entityKey)!;
     ["Faction unique", level.faction_unique],
     ["Can convert", level.can_convert],
     ["Shown in game UI", level.visible_in_ui],
-    ["Cultures", level.cultures.join(", ")],
   ]} />
   <ResourceCost cost={level.resource_cost} />
 </Section>
+<Section title="Available to" show={level.availability.length > 0}><LinkList links={level.availability} /></Section>
 <Section title="Effects" show={level.effects.length > 0}><EffectList applications={level.effects} /></Section>
 <Section title="Recruits" show={level.units_recruited.length > 0}><LinkList links={level.units_recruited} /></Section>

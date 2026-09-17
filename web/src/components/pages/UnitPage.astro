@@ -16,13 +16,15 @@ const melee = unit.melee_weapon;
 const missile = unit.missile_weapon;
 const projectile = missile?.projectile ?? null;
 const shield = unit.shield;
+const typeNames = [unit.caste_name ?? unit.caste, unit.category_name ?? unit.category, unit.class_name ?? unit.unit_class];
+const typeRows: [string, string | null][] = typeNames.every((n) => n === typeNames[0])
+  ? [["Type", typeNames[0]]]
+  : [["Caste", typeNames[0]], ["Category", typeNames[1]], ["Class", typeNames[2]]];
 ---
 <Section title="Overview">
   <GameText text={unit.short_description} block />
   <StatTable rows={[
-    ["Caste", unit.caste_name ?? unit.caste],
-    ["Category", unit.category_name ?? unit.category],
-    ["Class", unit.class_name ?? unit.unit_class],
+    ...typeRows,
     ["Tier", unit.tier],
     ["Naval", unit.is_naval],
     ["Recruitment cost", unit.recruitment_cost],
@@ -65,7 +67,6 @@ const shield = unit.shield;
 {melee && (
   <Section title="Melee weapon">
     <StatTable rows={[
-      ["Weapon", melee.key],
       ["Base damage", melee.damage],
       ["Armour-piercing damage", melee.ap_damage],
       ["Bonus vs large", melee.bonus_v_large || null],
@@ -82,7 +83,6 @@ const shield = unit.shield;
 {missile && (
   <Section title="Missile weapon">
     <StatTable rows={[
-      ["Weapon", missile.key],
       ["Base damage", projectile?.damage],
       ["Armour-piercing damage", projectile?.ap_damage],
       ["Bonus vs large", projectile?.bonus_v_large || null],

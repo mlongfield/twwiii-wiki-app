@@ -1,5 +1,6 @@
 ---
 import { getSite } from "../../data/model";
+import { stripGameMarkup } from "../../lib/gameText";
 import EffectList from "../EffectList.astro";
 import EntityLink from "../EntityLink.astro";
 import GameText from "../GameText.astro";
@@ -17,16 +18,17 @@ const item = site.model.entities.item.get(Astro.props.entityKey)!;
 <Section title="Overview">
   <GameText text={item.description} block />
   <GameText text={item.explanation} block />
+  {item.rarity && (
+    <p class="item-rarity">Rarity: <span style={item.rarity.colour ? `color: ${item.rarity.colour}` : undefined}>{stripGameMarkup(item.rarity.name ?? item.rarity.key)}</span></p>
+  )}
   <StatTable rows={[
-    ["Type", item.type],
-    ["Category", item.category],
+    ["Category", item.category.name ?? item.category.key],
     ["Subcategory", item.subcategory],
     ["Legendary", item.legendary],
-    ["Applies to", item.applies_to],
     ["Transferable", item.transferrable],
     ["Unique in the world", item.unique_to_world],
     ["Unique to faction", item.unique_to_faction],
-    ["Agent types", item.agent_types.join(", ")],
+    ["Agent types", item.agent_types.map((a) => a.name ?? a.key).join(", ")],
   ]} />
   {item.bodyguard_unit && <p>Bodyguard unit: <EntityLink link={item.bodyguard_unit} /></p>}
 </Section>
