@@ -50,6 +50,13 @@ describe("buildSearchDocuments", () => {
     expect(faction.culture).toBe("The Empire");
   });
 
+  it("omits subtitle for types and entities with none, to keep the index small", () => {
+    const docs = buildSearchDocuments(site);
+    const skill = docs.find((d) => d.type === "skill")!;
+    expect(skill.subtitle).toBeUndefined();
+    expect(Object.prototype.hasOwnProperty.call(skill, "subtitle")).toBe(false);
+  });
+
   it("resolves a building_chain's culture via subculture and via faction, not just a direct culture ref", () => {
     const site = minimalSite({
       culture: new Map([["culture_x", { key: "culture_x", name: "Culture X" }]]),

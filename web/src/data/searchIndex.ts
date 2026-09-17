@@ -51,13 +51,14 @@ export function buildSearchDocuments(site: Site): SearchDocument[] {
   for (const info of PAGE_TYPES) {
     for (const entity of (site.model.entities[info.type] as Map<string, Entity>).values()) {
       if (!entity.name) continue;
+      const subtitle = subtitleFor(site, info.type, entity);
       docs.push({
         id: `${info.type}:${entity.key}`,
         type: info.type,
         typeLabel: info.singular,
         key: entity.key,
         name: entity.name,
-        subtitle: subtitleFor(site, info.type, entity) ?? "",
+        ...(subtitle ? { subtitle } : {}),
         culture: searchCulture(site, info.type, entity),
         category: searchCategory(info.type, entity),
         icon: imageSrc(site, mainImage(site, info.type, entity)?.path),

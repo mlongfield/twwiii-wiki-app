@@ -7,7 +7,7 @@ export interface SearchDocument {
   typeLabel: string;
   key: string;
   name: string;
-  subtitle: string;
+  subtitle?: string;
   culture: string;
   category: string;
   icon: string | null;
@@ -35,7 +35,7 @@ export interface SearchHit {
   typeLabel: string;
   key: string;
   name: string;
-  subtitle: string;
+  subtitle?: string;
   icon: string | null;
   url: string;
 }
@@ -55,7 +55,7 @@ export function groupResults(results: SearchResult[], perType = 8): ResultGroup[
       typeLabel: result.typeLabel,
       key: result.key,
       name: result.name,
-      subtitle: result.subtitle ?? "",
+      subtitle: result.subtitle,
       icon: result.icon ?? null,
       url: result.url,
     };
