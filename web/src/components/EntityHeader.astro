@@ -1,6 +1,7 @@
 ---
 import type { EntityImage } from "../data/images";
 import { pageTypeInfo, type PageType } from "../data/pageTypes";
+import CampaignBadge from "./CampaignBadge.astro";
 import GameImage from "./GameImage.astro";
 
 interface Props {
@@ -8,11 +9,14 @@ interface Props {
   entityKey: string;
   name: string | null;
   image: EntityImage | null;
+  entity: Record<string, any>;
+  subtitle: string | null;
 }
 
-const { type, entityKey, name, image } = Astro.props;
+const { type, entityKey, name, image, entity, subtitle } = Astro.props;
 const info = pageTypeInfo(type)!;
 const kind = image ? (image.kind === "icon" ? "large" : image.kind) : null;
+const title = name ?? `Unnamed ${info.singular.toLowerCase()}`;
 ---
 <nav class="breadcrumbs" aria-label="Breadcrumbs">
   <a href="/">Home</a> › <a href={`/${info.segment}/`}>{info.label}</a>
@@ -20,7 +24,9 @@ const kind = image ? (image.kind === "icon" ? "large" : image.kind) : null;
 <header class="entity-header">
   {image && kind && <GameImage path={image.path} kind={kind} alt={name ?? entityKey} />}
   <div>
-    <h1 class:list={[{ unnamed: !name }]}>{name ?? entityKey}</h1>
+    <h1 class:list={[{ unnamed: !name }]}>{title}</h1>
+    {subtitle && <p class="entity-subtitle">{subtitle}</p>}
+    <CampaignBadge type={type} entity={entity} />
     <p class="muted entity-meta">{info.singular} · <code>{entityKey}</code></p>
   </div>
 </header>

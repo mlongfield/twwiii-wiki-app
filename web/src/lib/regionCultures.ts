@@ -19,7 +19,8 @@ export interface CultureChoice {
 
 export function cultureChoices(site: Site): CultureChoice[] {
   return [...site.model.entities.culture.values()]
-    .map((c) => ({ key: c.key, name: c.name ?? c.key }))
+    .filter((c) => c.name)
+    .map((c) => ({ key: c.key, name: c.name! }))
     .sort((a, b) => a.name.localeCompare(b.name) || a.key.localeCompare(b.key));
 }
 
@@ -35,10 +36,11 @@ export function chainGroups(site: Site, cultureKey: string): ChainGroup[] {
   const byCategory = new Map<string, ChainOption[]>();
   for (const key of site.chainsByCulture.get(cultureKey) ?? []) {
     const chain = site.model.entities.building_chain.get(key)!;
+    if (!chain.name) continue;
     const firstLevel = chain.levels[0] ? site.model.entities.building_level.get(chain.levels[0].key) : undefined;
     const option: ChainOption = {
       key,
-      name: chain.name ?? key,
+      name: chain.name,
       url: urlFor(site, "building_chain", key),
       icon: imageSrc(site, firstLevel?.icon_image),
     };

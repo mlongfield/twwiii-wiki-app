@@ -36,7 +36,12 @@ class Link(Strict):
 class EffectApplication(Strict):
     effect: Link
     scope: str | None
+    scope_text: str | None          # e.g. "([[img:icon_general]][[/img]]Lord's army)"
     value: float
+    priority: int | None            # None when the effect is not in the game data
+    hidden: bool                    # priority 0: the game does not display it
+    favourable: bool | None         # None for a zero value or an unknown effect
+    icon_image: str | None          # the negative icon when unfavourable and one exists
     source: Link
     value_damaged: float | None = None      # buildings only
     value_ruined: float | None = None       # buildings only
@@ -304,6 +309,11 @@ class LoreOfMagic(Strict):
     name: str | None
 
 
+class AgentType(Strict):
+    key: str
+    name: str | None
+
+
 class SkillTreeNode(Strict):
     key: str
     skill: Link
@@ -314,7 +324,7 @@ class SkillTreeNode(Strict):
     visible_in_ui: bool
     faction: str | None
     subculture: str | None
-    campaign: str | None
+    campaign: Link | None
 
 
 class SkillTreeLink(Strict):
@@ -335,7 +345,7 @@ class SkillTree(Strict):
     agent_type: str | None
     faction: str | None
     subculture: str | None
-    campaign: str | None
+    campaign: Link | None
     for_army: bool
     for_navy: bool
     nodes: list[SkillTreeNode]
@@ -355,7 +365,7 @@ class Character(Strict):
     name: str | None
     title: str | None
     description: str | None
-    agent_types: list[str]
+    agent_types: list[AgentType]
     associated_unit: Link | None
     lore_of_magic: LoreOfMagic | None
     is_caster: bool
@@ -365,6 +375,7 @@ class Character(Strict):
     cost: int
     cap: int
     factions: list[Link]
+    campaigns: list[Link]
     abilities: list[Link]
     skill_trees: list[SkillTree]
     items: list[Link] = []
@@ -406,6 +417,7 @@ class Placement(Strict):
     research_points_required: int
     cost_per_round: int
     resource_cost: ResourceCost | None
+    campaigns: list[Link]
 
 
 class TreeNode(Strict):
@@ -420,6 +432,7 @@ class TreeNode(Strict):
     ui_group: str | None
     pixel_offset_x: int
     pixel_offset_y: int
+    campaigns: list[Link]
 
 
 class TreeLink(Strict):
@@ -452,10 +465,11 @@ class Technology(Strict):
 class TechnologyTree(Strict):
     key: str
     name: str | None
+    name_derived: bool
     culture: Link | None
     subculture: Link | None
     faction: Link | None
-    campaign: str | None
+    campaign: Link | None
     colour: str | None
     nodes: list[TreeNode]
     links: list[TreeLink]
@@ -481,7 +495,7 @@ class BuildingLevel(Strict):
     can_convert: bool
     visible_in_ui: bool
     resource_cost: ResourceCost | None
-    cultures: list[str]
+    availability: list[Link]
     effects: list[EffectApplication]
     units_recruited: list[Link]
 
@@ -490,7 +504,7 @@ class ChainAvailability(Strict):
     culture: Link | None
     subculture: Link | None
     faction: Link | None
-    campaign: str | None
+    campaign: Link | None
 
 
 @entity("building_chain")
@@ -510,6 +524,17 @@ class RequiredSkill(Strict):
     level: int
 
 
+class ItemCategory(Strict):
+    key: str
+    name: str | None
+
+
+class Rarity(Strict):
+    key: str
+    name: str | None      # game markup kept, e.g. [[col:ancillary_rare]]Rare[[/col]]
+    colour: str | None    # "#RRGGBB"
+
+
 @entity("item")
 class Item(Strict):
     key: str
@@ -518,15 +543,15 @@ class Item(Strict):
     explanation: str | None
     icon_image: str | None
     type: str
-    category: str
+    category: ItemCategory
+    rarity: Rarity | None
     subcategory: str | None
     legendary: bool
-    applies_to: str
     transferrable: bool
     unique_to_world: bool
     unique_to_faction: bool
     bodyguard_unit: Link | None
-    agent_types: list[str]
+    agent_types: list[AgentType]
     agent_subtypes: list[Link]
     required_skills: list[RequiredSkill]
     effects: list[EffectApplication]
@@ -574,7 +599,7 @@ class SlotTemplate(Strict):
 class Region(Strict):
     key: str
     name: str | None
-    campaign: str | None
+    campaign: Link | None
     is_settlement: bool
     province: Link | None
     is_province_capital: bool
@@ -591,9 +616,23 @@ class Region(Strict):
 class Province(Strict):
     key: str
     name: str | None
-    campaign: str | None
+    campaign: Link | None
     regions: list[Link]
     capital: Link | None
+
+
+# ---- Campaigns -------------------------------------------------------------
+
+@entity("campaign")
+class Campaign(Strict):
+    key: str
+    name: str | None
+    map: str | None
+    script_folder: str | None
+    factions: list[Link]
+    playable_factions: list[Link]
+    major_factions: list[Link]
+    regions: list[Link] = []
 
 
 # ---- Factions, cultures, difficulty, campaign variables ---------------------
@@ -611,6 +650,9 @@ class Faction(Strict):
     flags_path: str
     flag_image: str | None
     primary_colour: str | None
+    start_campaigns: list[Link]
+    playable_in: list[Link]
+    major_in: list[Link]
     units: list[Link] = []
     characters: list[Link] = []
 
@@ -633,7 +675,7 @@ class Subculture(Strict):
 
 class DifficultyEffect(Strict):
     application: EffectApplication
-    campaign: str | None
+    campaign: Link | None
 
 
 @entity("difficulty_level")
@@ -645,7 +687,7 @@ class DifficultyLevel(Strict):
 
 
 class CampaignVariableOverride(Strict):
-    campaign: str
+    campaign: Link | None
     difficulty: str | None
     campaign_type: str | None
     value: float
@@ -656,3 +698,27 @@ class CampaignVariable(Strict):
     key: str
     value: float
     overrides: list[CampaignVariableOverride]
+
+
+# ---- Reference documents (model/<build_id>/reference/) ---------------------
+
+class CampaignSummary(Strict):
+    key: str
+    name: str | None
+    map: str | None
+    playable_factions: int
+    major_factions: int
+
+
+class ColourProfiles(Strict):
+    deuteranopia: str | None
+    protanopia: str | None
+    tritanopia: str | None
+
+
+class Colour(Strict):
+    key: str
+    description: str
+    hex: str
+    dark_hex: str
+    profiles: ColourProfiles

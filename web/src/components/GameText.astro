@@ -10,7 +10,7 @@ interface Props {
 
 const { text, block = false } = Astro.props;
 const site = await getSite();
-const html = renderGameTextHtml(text, { inline: site.model.inline, src: (p) => imageSrc(site, p) });
+const html = renderGameTextHtml(text, { inline: site.model.inline, src: (p) => imageSrc(site, p), colours: site.colourKeys });
 const Tag = block ? "p" : "span";
 ---
 {html && <Tag class="game-text" set:html={html} />}

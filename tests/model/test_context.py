@@ -44,7 +44,8 @@ def test_link_model_rejects_extra_fields():
 def test_effect_application_optional_fields_default_to_none():
     link = {"type": "effect", "key": "e", "name": None, "missing": False}
     src = {"type": "skill", "key": "s", "name": None, "missing": False}
-    app = schemas.EffectApplication(effect=link, scope="force_to_force_own", value=4.0, source=src)
+    app = schemas.EffectApplication(effect=link, scope="force_to_force_own", scope_text=None, value=4.0,
+                                    priority=None, hidden=False, favourable=None, icon_image=None, source=src)
     dumped = app.model_dump(mode="json")
     assert dumped["value_damaged"] is None and dumped["context_requirement"] is None
 

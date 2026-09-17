@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatEffect, formatNumber, scopeLabel, signed } from "../../src/lib/effectText";
+import { formatEffect, formatNumber, polarityClass, signed } from "../../src/lib/effectText";
 
 describe("numbers", () => {
   it("drops trailing zeros and rounds to two decimals", () => {
@@ -32,9 +32,11 @@ describe("formatEffect", () => {
   });
 });
 
-describe("scopeLabel", () => {
-  it("humanises scopes", () => {
-    expect(scopeLabel("faction_to_force_own")).toBe("faction to force own");
-    expect(scopeLabel(null)).toBeNull();
+describe("polarityClass", () => {
+  it("colours favourable and unfavourable values and leaves others neutral", () => {
+    expect(polarityClass(true)).toBe("fx-good");
+    expect(polarityClass(false)).toBe("fx-bad");
+    expect(polarityClass(null)).toBeNull();
+    expect(polarityClass(undefined)).toBeNull();
   });
 });

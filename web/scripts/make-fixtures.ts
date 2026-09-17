@@ -51,6 +51,19 @@ async function main(): Promise<void> {
   add("subculture", "wh_main_sc_teb_teb");
   add("faction", "wh_main_emp_empire");
 
+  for (const key of all.campaign.keys()) add("campaign", key);
+  add("building_chain", "wh2_dlc09_special_settlement_khemri_tmb");
+  const firstWith = (type: EntityType, test: (row: Row) => boolean, what: string): Row => {
+    for (const row of all[type].values()) if (test(row)) return add(type, row.key);
+    throw new Error(`the model has no ${type} with ${what}`);
+  };
+  const skillApps = (s: Row) => s.levels.flatMap((l: Row) => l.effects);
+  firstWith("skill", (s) => skillApps(s).some((a: Row) => a.hidden), "a hidden effect");
+  firstWith("skill", (s) => skillApps(s).some((a: Row) => a.favourable === false), "an unfavourable effect");
+  firstWith("item", (i) => i.rarity !== null && i.rarity.colour !== null, "a coloured rarity");
+  const restricted = firstWith("technology_tree", (t) => t.nodes.some((n: Row) => n.campaigns.length > 0), "a campaign-restricted node");
+  for (const node of restricted.nodes) add("technology", node.technology.key);
+
   const subcultureCulture = (k: string) => all.subculture.get(k)?.culture?.key;
   const factionCulture = (k: string) => all.faction.get(k)?.culture?.key;
   for (const chain of all.building_chain.values()) {
@@ -88,6 +101,7 @@ async function main(): Promise<void> {
   );
   await copyFile(path.join(source, "images", "inline.json"), path.join(outDir, "images", "inline.json"));
   await cp(path.join(source, "schema"), path.join(outDir, "schema"), { recursive: true });
+  await cp(path.join(source, "reference"), path.join(outDir, "reference"), { recursive: true });
   console.log(counts);
   console.log(`entity bytes: ${bytes}; inline.json bytes: ${(await stat(path.join(outDir, "images", "inline.json"))).size}`);
 }

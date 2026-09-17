@@ -4,8 +4,14 @@
       "additionalProperties": false,
       "properties": {
         "campaign": {
-          "title": "Campaign",
-          "type": "string"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Link"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "difficulty": {
           "anyOf": [
@@ -41,6 +47,42 @@
         "value"
       ],
       "title": "CampaignVariableOverride",
+      "type": "object"
+    },
+    "Link": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "title": "Type",
+          "type": "string"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name"
+        },
+        "missing": {
+          "title": "Missing",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "type",
+        "key",
+        "name",
+        "missing"
+      ],
+      "title": "Link",
       "type": "object"
     }
   },

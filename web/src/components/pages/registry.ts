@@ -1,6 +1,7 @@
 import AbilityPage from "./AbilityPage.astro";
 import BuildingChainPage from "./BuildingChainPage.astro";
 import BuildingLevelPage from "./BuildingLevelPage.astro";
+import CampaignPage from "./CampaignPage.astro";
 import CharacterPage from "./CharacterPage.astro";
 import CulturePage from "./CulturePage.astro";
 import FactionPage from "./FactionPage.astro";
@@ -31,4 +32,5 @@ export const PAGE_BODIES = {
   subculture: SubculturePage,
   region: RegionPage,
   province: ProvincePage,
+  campaign: CampaignPage,
 };

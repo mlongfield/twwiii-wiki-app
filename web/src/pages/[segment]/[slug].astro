@@ -5,6 +5,7 @@ import { mainImage } from "../../data/images";
 import { getSite } from "../../data/model";
 import { PAGE_TYPES, pageTypeInfo, type PageType } from "../../data/pageTypes";
 import Layout from "../../layouts/Layout.astro";
+import { subtitleFor } from "../../lib/subtitle";
 
 export async function getStaticPaths() {
   const site = await getSite();
@@ -26,10 +27,18 @@ const site = await getSite();
 const entity = (site.model.entities as Record<string, Map<string, Record<string, any>>>)[type].get(entityKey)!;
 const name: string | null = entity.name ?? null;
 const info = pageTypeInfo(type)!;
+const title = name ?? `Unnamed ${info.singular.toLowerCase()}`;
 const Body = PAGE_BODIES[type as keyof typeof PAGE_BODIES];
 ---
-<Layout title={name ?? entityKey} description={`${info.singular}: ${name ?? entityKey} — Total War: WARHAMMER III`}>
-  <EntityHeader type={type} entityKey={entityKey} name={name} image={mainImage(site, type, entity)} />
+<Layout title={title} description={`${info.singular}: ${title} — Total War: WARHAMMER III`}>
+  <EntityHeader
+    type={type}
+    entityKey={entityKey}
+    name={name}
+    image={mainImage(site, type, entity)}
+    entity={entity}
+    subtitle={subtitleFor(site, type, entity)}
+  />
   <div class="entity-body">
     <Body entityKey={entityKey} />
   </div>

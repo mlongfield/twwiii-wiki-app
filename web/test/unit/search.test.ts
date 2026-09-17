@@ -25,13 +25,15 @@ function minimalSite(overrides: Record<string, Map<string, any>>): Site {
     slugs: Object.fromEntries(PAGE_TYPES.map((p) => [p.type, new Map()])),
     chainsByCulture: new Map(),
     images: new Set(),
+    colourKeys: new Set(),
   } as unknown as Site;
 }
 
 describe("buildSearchDocuments", () => {
-  it("indexes every entity of every page type", () => {
+  it("indexes every named entity of every page type", () => {
     const docs = buildSearchDocuments(site);
-    const expected = PAGE_TYPES.reduce((n, p) => n + site.model.entities[p.type].size, 0);
+    const expected = PAGE_TYPES.reduce(
+      (n, p) => n + [...(site.model.entities[p.type] as Map<string, { name: string | null }>).values()].filter((e) => e.name).length, 0);
     expect(docs).toHaveLength(expected);
     expect(new Set(docs.map((d) => d.id)).size).toBe(docs.length);
   });
@@ -41,10 +43,18 @@ describe("buildSearchDocuments", () => {
     const gs = docs.find((d) => d.id === "unit:wh_main_emp_inf_greatswords")!;
     expect(gs).toMatchObject({ type: "unit", typeLabel: "Unit", name: "Greatswords", url: "/units/wh_main_emp_inf_greatswords/", icon: null });
     expect(gs.category).not.toBe("");
+    expect(gs.subtitle).not.toBe("");
     const chain = docs.find((d) => d.id === "building_chain:wh_main_EMPIRE_barracks")!;
     expect(chain.culture).toContain("The Empire");
     const faction = docs.find((d) => d.id === "faction:wh_main_emp_empire")!;
     expect(faction.culture).toBe("The Empire");
+  });
+
+  it("omits subtitle for types and entities with none, to keep the index small", () => {
+    const docs = buildSearchDocuments(site);
+    const skill = docs.find((d) => d.type === "skill")!;
+    expect(skill.subtitle).toBeUndefined();
+    expect(Object.prototype.hasOwnProperty.call(skill, "subtitle")).toBe(false);
   });
 
   it("resolves a building_chain's culture via subculture and via faction, not just a direct culture ref", () => {
@@ -84,7 +94,7 @@ describe("search index", () => {
 describe("groupResults", () => {
   it("groups by type in first-appearance order and caps each group", () => {
     const hit = (id: string, type: string): SearchResult =>
-      ({ id, score: 1, terms: [], queryTerms: [], match: {}, type, typeLabel: type.toUpperCase(), key: id, name: id, icon: null, url: `/${id}/` }) as SearchResult;
+      ({ id, score: 1, terms: [], queryTerms: [], match: {}, type, typeLabel: type.toUpperCase(), key: id, name: id, subtitle: "", icon: null, url: `/${id}/` }) as SearchResult;
     const results = [hit("s1", "skill"), hit("u1", "unit"), hit("s2", "skill"), hit("s3", "skill")];
     const groups = groupResults(results, 2);
     expect(groups.map((g) => [g.type, g.items.map((i) => i.id)])).toEqual([

@@ -1,5 +1,7 @@
 ---
 import { getSite } from "../../data/model";
+import { uiLabel } from "../../data/uiLabels";
+import { formatDuration, formatRange, formatUses, hideIfZero } from "../../lib/gameValue";
 import GameText from "../GameText.astro";
 import LinkList from "../LinkList.astro";
 import Section from "../Section.astro";
@@ -28,15 +30,15 @@ const act = ability.activation;
   <Section title="Activation">
     <StatTable rows={[
       ["Passive", act.passive],
-      ["Active time", act.active_time],
-      ["Recharge time", act.recharge_time],
-      ["Initial recharge", act.initial_recharge],
-      ["Uses", act.num_uses],
-      ["Range", act.effect_range],
-      ["Minimum range", act.min_range || null],
-      ["Mana cost", act.mana_cost || null],
-      ["Wind-up time", act.wind_up_time || null],
-      ["Miscast chance", act.miscast_chance || null],
+      [uiLabel(site, "duration", "Duration"), act.active_time, formatDuration],
+      [uiLabel(site, "cooldown", "Cooldown"), act.recharge_time, hideIfZero],
+      ["Initial cooldown", act.initial_recharge, hideIfZero],
+      [uiLabel(site, "uses", "Uses"), act.num_uses, formatUses],
+      [uiLabel(site, "range", "Range"), act.effect_range, formatRange],
+      ["Minimum range", act.min_range, hideIfZero],
+      ["Mana cost", act.mana_cost, hideIfZero],
+      ["Wind-up time", act.wind_up_time, hideIfZero],
+      ["Miscast chance", act.miscast_chance, hideIfZero],
       ["Targets self", act.target_self],
       ["Targets allies", act.target_friends],
       ["Targets enemies", act.target_enemies],

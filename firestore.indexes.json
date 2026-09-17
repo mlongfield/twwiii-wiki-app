@@ -17,6 +17,11 @@
       "indexes": []
     },
     {
+      "collectionGroup": "campaign",
+      "fieldPath": "entity",
+      "indexes": []
+    },
+    {
       "collectionGroup": "campaign_variable",
       "fieldPath": "entity",
       "indexes": []

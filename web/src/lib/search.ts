@@ -7,6 +7,7 @@ export interface SearchDocument {
   typeLabel: string;
   key: string;
   name: string;
+  subtitle?: string;
   culture: string;
   category: string;
   icon: string | null;
@@ -16,7 +17,7 @@ export interface SearchDocument {
 export const SEARCH_OPTIONS: Options<SearchDocument> = {
   idField: "id",
   fields: ["name", "key", "culture", "category"],
-  storeFields: ["type", "typeLabel", "key", "name", "icon", "url"],
+  storeFields: ["type", "typeLabel", "key", "name", "subtitle", "icon", "url"],
 };
 
 export const SEARCH_QUERY: SearchOptions = { prefix: true, fuzzy: 0.2, boost: { name: 3 }, combineWith: "AND" };
@@ -34,6 +35,7 @@ export interface SearchHit {
   typeLabel: string;
   key: string;
   name: string;
+  subtitle?: string;
   icon: string | null;
   url: string;
 }
@@ -53,6 +55,7 @@ export function groupResults(results: SearchResult[], perType = 8): ResultGroup[
       typeLabel: result.typeLabel,
       key: result.key,
       name: result.name,
+      subtitle: result.subtitle,
       icon: result.icon ?? null,
       url: result.url,
     };

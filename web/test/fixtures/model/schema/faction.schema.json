@@ -130,6 +130,27 @@
       ],
       "title": "Primary Colour"
     },
+    "start_campaigns": {
+      "items": {
+        "$ref": "#/$defs/Link"
+      },
+      "title": "Start Campaigns",
+      "type": "array"
+    },
+    "playable_in": {
+      "items": {
+        "$ref": "#/$defs/Link"
+      },
+      "title": "Playable In",
+      "type": "array"
+    },
+    "major_in": {
+      "items": {
+        "$ref": "#/$defs/Link"
+      },
+      "title": "Major In",
+      "type": "array"
+    },
     "units": {
       "default": [],
       "items": {
@@ -159,6 +180,9 @@
     "flags_path",
     "flag_image",
     "primary_colour",
+    "start_campaigns",
+    "playable_in",
+    "major_in",
     "units",
     "characters"
   ],

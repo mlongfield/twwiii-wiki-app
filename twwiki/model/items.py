@@ -2,12 +2,28 @@
 
 from __future__ import annotations
 
+from .characters import agent_type, agent_type_labels
 from .context import Context, by_key, grouped, opt
 from .effects import effect_application
 
 
 def _trait_levels(ctx: Context) -> dict[str, list[dict]]:
     return grouped(ctx, "character_trait_levels", "trait", "level, key")
+
+
+def _rarity(ctx: Context, groupings: list[dict], score: int) -> dict | None:
+    """The uniqueness grouping whose range holds the score; a score outside every range is counted."""
+    if not groupings:
+        return None
+    group = next((g for g in groupings if g["uniqueness_min"] <= score <= g["uniqueness_max"]), None)
+    if group is None:
+        ctx.tally["unmatched_rarity_scores"] += 1
+        return None
+    return {
+        "key": group["group_key"],
+        "name": ctx.loc.text(f"ancillary_uniqueness_groupings_onscreen_name_{group['group_key']}"),
+        "colour": f"#{group['col_hex']}" if opt(group["col_hex"]) else None,
+    }
 
 
 def catalog(ctx: Context) -> dict[str, dict[str, str | None]]:
@@ -40,6 +56,9 @@ def _items(ctx: Context) -> list[dict]:
     subtypes = grouped(ctx, "ancillaries_included_agent_subtypes", "ancillary", "agent_subtype")
     required = grouped(ctx, "ancillaries_required_skills", "ancillary", "required_skill")
     types = by_key(ctx, "ancillary_types", "type")
+    groupings = ctx.rows("SELECT * FROM ancillary_uniqueness_groupings ORDER BY uniqueness_min, group_key") \
+        if ctx.table_exists("ancillary_uniqueness_groupings") else []
+    labels = agent_type_labels(ctx)
 
     out = []
     for r in ctx.rows("SELECT * FROM ancillaries ORDER BY key"):
@@ -56,15 +75,16 @@ def _items(ctx: Context) -> list[dict]:
             "icon_image": ctx.images.resolve(
                 "item.icon_image", types[item_type]["ui_icon"] if item_type in types else None),
             "type": r["type"],
-            "category": r["category"],
+            "category": {"key": r["category"],
+                         "name": ctx.loc.text(f"ancillaries_categories_onscreen_name_{r['category']}")},
+            "rarity": _rarity(ctx, groupings, r["uniqueness_score"]),
             "subcategory": opt(r["subcategory"]),
             "legendary": r["legendary_item"],
-            "applies_to": r["applies_to"],
             "transferrable": r["transferrable"],
             "unique_to_world": r["unique_to_world"],
             "unique_to_faction": r["unique_to_faction"],
             "bodyguard_unit": ctx.links.link("unit", opt(r["provided_bodyguard_unit"]), source=source, relation="bodyguard"),
-            "agent_types": sorted({a["agent"] for a in agents.get(key, [])}),
+            "agent_types": [agent_type(ctx, labels, a, None) for a in sorted({a["agent"] for a in agents.get(key, [])})],
             "agent_subtypes": [ctx.links.link("character", s["agent_subtype"], source=source, relation="agent_subtypes")
                                for s in subtypes.get(key, [])],
             "required_skills": [{"skill": ctx.links.link("skill", s["required_skill"], source=source, relation="required_skills"),

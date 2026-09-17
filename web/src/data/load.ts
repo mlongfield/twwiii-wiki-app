@@ -16,10 +16,33 @@ export interface Manifest {
 
 export type EntityMaps = { [T in EntityType]: Map<string, EntityTypeMap[T]> };
 
+export interface CampaignSummary {
+  key: string;
+  name: string | null;
+  map: string | null;
+  playable_factions: number;
+  major_factions: number;
+}
+
+export interface ColourEntry {
+  key: string;
+  description: string;
+  hex: string;
+  dark_hex: string;
+  profiles: Record<"deuteranopia" | "protanopia" | "tritanopia", string | null>;
+}
+
+export interface Reference {
+  campaigns: CampaignSummary[];
+  colours: ColourEntry[];
+  ui_labels: Record<string, string | null>;
+}
+
 export interface Model {
   dir: string;
   manifest: Manifest;
   inline: Record<string, string | null>;
+  reference: Reference;
   entities: EntityMaps;
 }
 
@@ -43,6 +66,18 @@ export async function readJsonl<T extends { key: string }>(file: string): Promis
   return rows;
 }
 
+async function readReference(dir: string): Promise<Reference> {
+  const read = async (name: string) => {
+    const file = path.join(dir, "reference", `${name}.json`);
+    try {
+      return JSON.parse(await readFile(file, "utf-8"));
+    } catch (e) {
+      throw new ModelLoadError(`${file}: missing or invalid (${(e as Error).message})`);
+    }
+  };
+  return { campaigns: await read("campaigns"), colours: await read("colours"), ui_labels: await read("ui_labels") };
+}
+
 export async function loadModel(dir: string): Promise<Model> {
   const manifest = JSON.parse(await readFile(path.join(dir, "manifest.json"), "utf-8")) as Manifest;
   let inline: Record<string, string | null> = {};
@@ -54,5 +89,5 @@ export async function loadModel(dir: string): Promise<Model> {
   const loaded = await Promise.all(
     ENTITY_TYPES.map(async (type) => [type, await readJsonl(path.join(dir, "entities", `${type}.jsonl`))] as const),
   );
-  return { dir, manifest, inline, entities: Object.fromEntries(loaded) as unknown as EntityMaps };
+  return { dir, manifest, inline, reference: await readReference(dir), entities: Object.fromEntries(loaded) as unknown as EntityMaps };
 }

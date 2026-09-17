@@ -1,12 +1,12 @@
 from twwiki.model import schemas, technologies
-from tests.model.fixtures import make_context
+from tests.model.fixtures import make_context, register_catalogs
 
 
-def node(key, tech, tree, rp, tier=0, indent=0, cost_per_round=0, resource_cost=""):
+def node(key, tech, tree, rp, tier=0, indent=0, cost_per_round=0, resource_cost="", campaign_key=""):
     return {"key": key, "technology_key": tech, "technology_node_set": tree, "tier": tier, "indent": indent,
             "research_points_required": rp, "cost_per_round": cost_per_round, "food_cost": 0,
             "optional_ui_group": "", "resource_cost": resource_cost, "required_parents": 0,
-            "pixel_offset_x": 0, "pixel_offset_y": 0, "faction_key": "", "campaign_key": ""}
+            "pixel_offset_x": 0, "pixel_offset_y": 0, "faction_key": "", "campaign_key": campaign_key}
 
 
 def tech_context():
@@ -96,3 +96,46 @@ def test_technology_tree_scope_nodes_and_links():
     assert trees["emp_wulfhart"]["faction"]["key"] == "wulfhart_faction"
     for tree in trees.values():
         schemas.ENTITY_MODELS["technology_tree"].model_validate(tree)
+
+
+def test_campaign_restricted_nodes_and_placements():
+    ctx = tech_context()
+    ctx.links.register("campaign", {"wh3_main_chaos": "The Realm of Chaos"})
+    ctx.con.execute("UPDATE technology_nodes SET campaign_key = 'wh3_main_chaos' WHERE key = 'hw_wulf_node'")
+    built = technologies.build(ctx)
+    trees = {t["key"]: t for t in built["technology_tree"]}
+    wulf_nodes = {n["key"]: n for n in trees["emp_wulfhart"]["nodes"]}
+    assert [c["key"] for c in wulf_nodes["hw_wulf_node"]["campaigns"]] == ["wh3_main_chaos"]
+    assert all(n["campaigns"] == [] for n in trees["emp_civ_reworkd"]["nodes"])
+    assert trees["emp_wulfhart"]["campaign"] is None
+    placements = {p["node_key"]: p for p in {t["key"]: t for t in built["technology"]}["heavy_weapons"]["placements"]}
+    assert placements["hw_node"]["campaigns"] == []
+    assert [c["name"] for c in placements["hw_wulf_node"]["campaigns"]] == ["The Realm of Chaos"]
+    for tree in trees.values():
+        schemas.ENTITY_MODELS["technology_tree"].model_validate(tree)
+
+
+def test_unnamed_trees_derive_a_name_from_faction_then_culture():
+    def tree(key, culture, faction=""):
+        return {"key": key, "culture": culture, "subculture": "", "faction_key": faction, "campaign_key": "",
+                "colour_hex": ""}
+
+    ctx = make_context({
+        "technology_node_sets": [tree("named", "cathay"), tree("wulf", "empire", "wulfhart"),
+                                 tree("cth_mil", "cathay"), tree("rogue_mil", "rogue")],
+        "technology_nodes": [node("n1", "t1", "named", 100)],
+    }, loc={
+        "technology_node_sets_localised_name_named": "Cathay Civil",
+        "factions_screen_name_wulfhart": "The Huntsmarshal's Expedition",
+        "cultures_name_empire": "The Empire",
+        "cultures_name_cathay": "Grand Cathay",
+    })
+    register_catalogs(ctx, technologies)
+    trees = {t["key"]: t for t in technologies.build(ctx)["technology_tree"]}
+    assert (trees["named"]["name"], trees["named"]["name_derived"]) == ("Cathay Civil", False)
+    assert (trees["wulf"]["name"], trees["wulf"]["name_derived"]) == ("The Huntsmarshal's Expedition Technologies", True)
+    assert (trees["cth_mil"]["name"], trees["cth_mil"]["name_derived"]) == ("Grand Cathay Technologies", True)
+    assert (trees["rogue_mil"]["name"], trees["rogue_mil"]["name_derived"]) == (None, False)
+    assert ctx.missing_names["technology_tree"] == 1
+    for t in trees.values():
+        schemas.ENTITY_MODELS["technology_tree"].model_validate(t)

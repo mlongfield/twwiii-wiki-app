@@ -47,7 +47,9 @@ def unit_context(extra_tables: dict | None = None):
         "land_units_to_unit_abilites_junctions": [{"ability": "hold", "land_unit": "gs_land"},
                                                   {"ability": "missing_ability", "land_unit": "gs_land"}],
         "agent_subtypes": [{"key": "captain", "associated_unit_override": "gs"}],
-        "units_custom_battle_permissions": [{"faction": "reikland", "unit": "gs"}, {"faction": "reikland", "unit": "gs"}],
+        "units_custom_battle_permissions": [{"faction": "reikland", "unit": "gs", "campaign_exclusive": False},
+                                            {"faction": "reikland", "unit": "gs", "campaign_exclusive": False},
+                                            {"faction": "norsca", "unit": "gs", "campaign_exclusive": True}],
         "building_units_allowed": [{"building": "barracks_2", "unit": "gs"}],
     }
     if extra_tables:
@@ -85,7 +87,7 @@ def test_greatswords_stats_weapons_and_links():
     assert (stats["melee_attack"], stats["melee_defence"], stats["armour"]) == (32, 30, 95)
     assert gs["melee_weapon"]["damage"] == 10 and gs["melee_weapon"]["ap_damage"] == 25
     assert gs["missile_weapon"] is None and gs["shield"] is None
-    assert gs["attributes"] == [{"key": "hide_forest", "name": "Hide (forest)", "description": "Hide (forest)||Can hide in forests."}]
+    assert gs["attributes"] == [{"key": "hide_forest", "name": "Hide (forest)", "description": "Can hide in forests."}]
     assert [a["key"] for a in gs["abilities"]] == ["hold", "missing_ability"]
     assert gs["abilities"][1]["missing"] is True
     assert [c["key"] for c in gs["characters"]] == ["captain"]
@@ -132,3 +134,18 @@ def test_units_carry_resolved_unit_sets():
     schemas.ENTITY_MODELS["unit"].model_validate(gs)
     schemas.ENTITY_MODELS["unit"].model_validate(archers)
     schemas.ENTITY_MODELS["unit"].model_validate(ship)
+
+
+def test_campaign_exclusive_permissions_are_excluded_and_counted():
+    ctx, built = built_units()
+    assert [f["key"] for f in built["gs"]["custom_battle_factions"]] == ["reikland"]
+    assert ctx.tally["campaign_exclusive_permissions_excluded"] == 1
+
+
+def test_attribute_name_falls_back_to_the_bullet_title():
+    ctx = make_context({"dummy": [{"a": 1}]}, loc={
+        "unit_attributes_bullet_text_stalk": "Stalk||Can move while hidden.",
+        "unit_attributes_bullet_text_plain": "Just text",
+    })
+    assert units._attribute(ctx, "stalk") == {"key": "stalk", "name": "Stalk", "description": "Can move while hidden."}
+    assert units._attribute(ctx, "plain") == {"key": "plain", "name": None, "description": "Just text"}

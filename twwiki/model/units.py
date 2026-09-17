@@ -9,6 +9,7 @@ from collections import defaultdict
 
 from .context import Context, by_key, opt
 from .images import UNIT_CARDS
+from .text import split_title_body
 from .unit_sets import resolve_unit_sets
 
 LAND_STAT_FIELDS = (
@@ -52,6 +53,26 @@ def _distinct(ctx: Context, table: str, key_col: str, value_col: str) -> dict[st
     return out
 
 
+def _custom_battle_factions(ctx: Context) -> dict[str, list[str]]:
+    """Factions that field each unit in custom battles; campaign-exclusive rows are left out and counted."""
+    out: dict[str, list[str]] = defaultdict(list)
+    if not ctx.table_exists("units_custom_battle_permissions"):
+        return out
+    for r in ctx.rows("SELECT DISTINCT unit, faction, campaign_exclusive FROM units_custom_battle_permissions "
+                      "ORDER BY unit, faction, campaign_exclusive"):
+        if r["campaign_exclusive"]:
+            ctx.tally["campaign_exclusive_permissions_excluded"] += 1
+        elif opt(r["faction"]) and r["faction"] not in out[r["unit"]]:
+            out[r["unit"]].append(r["faction"])
+    return out
+
+
+def _attribute(ctx: Context, key: str) -> dict:
+    """An attribute's name and description; the bullet text's title names it when it has no name of its own."""
+    title, body = split_title_body(ctx.loc.text(f"unit_attributes_bullet_text_{key}"))
+    return {"key": key, "name": ctx.loc.text(f"unit_attributes_imued_effect_text_{key}") or title, "description": body}
+
+
 def build(ctx: Context) -> dict[str, list[dict]]:
     if not ctx.require("unit", "main_units", "land_units"):
         return {"unit": []}
@@ -65,7 +86,7 @@ def build(ctx: Context) -> dict[str, list[dict]]:
     attributes = _distinct(ctx, "unit_attributes_to_groups_junctions", "attribute_group", "attribute")
     abilities = _distinct(ctx, "land_units_to_unit_abilites_junctions", "land_unit", "ability")
     characters = _distinct(ctx, "agent_subtypes", "associated_unit_override", "key")
-    factions = _distinct(ctx, "units_custom_battle_permissions", "unit", "faction")
+    factions = _custom_battle_factions(ctx)
     buildings = _distinct(ctx, "building_units_allowed", "unit", "building")
     unit_sets = resolve_unit_sets(ctx)
     # Faction-specific cards are out of scope; take the unit's default card.
@@ -110,8 +131,7 @@ def build(ctx: Context) -> dict[str, list[dict]]:
             "shield": _shield(shields.get(lu["shield"])) if lu else None,
             "mount": opt(lu["mount"]) if lu else None,
             "attributes": [
-                {"key": a, "name": ctx.loc.text(f"unit_attributes_imued_effect_text_{a}"),
-                 "description": ctx.loc.text(f"unit_attributes_bullet_text_{a}")}
+                _attribute(ctx, a)
                 for a in (attributes.get(lu["attribute_group"], []) if lu and opt(lu["attribute_group"]) else [])
             ],
             "abilities": [link("ability", a, "abilities") for a in (abilities.get(lu["key"], []) if lu else [])],

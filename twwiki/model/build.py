@@ -11,16 +11,18 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
-from . import abilities, buildings, characters, effects, factions, items, regions, technologies, units
+from . import abilities, buildings, campaigns, characters, effects, factions, items, regions, technologies, units
 from .context import Context, by_key
 from .images import INLINE_ICONS, ImageIndex, inline_targets
 from .link_report import link_report
+from .reference import build_reference
 from .schemas import ENTITY_MODELS
+from .text import round_float
 
 log = logging.getLogger(__name__)
 
-MODEL_VERSION = 2
-MODULES = [effects, abilities, units, characters, technologies, buildings, items, factions, regions]
+MODEL_VERSION = 3
+MODULES = [effects, campaigns, abilities, units, characters, technologies, buildings, items, factions, regions]
 
 # (target type, field, relation, source type or None for any)
 REVERSE = [
@@ -35,6 +37,7 @@ REVERSE = [
     ("culture", "subcultures", "culture", "subculture"),
     ("culture", "factions", "culture", "faction"),
     ("subculture", "factions", "subculture", "faction"),
+    ("campaign", "regions", "campaign", "region"),
 ]
 
 # Extra fields copied into index/<type>.json next to key and name.
@@ -45,7 +48,7 @@ INDEX_FIELDS = {
     "ability": ["type", "source_type"],
     "effect": ["category"],
     "effect_bundle": ["target"],
-    "building_level": ["level", "cultures"],
+    "building_level": ["level"],
     "building_chain": ["category"],
     "technology": ["is_hidden"],
     "item": ["category", "legendary"],
@@ -54,7 +57,34 @@ INDEX_FIELDS = {
     "campaign_variable": ["value"],
     "region": ["campaign", "is_settlement", "template_source"],
     "province": ["campaign"],
+    "campaign": ["map"],
 }
+
+# Counters builders add to ctx.tally; each is written to the manifest, 0 when never touched.
+QUALITY_COUNTS = (
+    "effect_applications_without_scope_text",
+    "unmatched_rarity_scores",
+    "unresolved_agent_type_names",
+    "campaign_exclusive_permissions_excluded",
+    "unresolved_building_availability_keys",
+    "ui_labels_without_text",
+)
+
+
+def round_floats(value):
+    """Round every float in a JSON-like value; ints, bools and strings are unchanged."""
+    if isinstance(value, float):
+        return round_float(value)
+    if isinstance(value, dict):
+        return {k: round_floats(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [round_floats(v) for v in value]
+    return value
+
+
+def unnamed_by_type(entities: dict[str, list[dict]]) -> dict[str, int]:
+    counts = {t: sum(1 for r in rows if "name" in r and r["name"] is None) for t, rows in sorted(entities.items())}
+    return {t: n for t, n in counts.items() if n}
 
 
 class ModelBuildError(Exception):
@@ -96,17 +126,17 @@ def write_output(ctx: Context, entities: dict[str, list[dict]], out_root: Path, 
     staging = out_root / f"{build_id}.partial"
     if staging.exists():
         shutil.rmtree(staging)
-    for sub in ("entities", "index", "schema", "images"):
+    for sub in ("entities", "index", "schema", "images", "reference"):
         (staging / sub).mkdir(parents=True)
 
     for entity_type, rows in sorted(entities.items()):
         with (staging / "entities" / f"{entity_type}.jsonl").open("w", encoding="utf-8", newline="\n") as fh:
             for row in rows:
-                fh.write(json.dumps(row, ensure_ascii=False) + "\n")
+                fh.write(json.dumps(round_floats(row), ensure_ascii=False) + "\n")
         index = [{"key": r["key"], "name": ctx.links.name(entity_type, r["key"]),
                   **{f: r[f] for f in INDEX_FIELDS.get(entity_type, [])}} for r in rows]
         (staging / "index" / f"{entity_type}.json").write_text(
-            json.dumps(index, ensure_ascii=False, indent=1), encoding="utf-8")
+            json.dumps(round_floats(index), ensure_ascii=False, indent=1), encoding="utf-8")
 
     for entity_type, model in sorted(ENTITY_MODELS.items()):
         (staging / "schema" / f"{entity_type}.schema.json").write_text(
@@ -120,6 +150,11 @@ def write_output(ctx: Context, entities: dict[str, list[dict]], out_root: Path, 
         json.dumps(inline, ensure_ascii=False, indent=1, sort_keys=True), encoding="utf-8")
     files_copied = ctx.images.copy_used(staging / "images")
 
+    reference_docs = build_reference(ctx, entities)
+    for name, doc in reference_docs.items():
+        (staging / "reference" / f"{name}.json").write_text(
+            json.dumps(round_floats(doc), ensure_ascii=False, indent=1), encoding="utf-8")
+
     manifest = {
         "build_id": build_id,
         "model_version": MODEL_VERSION,
@@ -128,8 +163,12 @@ def write_output(ctx: Context, entities: dict[str, list[dict]], out_root: Path, 
         "missing_names": dict(sorted(ctx.missing_names.items())),
         "missing_links": dict(sorted(ctx.links.missing.items())),
         "unresolved_text_targets": len(ctx.loc.unresolved_targets),
+        "text": ctx.loc.text_report(),
+        "unnamed_by_type": unnamed_by_type(entities),
+        **{name: ctx.tally[name] for name in QUALITY_COUNTS},
         "partial": ctx.partial,
         "images": ctx.images.manifest(files_copied),
+        "reference": {name: len(doc) for name, doc in reference_docs.items()},
     }
     manifest.update(ctx.manifest_sections)
     (staging / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")

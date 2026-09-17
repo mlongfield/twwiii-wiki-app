@@ -5,6 +5,8 @@ import { getSite } from "../../data/model";
 import { PAGE_TYPES, pageTypeInfo, type PageType } from "../../data/pageTypes";
 import BrowseFilter from "../../islands/BrowseFilter.tsx";
 import Layout from "../../layouts/Layout.astro";
+import { CAMPAIGN_FILTER_TYPES } from "../../lib/campaignFilter";
+import { SUBTITLE_TYPES } from "../../lib/subtitle";
 
 export async function getStaticPaths() {
   return PAGE_TYPES.map((info) => ({ params: { segment: info.segment }, props: { type: info.type } }));
@@ -20,25 +22,34 @@ const info = pageTypeInfo(type)!;
 const rows = browseRows(site, type);
 const fields = BROWSE_FIELDS[type];
 const filters = browseFilters(type, rows);
+const campaigns = CAMPAIGN_FILTER_TYPES.has(type)
+  ? site.model.reference.campaigns.map((c) => ({ key: c.key, name: c.name ?? c.key }))
+  : [];
+const hasSubtitles = SUBTITLE_TYPES.has(type);
 ---
 <Layout title={info.label} description={`All ${rows.length} ${info.label.toLowerCase()} in Total War: WARHAMMER III`}>
   <nav class="breadcrumbs" aria-label="Breadcrumbs"><a href="/">Home</a></nav>
   <h1>{info.label}</h1>
-  <BrowseFilter client:visible tableId="browse-table" filters={filters} total={rows.length} />
+  <BrowseFilter client:visible tableId="browse-table" filters={filters} total={rows.length} campaigns={campaigns} />
   <div class="table-wrap">
     <table id="browse-table" class="browse">
       <thead>
-        <tr><th>Name</th><th>Key</th>{fields.map((f) => <th>{f.label}</th>)}</tr>
+        <tr><th>Name</th>{hasSubtitles && <th>Details</th>}<th>Key</th>{fields.map((f) => <th>{f.label}</th>)}</tr>
       </thead>
       <tbody>
         {rows.map((row) => (
-          <tr data-search={`${row.name} ${row.key}`.toLowerCase()} {...Object.fromEntries(row.values.map((v, i) => [`data-f${i}`, v]))}>
+          <tr
+            data-search={`${row.name} ${row.key}`.toLowerCase()}
+            data-campaigns={row.campaigns ?? undefined}
+            {...Object.fromEntries(row.values.map((v, i) => [`data-f${i}`, v]))}
+          >
             <td>
               <a class="entity-link" href={row.url}>
                 {row.image && <GameImage path={row.image.path} kind="icon" />}
-                <span class:list={[{ unnamed: row.unnamed }]}>{row.name}</span>
+                <span>{row.name}</span>
               </a>
             </td>
+            {hasSubtitles && <td>{row.subtitle}</td>}
             <td><code>{row.key}</code></td>
             {row.values.map((v) => <td>{v}</td>)}
           </tr>

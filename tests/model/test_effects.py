@@ -126,6 +126,46 @@ def test_direct_unit_attribute_and_phase_targets_fill_attribute_and_phase():
     schemas.ENTITY_MODELS["effect"].model_validate(built["e_attack"])
 
 
+def test_effect_application_presentation_fields():
+    ctx = make_context({"dummy": [{"a": 1}]}, loc={
+        "campaign_effect_scopes_localised_text_army_own": "\\\\n([[img:icon_general]][[/img]]Lord's army)",
+        "campaign_effect_scopes_localised_text_faction_own": "\\n",
+    })
+    ctx.links.register("effect", {"good": "Good", "cost": "Cost", "quiet": "Quiet"})
+    ctx.links.register("skill", {"s": "Skill"})
+    ctx.effect_display.update({
+        "good": {"priority": 1, "is_positive_value_good": True, "icon_image": "g.png", "icon_negative_image": "g_neg.png"},
+        "cost": {"priority": 2, "is_positive_value_good": False, "icon_image": "c.png", "icon_negative_image": None},
+        "quiet": {"priority": 0, "is_positive_value_good": True, "icon_image": None, "icon_negative_image": None},
+    })
+
+    def app(key, value, scope="army_own"):
+        return effects.effect_application(ctx, key, scope=scope, value=value, source=("skill", "s"))
+
+    lord = app("good", 5)
+    assert (lord["scope_text"], lord["priority"], lord["hidden"], lord["favourable"], lord["icon_image"]) == \
+        ("([[img:icon_general]][[/img]]Lord's army)", 1, False, True, "g.png")
+    assert (app("good", -5)["favourable"], app("good", -5)["icon_image"]) == (False, "g_neg.png")
+    assert (app("cost", 5)["favourable"], app("cost", 5)["icon_image"]) == (False, "c.png")
+    assert app("cost", -5)["favourable"] is True
+    assert app("good", 0)["favourable"] is None
+    assert app("quiet", 1)["hidden"] is True
+    unknown = app("not_an_effect", 3, scope="faction_own")
+    assert (unknown["scope_text"], unknown["priority"], unknown["hidden"], unknown["favourable"], unknown["icon_image"]) == \
+        (None, None, False, None, None)
+    assert app("good", 1, scope="")["scope_text"] is None
+    assert ctx.tally["effect_applications_without_scope_text"] == 1
+    schemas.EffectApplication.model_validate(lord)
+
+
+def test_build_fills_effect_display_before_bundles():
+    ctx = effects_context()
+    bundle = effects.build(ctx)["effect_bundle"][0]
+    assert ctx.effect_display["e_attack"] == {"priority": 1, "is_positive_value_good": True,
+                                              "icon_image": None, "icon_negative_image": None}
+    assert bundle["effects"][0]["priority"] == 2 and bundle["effects"][0]["favourable"] is True
+
+
 def test_unrecognised_bonus_table_is_skipped_and_recorded():
     ctx = effects_context(
         effect_bonus_value_weird_junction=[

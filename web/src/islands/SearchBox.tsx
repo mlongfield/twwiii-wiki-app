@@ -110,7 +110,10 @@ export default function SearchBox({ indexUrl }: Props) {
                     onMouseEnter={() => setActive(itemPosition)}
                   >
                     {item.icon ? <img src={item.icon} alt="" width={20} height={20} /> : <span className="search-hit-blank" />}
-                    <span>{item.name}</span>
+                    <span className="search-hit-text">
+                      <span>{item.name}</span>
+                      {item.subtitle && <span className="search-hit-subtitle">{item.subtitle}</span>}
+                    </span>
                   </a>
                 );
               })}

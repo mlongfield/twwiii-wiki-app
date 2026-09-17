@@ -1,12 +1,12 @@
 export type EntityType =
   | "unit" | "character" | "skill" | "ability" | "effect" | "effect_bundle" | "building_level" | "building_chain"
   | "technology" | "technology_tree" | "item" | "trait" | "faction" | "culture" | "subculture"
-  | "difficulty_level" | "campaign_variable" | "region" | "province";
+  | "difficulty_level" | "campaign_variable" | "region" | "province" | "campaign";
 
 export const ENTITY_TYPES: readonly EntityType[] = [
   "unit", "character", "skill", "ability", "effect", "effect_bundle", "building_level", "building_chain",
   "technology", "technology_tree", "item", "trait", "faction", "culture", "subculture",
-  "difficulty_level", "campaign_variable", "region", "province",
+  "difficulty_level", "campaign_variable", "region", "province", "campaign",
 ];
 
 export type PageType = Exclude<EntityType, "effect" | "effect_bundle" | "difficulty_level" | "campaign_variable">;
@@ -34,6 +34,7 @@ export const PAGE_TYPES: readonly PageTypeInfo[] = [
   { type: "subculture", segment: "subcultures", label: "Subcultures", singular: "Subculture" },
   { type: "region", segment: "regions", label: "Regions", singular: "Region" },
   { type: "province", segment: "provinces", label: "Provinces", singular: "Province" },
+  { type: "campaign", segment: "campaigns", label: "Campaigns", singular: "Campaign" },
 ];
 
 const BY_TYPE = new Map(PAGE_TYPES.map((p) => [p.type as string, p]));

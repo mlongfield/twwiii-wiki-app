@@ -1,19 +1,29 @@
 ---
 import { formatNumber } from "../lib/effectText";
+import type { GameValueFormat } from "../lib/gameValue";
+
+type Value = string | number | boolean | null | undefined;
 
 interface Props {
-  rows: [string, string | number | boolean | null | undefined][];
+  rows: ([string, Value] | [string, Value, GameValueFormat])[];
 }
 
-const shown = Astro.props.rows.filter(([, value]) => value !== null && value !== undefined && value !== "");
 const display = (value: string | number | boolean) =>
   typeof value === "number" ? formatNumber(value) : typeof value === "boolean" ? (value ? "Yes" : "No") : value;
+const shown = Astro.props.rows.flatMap(([label, value, format]) => {
+  if (value === null || value === undefined || value === "") return [];
+  if (format && typeof value === "number") {
+    const text = format(value);
+    return text === null ? [] : [[label, text] as const];
+  }
+  return [[label, display(value)] as const];
+});
 ---
 {shown.length > 0 && (
   <table class="stats">
     <tbody>
-      {shown.map(([label, value]) => (
-        <tr><th scope="row">{label}</th><td>{display(value!)}</td></tr>
+      {shown.map(([label, text]) => (
+        <tr><th scope="row">{label}</th><td>{text}</td></tr>
       ))}
     </tbody>
   </table>

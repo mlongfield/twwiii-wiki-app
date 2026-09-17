@@ -2,11 +2,11 @@ import { describe, expect, it } from "vitest";
 import { ENTITY_TYPES, PAGE_TYPES, hasPage, imageUrl, pageTypeBySegment, pageTypeInfo } from "../../src/data/pageTypes";
 
 describe("page types", () => {
-  it("lists 19 entity types and 15 page types", () => {
-    expect(ENTITY_TYPES).toHaveLength(19);
+  it("lists 20 entity types and 16 page types", () => {
+    expect(ENTITY_TYPES).toHaveLength(20);
     expect(PAGE_TYPES.map((p) => p.segment)).toEqual([
       "units", "characters", "skills", "abilities", "technologies", "technology-trees", "buildings",
-      "building-chains", "items", "traits", "factions", "cultures", "subcultures", "regions", "provinces",
+      "building-chains", "items", "traits", "factions", "cultures", "subcultures", "regions", "provinces", "campaigns",
     ]);
   });
 

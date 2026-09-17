@@ -36,13 +36,12 @@
         "campaign": {
           "anyOf": [
             {
-              "type": "string"
+              "$ref": "#/$defs/Link"
             },
             {
               "type": "null"
             }
-          ],
-          "title": "Campaign"
+          ]
         }
       },
       "required": [

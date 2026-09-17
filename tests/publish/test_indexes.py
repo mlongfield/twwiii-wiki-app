@@ -12,7 +12,7 @@ def test_indexes_exempt_entity_in_every_collection_and_add_no_composites():
     assert indexes["indexes"] == []
     assert indexes["fieldOverrides"] == [
         {"collectionGroup": t, "fieldPath": "entity", "indexes": []} for t in ENTITY_TYPES]
-    assert len(indexes["fieldOverrides"]) == 19
+    assert len(indexes["fieldOverrides"]) == 20
 
 
 def test_render_is_stable_json_with_trailing_newline():

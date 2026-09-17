@@ -148,12 +148,12 @@ bring it to 286 MB (16,561 files) with an identical model.
 `python -m twwiki.model` turns `twwiki.duckdb` into curated entities in
 `model/<build_id>/` (design: `docs/superpowers/specs/2026-09-15-game-data-model-design.md`):
 
-- `entities/<type>.jsonl`: one entity per line for 19 types (units, characters
+- `entities/<type>.jsonl`: one entity per line for 20 types (units, characters
   with skill trees, skills, abilities, effects and bundles, buildings,
   technologies and trees, items, traits, factions, cultures, subcultures,
-  difficulty levels, campaign variables, regions, provinces). References are links
-  `{type, key, name, missing}`; effects are applied through one
-  `EffectApplication` shape everywhere.
+  difficulty levels, campaign variables, regions, provinces, campaigns).
+  References are links `{type, key, name, missing}`; effects are applied
+  through one `EffectApplication` shape everywhere.
 - Regions and provinces come from the start-position tables: owner at
   campaign start, capitals, slot cap and province. Slot templates, resources
   and permitted building chains are known only for special settlements (their
@@ -165,9 +165,16 @@ bring it to 286 MB (16,561 files) with an identical model.
   in `twwiki/model/schemas.py`; the web app generates TypeScript types from them.
 - `images/`: referenced image files copied under their in-game paths, plus
   `images/inline.json` mapping `[[img:…]]` text tokens to a file or null.
-- `manifest.json`: counts, missing names, missing links, unresolved text tokens,
-  partial entity types, an `images` section (per-field referenced/resolved/
-  missing/ambiguous counts, plus `available` and `files_copied`), and a
+- `reference/`: `campaigns.json`, `colours.json` (game UI colours with a
+  dark-background variant and colour-blind profiles) and `ui_labels.json`.
+- `manifest.json`: `model_version` (3), counts, missing names, missing links,
+  unresolved text tokens, a `text` section (placeholder prefixes and dropped
+  token counts), `unnamed_by_type`, quality counts (effect applications
+  without scope text, unmatched rarity scores, unresolved agent type names,
+  excluded campaign-exclusive permissions, unresolved building availability
+  keys, `ui_labels_without_text`), partial entity types, an `images` section (per-field
+  referenced/resolved/missing/ambiguous counts, plus `available` and
+  `files_copied`), a `reference` section (document name to entry count), and a
   `regions` section (`special_templates_unmatched`).
 - `link_report.json`: every schema reference (RPFM's reference marks, kept
   in the database's `_columns` table) that touches a table the build read,
@@ -212,7 +219,7 @@ npm run fixtures   # regenerate web/test/fixtures/model from the real model
 `MODEL_DIR=test/fixtures/model npm run build` builds the small fixture site in
 seconds, which is the quickest way to check a change.
 
-The site has a page for each of the 15 entity types with pages (effects,
+The site has a page for each of the 16 entity types with pages (effects,
 effect bundles, difficulty levels and campaign variables are shown inline on
 the pages that use them), skill and technology tree views, a region building
 browser with a culture picker, and search over names and key facts. Pages are
@@ -313,7 +320,7 @@ Setup (once, by the project owner):
    ```
 
    and wait until the Firestore console, under Indexes → Single field →
-   Exemptions, shows the 19 `entity` exemptions as ready. The deploy workflow
+   Exemptions, shows the 20 `entity` exemptions as ready. The deploy workflow
    deploys them too, but it first runs after publish has written about 48,600
    documents; without the exemptions Firestore would index every `entity`
    subfield (about 2.87 million index entries), and a database created in

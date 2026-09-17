@@ -148,7 +148,7 @@ def _regions(ctx: Context, start: dict[str, dict]) -> list[dict]:
         out.append({
             "key": key,
             "name": ctx.links.name("region", key),
-            "campaign": s["campaign"] if s else None,
+            "campaign": ctx.links.link("campaign", opt(s["campaign"]), source=source, relation="campaign") if s else None,
             "is_settlement": s is not None,
             "province": ctx.links.link("province", j["province"], source=source, relation="province") if j else None,
             "is_province_capital": bool(j and j["is_capital"]),
@@ -201,7 +201,9 @@ def _provinces(ctx: Context, start: dict[str, dict]) -> list[dict]:
         out.append({
             "key": key,
             "name": ctx.links.name("province", key),
-            "campaign": next((start[j["region"]]["campaign"] for j in rows if j["region"] in start), None),
+            "campaign": ctx.links.link(
+                "campaign", next((start[j["region"]]["campaign"] for j in rows if j["region"] in start), None),
+                source=source, relation="campaign"),
             "regions": [ctx.links.link("region", j["region"], source=source, relation="regions") for j in rows],
             "capital": ctx.links.link("region", capital, source=source, relation="capital"),
         })

@@ -51,6 +51,7 @@ def check_model(model_dir: Path) -> dict:
     required = [f"entities/{t}.jsonl" for t in ENTITY_TYPES]
     required += [f"schema/{t}.schema.json" for t in ENTITY_TYPES]
     required.append("images/inline.json")
+    required += ["reference/campaigns.json", "reference/colours.json", "reference/ui_labels.json"]
     missing = [rel for rel in required if not (model_dir / rel).is_file()]
     if missing:
         raise PublishError(f"{model_dir}: missing {', '.join(missing)}")

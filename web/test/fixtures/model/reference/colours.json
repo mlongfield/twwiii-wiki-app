@@ -1,0 +1,1795 @@
+[
+ {
+  "key": "alliance_ally",
+  "description": "Colour used for indicating allies in battle/campaign",
+  "hex": "#68CEFF",
+  "dark_hex": "#68CEFF",
+  "profiles": {
+   "deuteranopia": "#364099",
+   "protanopia": "#508EF5",
+   "tritanopia": "#029AAF"
+  }
+ },
+ {
+  "key": "alliance_destroyed",
+  "description": "Colour used for indicating destroyed factions/armies in battle/campaign",
+  "hex": "#808080",
+  "dark_hex": "#999999",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "alliance_enemy",
+  "description": "Colour used for indicating enemies in battle/campaign",
+  "hex": "#FF2D2D",
+  "dark_hex": "#FF3333",
+  "profiles": {
+   "deuteranopia": "#B34E30",
+   "protanopia": "#7E7556",
+   "tritanopia": "#CE464A"
+  }
+ },
+ {
+  "key": "alliance_neutral",
+  "description": "Colour used for indicating neutrality in battle/campaign",
+  "hex": "#BEBEBE",
+  "dark_hex": "#BEBEBE",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "alliance_player",
+  "description": "Colour used for indicating player owned in battle/campaign",
+  "hex": "#A2EC17",
+  "dark_hex": "#B3F042",
+  "profiles": {
+   "deuteranopia": "#CEABCB",
+   "protanopia": "#CEB501",
+   "tritanopia": "#6FC2D4"
+  }
+ },
+ {
+  "key": "alliance_uniform_ally_primary",
+  "description": "These are for alliance colouring mode for battle units uniform colouring",
+  "hex": "#3232DC",
+  "dark_hex": "#5151E1",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "alliance_uniform_ally_secondary",
+  "description": "These are for alliance colouring mode for battle units uniform colouring",
+  "hex": "#545486",
+  "dark_hex": "#8282B0",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "alliance_uniform_ally_tertiary",
+  "description": "These are for alliance colouring mode for battle units uniform colouring",
+  "hex": "#808080",
+  "dark_hex": "#999999",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "alliance_uniform_enemy_primary",
+  "description": "These are for alliance colouring mode for battle units uniform colouring",
+  "hex": "#DC3232",
+  "dark_hex": "#E15151",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "alliance_uniform_enemy_secondary",
+  "description": "These are for alliance colouring mode for battle units uniform colouring",
+  "hex": "#7A2B2B",
+  "dark_hex": "#CA6868",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "alliance_uniform_enemy_tertiary",
+  "description": "These are for alliance colouring mode for battle units uniform colouring",
+  "hex": "#808080",
+  "dark_hex": "#999999",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "alliance_uniform_player_primary",
+  "description": "These are for alliance colouring mode for battle units uniform colouring",
+  "hex": "#DCDC32",
+  "dark_hex": "#E1E151",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "alliance_uniform_player_secondary",
+  "description": "These are for alliance colouring mode for battle units uniform colouring",
+  "hex": "#9B9B66",
+  "dark_hex": "#AEAE84",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "alliance_uniform_player_tertiary",
+  "description": "These are for alliance colouring mode for battle units uniform colouring",
+  "hex": "#808080",
+  "dark_hex": "#999999",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "ancillary_crafted",
+  "description": "placeholder",
+  "hex": "#808000",
+  "dark_hex": "#FFFF33",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "ancillary_rare",
+  "description": "placeholder",
+  "hex": "#1C6BA7",
+  "dark_hex": "#50A3E2",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "ancillary_uncommon",
+  "description": "placeholder",
+  "hex": "#246E00",
+  "dark_hex": "#76FF33",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "ancillary_unique",
+  "description": "placeholder",
+  "hex": "#4B096F",
+  "dark_hex": "#B342F0",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "approved",
+  "description": "placeholder",
+  "hex": "#55FFFF",
+  "dark_hex": "#55FFFF",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "battle_attack_target",
+  "description": "Colour used in battle for lines shown connecting unit to target when attacking, and for first person projectile trajectory",
+  "hex": "#C80000",
+  "dark_hex": "#FF3333",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "black",
+  "description": "Generic colour usesd by UI for text tags, fonts, images, etc. ",
+  "hex": "#000000",
+  "dark_hex": "#999999",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "bloodgrounds_highlight",
+  "description": "Colour used for bloodgrounds region highlighting",
+  "hex": "#DC0000",
+  "dark_hex": "#FF3333",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "bloodgrounds_highlight_other_region",
+  "description": "Colour used in preview to contrast preview region (so region not in preview)",
+  "hex": "#FFFFFF",
+  "dark_hex": "#FFFFFF",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "blue",
+  "description": "Negative. Generic colour usesd by UI for text tags, fonts, images, etc. ",
+  "hex": "#2D2DFF",
+  "dark_hex": "#3333FF",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "building_highlight_outline_colour",
+  "description": "Colour used for highlight outlines on toggleable buildings mouseover",
+  "hex": "#FFB400",
+  "dark_hex": "#FFC333",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "campaign_movement_path",
+  "description": "Colour for campaign movement paths",
+  "hex": "#406616",
+  "dark_hex": "#9CDB57",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "common",
+  "description": "colour used for tiers",
+  "hex": "#66FF00",
+  "dark_hex": "#85FF33",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "context_link",
+  "description": "For event feed links",
+  "hex": "#B95C00",
+  "dark_hex": "#FF9833",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "context_link_mouseover",
+  "description": "For event feed links",
+  "hex": "#C86B0F",
+  "dark_hex": "#F19941",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "cooking_ingredients_group_1",
+  "description": "Colour used for the cooking system",
+  "hex": "#98FF00",
+  "dark_hex": "#ADFF33",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "cooking_ingredients_group_2",
+  "description": "Colour used for the cooking system",
+  "hex": "#FF9D00",
+  "dark_hex": "#FFB133",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "cooking_ingredients_group_3",
+  "description": "Colour used for the cooking system",
+  "hex": "#32ADFF",
+  "dark_hex": "#33ADFF",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "cooking_ingredients_group_4",
+  "description": "Colour used for the cooking system",
+  "hex": "#FF4E4E",
+  "dark_hex": "#FF4E4E",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "cooking_ingredients_group_5",
+  "description": "Colour used for the cooking system",
+  "hex": "#FFED00",
+  "dark_hex": "#FFF133",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "cooking_ingredients_group_6",
+  "description": "Colour used for the cooking system",
+  "hex": "#BA9FDD",
+  "dark_hex": "#BA9FDD",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "dark_g",
+  "description": "Positive. Generic colour usesd by UI for text tags, fonts, images, etc. ",
+  "hex": "#1E490C",
+  "dark_hex": "#7BE250",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "dark_r",
+  "description": "Negative. Generic colour usesd by UI for text tags, fonts, images, etc. ",
+  "hex": "#AA0000",
+  "dark_hex": "#FF3333",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "dark_y",
+  "description": "Generic colour usesd by UI for text tags, fonts, images, etc",
+  "hex": "#8C8C00",
+  "dark_hex": "#FFFF33",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "dip_attitude_0",
+  "description": "hostile - RGBS to match diplomatic attitude icon in campaign",
+  "hex": "#C63118",
+  "dark_hex": "#E96049",
+  "profiles": {
+   "deuteranopia": "#B34E30",
+   "protanopia": "#7E7556",
+   "tritanopia": "#CE464A"
+  }
+ },
+ {
+  "key": "dip_attitude_1",
+  "description": "very unfriendly - RGBS to match diplomatic attitude icon in campaign",
+  "hex": "#FF622D",
+  "dark_hex": "#FF6633",
+  "profiles": {
+   "deuteranopia": "#B34E30",
+   "protanopia": "#7E7556",
+   "tritanopia": "#CE464A"
+  }
+ },
+ {
+  "key": "dip_attitude_2",
+  "description": "unfriendly - RGBS to match diplomatic attitude icon in campaign",
+  "hex": "#FF622D",
+  "dark_hex": "#FF6633",
+  "profiles": {
+   "deuteranopia": "#B34E30",
+   "protanopia": "#7E7556",
+   "tritanopia": "#CE464A"
+  }
+ },
+ {
+  "key": "dip_attitude_3",
+  "description": "neutral - RGBS to match diplomatic attitude icon in campaign",
+  "hex": "#FFAD5B",
+  "dark_hex": "#FFAD5B",
+  "profiles": {
+   "deuteranopia": "#364099",
+   "protanopia": "#508EF5",
+   "tritanopia": "#029AAF"
+  }
+ },
+ {
+  "key": "dip_attitude_4",
+  "description": "friendly - RGBS to match diplomatic attitude icon in campaign",
+  "hex": "#D7FE38",
+  "dark_hex": "#D7FE38",
+  "profiles": {
+   "deuteranopia": "#CEABCB",
+   "protanopia": "#CEB501",
+   "tritanopia": "#6FC2D4"
+  }
+ },
+ {
+  "key": "dip_attitude_5",
+  "description": "very friendly - RGBS to match diplomatic attitude icon in campaign",
+  "hex": "#A0FF37",
+  "dark_hex": "#A0FF37",
+  "profiles": {
+   "deuteranopia": "#CEABCB",
+   "protanopia": "#CEB501",
+   "tritanopia": "#6FC2D4"
+  }
+ },
+ {
+  "key": "dip_attitude_6",
+  "description": "best friends - RGBS to match diplomatic attitude icon in campaign",
+  "hex": "#A0FF37",
+  "dark_hex": "#A0FF37",
+  "profiles": {
+   "deuteranopia": "#CEB5CB",
+   "protanopia": "#CEB501",
+   "tritanopia": "#6FC2D4"
+  }
+ },
+ {
+  "key": "epic",
+  "description": "colour used for tiers",
+  "hex": "#A600FF",
+  "dark_hex": "#B833FF",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "fabulous_pink",
+  "description": "Colour used by UI for text tags",
+  "hex": "#F33BFF",
+  "dark_hex": "#F33BFF",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "fatigue_active",
+  "description": "Colour for this fatigue state in battle",
+  "hex": "#A0FF37",
+  "dark_hex": "#A0FF37",
+  "profiles": {
+   "deuteranopia": "#CEABCB",
+   "protanopia": "#CEB501",
+   "tritanopia": "#6FC2D4"
+  }
+ },
+ {
+  "key": "fatigue_exhausted",
+  "description": "Colour for this fatigue state in battle",
+  "hex": "#FF2D2D",
+  "dark_hex": "#FF3333",
+  "profiles": {
+   "deuteranopia": "#B34E30",
+   "protanopia": "#7E7556",
+   "tritanopia": "#CE464A"
+  }
+ },
+ {
+  "key": "fatigue_fresh",
+  "description": "Colour for this fatigue state in battle",
+  "hex": "#A0FF37",
+  "dark_hex": "#A0FF37",
+  "profiles": {
+   "deuteranopia": "#CEABCB",
+   "protanopia": "#CEB501",
+   "tritanopia": "#6FC2D4"
+  }
+ },
+ {
+  "key": "fatigue_tired",
+  "description": "Colour for this fatigue state in battle",
+  "hex": "#FFAD5B",
+  "dark_hex": "#FFAD5B",
+  "profiles": {
+   "deuteranopia": "#B34E30",
+   "protanopia": "#7E7556",
+   "tritanopia": "#CE464A"
+  }
+ },
+ {
+  "key": "fatigue_very_tired",
+  "description": "Colour for this fatigue state in battle",
+  "hex": "#FF2D2D",
+  "dark_hex": "#FF3333",
+  "profiles": {
+   "deuteranopia": "#B34E30",
+   "protanopia": "#7E7556",
+   "tritanopia": "#CE464A"
+  }
+ },
+ {
+  "key": "fatigue_winded",
+  "description": "Colour for this fatigue state in battle",
+  "hex": "#FFAD5B",
+  "dark_hex": "#FFAD5B",
+  "profiles": {
+   "deuteranopia": "#364099",
+   "protanopia": "#508EF5",
+   "tritanopia": "#029AAF"
+  }
+ },
+ {
+  "key": "fe_white",
+  "description": "Generic colour usesd by UI for text tags, fonts, images, etc",
+  "hex": "#FFF8D7",
+  "dark_hex": "#FFF8D7",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "garrison_attack_range",
+  "description": "Used for garrisons when they have an attack range setup",
+  "hex": "#EE82EE",
+  "dark_hex": "#EE82EE",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "geomantic_web_1",
+  "description": "used for geomantic web text",
+  "hex": "#FF0000",
+  "dark_hex": "#FF3333",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "geomantic_web_2",
+  "description": "used for geomantic web text",
+  "hex": "#FF5E00",
+  "dark_hex": "#FF7E33",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "geomantic_web_3",
+  "description": "used for geomantic web text",
+  "hex": "#FFBA00",
+  "dark_hex": "#FFC833",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "geomantic_web_4",
+  "description": "used for geomantic web text",
+  "hex": "#CFFF00",
+  "dark_hex": "#D9FF33",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "geomantic_web_5",
+  "description": "used for geomantic web text",
+  "hex": "#5BCA00",
+  "dark_hex": "#8FFF33",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "green",
+  "description": "Positive. Generic colour usesd by UI for text tags, fonts, images, etc. ",
+  "hex": "#A0FF37",
+  "dark_hex": "#A0FF37",
+  "profiles": {
+   "deuteranopia": "#CEABCB",
+   "protanopia": "#CEB501",
+   "tritanopia": "#6FC2D4"
+  }
+ },
+ {
+  "key": "group_colour1",
+  "description": "Colour for this battle group index (used for group frame for example)",
+  "hex": "#780700",
+  "dark_hex": "#FF3F33",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "group_colour10",
+  "description": "Colour for this battle group index (used for group frame for example)",
+  "hex": "#00649A",
+  "dark_hex": "#33B7FF",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "group_colour2",
+  "description": "Colour for this battle group index (used for group frame for example)",
+  "hex": "#B75A00",
+  "dark_hex": "#FF9733",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "group_colour3",
+  "description": "Colour for this battle group index (used for group frame for example)",
+  "hex": "#E09600",
+  "dark_hex": "#FFBC33",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "group_colour4",
+  "description": "Colour for this battle group index (used for group frame for example)",
+  "hex": "#9BDA1E",
+  "dark_hex": "#B2E64C",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "group_colour5",
+  "description": "Colour for this battle group index (used for group frame for example)",
+  "hex": "#A5A600",
+  "dark_hex": "#FEFF33",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "group_colour6",
+  "description": "Colour for this battle group index (used for group frame for example)",
+  "hex": "#6D7800",
+  "dark_hex": "#ECFF33",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "group_colour7",
+  "description": "Colour for this battle group index (used for group frame for example)",
+  "hex": "#65A000",
+  "dark_hex": "#B4FF33",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "group_colour8",
+  "description": "Colour for this battle group index (used for group frame for example)",
+  "hex": "#057700",
+  "dark_hex": "#3CFF33",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "group_colour9",
+  "description": "Colour for this battle group index (used for group frame for example)",
+  "hex": "#009492",
+  "dark_hex": "#33FFFC",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "harmony_yang",
+  "description": "Colour used to indicate a unit has a Yang battle harmony buff",
+  "hex": "#FFFFFF",
+  "dark_hex": "#FFFFFF",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "harmony_yin",
+  "description": "Colour used to indicate a unit has a Yin battle harmony buff",
+  "hex": "#000000",
+  "dark_hex": "#999999",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "help_page_link_inactive",
+  "description": "Yellow colour for inactive links on help pages/infotext (for links that only show tooltips and can't be clicked on)",
+  "hex": "#FFE77F",
+  "dark_hex": "#FFE77F",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "hidden",
+  "description": "placeholder",
+  "hex": "#808080",
+  "dark_hex": "#999999",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "link",
+  "description": "Colour used for hyperlinked text in UI",
+  "hex": "#B95C00",
+  "dark_hex": "#FF9833",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "link_mouseover",
+  "description": "Colour used for hyperlinked text in UI",
+  "hex": "#C86B0F",
+  "dark_hex": "#F19941",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "link_visited",
+  "description": "Fade orange/brown colour for visited links on help pages/infotext",
+  "hex": "#A87A54",
+  "dark_hex": "#BB9677",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "link_visited_mouseover",
+  "description": "Fade orange/brown colour for visited links on help pages/infotext",
+  "hex": "#B78963",
+  "dark_hex": "#BF9573",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "magic",
+  "description": "Colour magic is shown as in UI (used on text, icons, campaign tacmap, etc)",
+  "hex": "#41E1E1",
+  "dark_hex": "#4FE3E3",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "magic_barrier",
+  "description": "Colour of magic barrier ui",
+  "hex": "#82E1E1",
+  "dark_hex": "#82E1E1",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "magic_range_link",
+  "description": "Colour of magic link spline in area of effect display system when targetting spells",
+  "hex": "#ACE1E7",
+  "dark_hex": "#ACE1E7",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "missing_string",
+  "description": "Used to tag missing string text to make them more obvious since now return keys of failed lookups rather than missign string text",
+  "hex": "#FF1493",
+  "dark_hex": "#FF33A1",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "morale_broken",
+  "description": "Colour for this morale state in battle",
+  "hex": "#FFFFFF",
+  "dark_hex": "#FFFFFF",
+  "profiles": {
+   "deuteranopia": "#000000",
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "morale_confident",
+  "description": "Colour for this morale state in battle",
+  "hex": "#A0FF37",
+  "dark_hex": "#A0FF37",
+  "profiles": {
+   "deuteranopia": "#CEABCB",
+   "protanopia": "#CEB501",
+   "tritanopia": "#6FC2D4"
+  }
+ },
+ {
+  "key": "morale_eager",
+  "description": "Colour for this morale state in battle",
+  "hex": "#A0FF37",
+  "dark_hex": "#A0FF37",
+  "profiles": {
+   "deuteranopia": "#CEABCB",
+   "protanopia": "#CEB501",
+   "tritanopia": "#6FC2D4"
+  }
+ },
+ {
+  "key": "morale_impetuous",
+  "description": "Colour for this morale state in battle",
+  "hex": "#A0FF37",
+  "dark_hex": "#A0FF37",
+  "profiles": {
+   "deuteranopia": "#CEABCB",
+   "protanopia": "#CEB501",
+   "tritanopia": "#6FC2D4"
+  }
+ },
+ {
+  "key": "morale_shaken",
+  "description": "Colour for this morale state in battle",
+  "hex": "#FF2D2D",
+  "dark_hex": "#FF3333",
+  "profiles": {
+   "deuteranopia": "#B34E30",
+   "protanopia": "#7E7556",
+   "tritanopia": "#CE464A"
+  }
+ },
+ {
+  "key": "morale_shattered",
+  "description": "Colour for this morale state in battle",
+  "hex": "#FFFFFF",
+  "dark_hex": "#FFFFFF",
+  "profiles": {
+   "deuteranopia": "#000000",
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "morale_steady",
+  "description": "Colour for this morale state in battle",
+  "hex": "#A0FF37",
+  "dark_hex": "#A0FF37",
+  "profiles": {
+   "deuteranopia": "#CEABCB",
+   "protanopia": "#CEB501",
+   "tritanopia": "#6FC2D4"
+  }
+ },
+ {
+  "key": "morale_wavering",
+  "description": "Colour for this morale state in battle",
+  "hex": "#FF2D2D",
+  "dark_hex": "#FF3333",
+  "profiles": {
+   "deuteranopia": "#B34E30",
+   "protanopia": "#7E7556",
+   "tritanopia": "#CE464A"
+  }
+ },
+ {
+  "key": "not_for_translation",
+  "description": "placeholder",
+  "hex": "#F7F9C8",
+  "dark_hex": "#F7F9C8",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "orange",
+  "description": "Generic colour usesd by UI for text tags, fonts, images, etc",
+  "hex": "#FFAD5B",
+  "dark_hex": "#FFAD5B",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": "#CE9A29",
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "placeholder",
+  "description": "placeholder",
+  "hex": "#FF943F",
+  "dark_hex": "#FF943F",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "projectile_trajectory_ability",
+  "description": "Shown for projectile trajectories aiming abilities that fire projectile",
+  "hex": "#FF9900",
+  "dark_hex": "#FFAD33",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "projectile_trajectory_blocked",
+  "description": "Shown for projectile trajectories when something in the way of the projectile (like an obstacle)",
+  "hex": "#808080",
+  "dark_hex": "#999999",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "projectile_trajectory_loaded",
+  "description": "Shown for projectile trajectories when loaded. Colour gets lerped between this and loaded.",
+  "hex": "#406616",
+  "dark_hex": "#9CDB57",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "projectile_trajectory_moving",
+  "description": "Shown for projectile trajectories when firing unit currently moving so wont fire until stationary",
+  "hex": "#0000C8",
+  "dark_hex": "#3333FF",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "projectile_trajectory_unloaded",
+  "description": "Shown for projectile trajectories when unloaded. Colour gets lerped between this and loaded.",
+  "hex": "#FF2D2D",
+  "dark_hex": "#FF3333",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "rare",
+  "description": "colour used for tiers",
+  "hex": "#00C6FF",
+  "dark_hex": "#33D1FF",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "red",
+  "description": "Negative. Generic colour usesd by UI for text tags, fonts, images, etc. ",
+  "hex": "#FF2D2D",
+  "dark_hex": "#FF3333",
+  "profiles": {
+   "deuteranopia": "#B34E30",
+   "protanopia": "#7E7556",
+   "tritanopia": "#CE464A"
+  }
+ },
+ {
+  "key": "subtitle_azazel",
+  "description": "Subtitle colour for Azazel character",
+  "hex": "#99549E",
+  "dark_hex": "#B47AB8",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "subtitle_belakor",
+  "description": "Subtitle colour for Belakor character",
+  "hex": "#CEC0C0",
+  "dark_hex": "#CEC0C0",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "subtitle_boris",
+  "description": "Subtitle colour for Boris Ursus character",
+  "hex": "#7AA7D6",
+  "dark_hex": "#7AA7D6",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "subtitle_daemon_prince",
+  "description": "Subtitle colour for Daemon Prince character",
+  "hex": "#BCBCBC",
+  "dark_hex": "#BCBCBC",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "subtitle_festus",
+  "description": "Subtitle colour for Festus character",
+  "hex": "#68851D",
+  "dark_hex": "#B6DA58",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "subtitle_golgfag",
+  "description": "Subtitle colour for Golgfag character",
+  "hex": "#C6BA99",
+  "dark_hex": "#C6BA99",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "subtitle_greasus",
+  "description": "Subtitle colour for Greasus Goldtooth character",
+  "hex": "#C6BA99",
+  "dark_hex": "#C6BA99",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "subtitle_kairos_future",
+  "description": "Subtitle colour for Kairos Fateweaver - future head character",
+  "hex": "#FEF234",
+  "dark_hex": "#FEF234",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "subtitle_kairos_past",
+  "description": "Subtitle colour for Kairos Fateweaver - past head character",
+  "hex": "#98E956",
+  "dark_hex": "#98E956",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "subtitle_katarin",
+  "description": "Subtitle colour for Katarin character",
+  "hex": "#84ACE3",
+  "dark_hex": "#84ACE3",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "subtitle_kislev_crowd",
+  "description": "Subtitle colour for \"Kislev crowd\" character",
+  "hex": "#D9B2BF",
+  "dark_hex": "#D9B2BF",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "subtitle_kostaltyn",
+  "description": "Subtitle colour for Kostaltyn character",
+  "hex": "#CEC0E1",
+  "dark_hex": "#CEC0E1",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "subtitle_kugath",
+  "description": "Subtitle colour for Ku'gath character",
+  "hex": "#AFCB9E",
+  "dark_hex": "#AFCB9E",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "subtitle_miao_ying",
+  "description": "Subtitle colour for Miao Ying character",
+  "hex": "#ABB3B6",
+  "dark_hex": "#ABB3B6",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "subtitle_nkari",
+  "description": "Subtitle colour for N'Kari character",
+  "hex": "#C7A3C4",
+  "dark_hex": "#C7A3C4",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "subtitle_ogres",
+  "description": "Subtitle colour for \"ogres\" character",
+  "hex": "#C6C09B",
+  "dark_hex": "#C6C09B",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "subtitle_skarbrand",
+  "description": "Subtitle colour for Skarbrand character",
+  "hex": "#D18686",
+  "dark_hex": "#D18686",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "subtitle_skrag",
+  "description": "Subtitle colour for Skrag the Slaughterer character",
+  "hex": "#C79381",
+  "dark_hex": "#C79381",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "subtitle_spirits",
+  "description": "Subtitle colour for \"spirits\" character",
+  "hex": "#95CFCE",
+  "dark_hex": "#95CFCE",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "subtitle_ursun",
+  "description": "Subtitle colour for Ursun character",
+  "hex": "#78B8DD",
+  "dark_hex": "#78B8DD",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "subtitle_valkia",
+  "description": "Subtitle colour for Valkia character",
+  "hex": "#B52222",
+  "dark_hex": "#DF5353",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "subtitle_vilitch",
+  "description": "Subtitle colour for Vilitch character",
+  "hex": "#9AA4C0",
+  "dark_hex": "#9AA4C0",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "subtitle_zhao_ming",
+  "description": "Subtitle colour for Zhao Ming character",
+  "hex": "#CDC7C7",
+  "dark_hex": "#CDC7C7",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "team_colour_ally_1",
+  "description": "Multiplayer battle team colour",
+  "hex": "#7ED7FF",
+  "dark_hex": "#7ED7FF",
+  "profiles": {
+   "deuteranopia": "#9255FF",
+   "protanopia": "#9255FF",
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "team_colour_ally_2",
+  "description": "Multiplayer battle team colour",
+  "hex": "#55AFE6",
+  "dark_hex": "#55AFE6",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "team_colour_ally_3",
+  "description": "Multiplayer battle team colour",
+  "hex": "#2B85BC",
+  "dark_hex": "#59A8D9",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "team_colour_ally_4",
+  "description": "Multiplayer battle team colour",
+  "hex": "#1E5C8A",
+  "dark_hex": "#57A3DB",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "team_colour_ally_5",
+  "description": "Multiplayer battle team colour",
+  "hex": "#9ECADE",
+  "dark_hex": "#9ECADE",
+  "profiles": {
+   "deuteranopia": "#9200FF",
+   "protanopia": "#9200FF",
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "team_colour_ally_6",
+  "description": "Multiplayer battle team colour",
+  "hex": "#79A5C1",
+  "dark_hex": "#79A5C1",
+  "profiles": {
+   "deuteranopia": "#9246FF",
+   "protanopia": "#9246FF",
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "team_colour_ally_7",
+  "description": "Multiplayer battle team colour",
+  "hex": "#4F7B97",
+  "dark_hex": "#79A0B9",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "team_colour_ally_8",
+  "description": "Multiplayer battle team colour",
+  "hex": "#39586F",
+  "dark_hex": "#789EBA",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "team_colour_enemy_1",
+  "description": "Multiplayer battle team colour",
+  "hex": "#C41400",
+  "dark_hex": "#FF4833",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "team_colour_enemy_2",
+  "description": "Multiplayer battle team colour",
+  "hex": "#FF3C43",
+  "dark_hex": "#FF3C43",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "team_colour_enemy_3",
+  "description": "Multiplayer battle team colour",
+  "hex": "#FF7E8D",
+  "dark_hex": "#FF7E8D",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "team_colour_enemy_4",
+  "description": "Multiplayer battle team colour",
+  "hex": "#A80200",
+  "dark_hex": "#FF3533",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "team_colour_enemy_5",
+  "description": "Multiplayer battle team colour",
+  "hex": "#933B31",
+  "dark_hex": "#CC7066",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "team_colour_enemy_6",
+  "description": "Multiplayer battle team colour",
+  "hex": "#CE6D70",
+  "dark_hex": "#CE6D70",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "team_colour_enemy_7",
+  "description": "Multiplayer battle team colour",
+  "hex": "#DE9EA5",
+  "dark_hex": "#DE9EA5",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "team_colour_enemy_8",
+  "description": "Multiplayer battle team colour",
+  "hex": "#7E2B2A",
+  "dark_hex": "#CC6766",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "team_colour_ffa_1",
+  "description": "Multiplayer battle team colour",
+  "hex": "#FF4200",
+  "dark_hex": "#FF6833",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "team_colour_ffa_2",
+  "description": "Multiplayer battle team colour",
+  "hex": "#9200FF",
+  "dark_hex": "#A833FF",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "team_colour_ffa_3",
+  "description": "Multiplayer battle team colour",
+  "hex": "#469F1C",
+  "dark_hex": "#7FE052",
+  "profiles": {
+   "deuteranopia": "#A80200",
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "team_colour_ffa_4",
+  "description": "Multiplayer battle team colour",
+  "hex": "#00D6D4",
+  "dark_hex": "#33FFFD",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "threat_high",
+  "description": "Battle threat colour",
+  "hex": "#C41400",
+  "dark_hex": "#FF4833",
+  "profiles": {
+   "deuteranopia": "#B34E30",
+   "protanopia": "#F82D00",
+   "tritanopia": "#CE464A"
+  }
+ },
+ {
+  "key": "threat_low",
+  "description": "Battle threat colour",
+  "hex": "#6AA924",
+  "dark_hex": "#9CDB57",
+  "profiles": {
+   "deuteranopia": "#B34E30",
+   "protanopia": "#09FF00",
+   "tritanopia": "#7E7556"
+  }
+ },
+ {
+  "key": "threat_medium",
+  "description": "Battle threat colour",
+  "hex": "#FFAD5B",
+  "dark_hex": "#FFAD5B",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": "#CE9A29",
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "transported_army",
+  "description": "Colour used to indicate a transported army",
+  "hex": "#FF8C00",
+  "dark_hex": "#FFA333",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "ui_font_blue",
+  "description": "placeholder",
+  "hex": "#57A7FF",
+  "dark_hex": "#57A7FF",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "ui_font_blue_light",
+  "description": "placeholder",
+  "hex": "#41E1E1",
+  "dark_hex": "#4FE3E3",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "ui_font_brown",
+  "description": "placeholder",
+  "hex": "#4D3019",
+  "dark_hex": "#CD9365",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "ui_font_brown_dark",
+  "description": "placeholder",
+  "hex": "#A52A00",
+  "dark_hex": "#FF6733",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "ui_font_brown_faded",
+  "description": "placeholder",
+  "hex": "#914D3C",
+  "dark_hex": "#C3806F",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "ui_font_faded_grey_beige",
+  "description": "placeholder",
+  "hex": "#A99F89",
+  "dark_hex": "#A99F89",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "ui_font_green_light",
+  "description": "placeholder",
+  "hex": "#BAEE1E",
+  "dark_hex": "#C5F141",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "ui_font_inactive_grey",
+  "description": "placeholder",
+  "hex": "#666666",
+  "dark_hex": "#999999",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "ui_font_inactive_grey_light",
+  "description": "placeholder",
+  "hex": "#C0C0C0",
+  "dark_hex": "#C0C0C0",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "ui_font_orange",
+  "description": "placeholder",
+  "hex": "#FC8A23",
+  "dark_hex": "#FC9436",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "ui_font_yellow",
+  "description": "placeholder",
+  "hex": "#FFD700",
+  "dark_hex": "#FFDF33",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "unapproved",
+  "description": "placeholder",
+  "hex": "#FFAEC9",
+  "dark_hex": "#FFAEC9",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "untranslated",
+  "description": "placeholder",
+  "hex": "#5AD54D",
+  "dark_hex": "#66D85A",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "white",
+  "description": "Generic white colour for use in text tags, etc",
+  "hex": "#FFFFFF",
+  "dark_hex": "#FFFFFF",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ },
+ {
+  "key": "yellow",
+  "description": "Generic colour usesd by UI for text tags, fonts, images, etc",
+  "hex": "#FFB900",
+  "dark_hex": "#FFC733",
+  "profiles": {
+   "deuteranopia": null,
+   "protanopia": null,
+   "tritanopia": null
+  }
+ }
+]

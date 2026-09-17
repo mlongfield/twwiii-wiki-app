@@ -29,16 +29,32 @@ describe("browseRows", () => {
     expect(Object.keys(BROWSE_FIELDS).sort()).toEqual(PAGE_TYPES.map((p) => p.type).sort());
   });
 
-  it("lists every entity with URL, name and field values, sorted by name", () => {
+  it("lists every named entity with URL, name, subtitle and field values, sorted by name", () => {
     const rows = browseRows(site, "unit");
-    expect(rows).toHaveLength(site.model.entities.unit.size);
+    expect(rows).toHaveLength([...site.model.entities.unit.values()].filter((u) => u.name).length);
     const names = rows.map((r) => r.name);
     expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b)));
     const gs = rows.find((r) => r.key === "wh_main_emp_inf_greatswords")!;
     expect(gs.url).toBe("/units/wh_main_emp_inf_greatswords/");
     expect(gs.name).toBe("Greatswords");
+    expect(gs.subtitle).toBe(site.model.entities.unit.get("wh_main_emp_inf_greatswords")!.category_name);
     expect(gs.values).toHaveLength(BROWSE_FIELDS.unit.length);
     expect(gs.values[3]).toBe("3");
+  });
+
+  it("shows labels, not objects, for label fields", () => {
+    const rows = browseRows(site, "character");
+    const karl = rows.find((r) => r.key === "wh_main_emp_karl_franz")!;
+    expect(karl.values[BROWSE_FIELDS.character.findIndex((f) => f.field === "agent_types")]).toBe("Lord");
+    const item = browseRows(site, "item")[0];
+    expect(item.values.join(" ")).not.toContain("[object Object]");
+  });
+
+  it("tags rows with campaigns for filterable types only", () => {
+    const reikland = browseRows(site, "faction").find((r) => r.key === "wh_main_emp_empire")!;
+    expect(reikland.campaigns?.split(" ")).toContain("wh3_main_combi");
+    expect(browseRows(site, "unit")[0].campaigns).toBeNull();
+    expect(browseRows(site, "campaign").map((r) => r.key)).toContain("wh3_main_combi");
   });
 });
 

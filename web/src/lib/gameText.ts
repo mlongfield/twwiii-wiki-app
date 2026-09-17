@@ -1,11 +1,14 @@
-/** Game UI markup: [[b]], [[i]], [[sl:…]], [[col:…]], [[overridecol:…]], [[img:…]], {{…}}, \n and title||body. */
+/** Game UI markup: [[b]], [[i]], [[col:…]], [[overridecol:…]], [[img:…]], [[opacity:…]], other tags, {{…}}, \n and title||body. */
+import { colourClassName } from "./coloursCss";
 import { escapeHtml } from "./html";
+
+export type SpanStyle = "bold" | "italic" | "colour" | "hidden" | "plain";
 
 export type GameNode =
   | { kind: "text"; text: string }
   | { kind: "br" }
   | { kind: "img"; target: string }
-  | { kind: "span"; style: "bold" | "italic" | "help" | "colour"; colour: string | null; children: GameNode[] };
+  | { kind: "span"; tag: string; style: SpanStyle; colour: string | null; children: GameNode[] };
 
 type SpanNode = Extract<GameNode, { kind: "span" }>;
 
@@ -17,14 +20,21 @@ export interface ParsedGameText {
 export interface GameTextImages {
   inline: Record<string, string | null>;
   src: (path: string) => string | null;
+  /** Lower-case ui_colours keys. When given, other col: names render uncoloured and marked. */
+  colours?: ReadonlySet<string>;
 }
 
-export const KNOWN_COLOURS: readonly string[] = ["yellow", "white", "red", "green", "magic", "fe_white", "ancillary_unique"];
-
 // [[/name:arg]] tags, {{…}} tokens, a literal backslash-n, or a real newline.
-const TOKEN = /\[\[(\/?)([A-Za-z_]+)(?::([^\]]*))?\]\]|\{\{([^}]*)\}\}|\\n|\r?\n/g;
+const TOKEN = /\[\[(\/?)([A-Za-z_]+)(?::([^\]]*))?\]\]|\{\{[^}]*\}\}|\\n|\r?\n/g;
 
-const STYLES: Record<string, SpanNode["style"]> = { b: "bold", i: "italic", sl: "help", col: "colour", overridecol: "colour" };
+function spanStyle(tag: string, arg: string | undefined): SpanStyle {
+  if (tag === "b") return "bold";
+  if (tag === "i") return "italic";
+  if (tag === "col" || tag === "overridecol") return "colour";
+  if (tag === "opacity" && arg !== undefined && arg.trim() !== "" && Number(arg) === 0) return "hidden";
+  // sl, sl_link, sl_tooltip, url, tooltip, fragment, opacity > 0 and unknown tags show their inner text.
+  return "plain";
+}
 
 function parseNodes(text: string): GameNode[] {
   const root: GameNode[] = [];
@@ -42,31 +52,46 @@ function parseNodes(text: string): GameNode[] {
   for (const match of text.matchAll(TOKEN)) {
     pushText(text.slice(pos, match.index));
     pos = match.index! + match[0].length;
-    const [, closing, name, arg, braces] = match;
-    if (braces !== undefined) {
-      pushText(braces);
-      continue;
-    }
+    const [whole, closing, name, arg] = match;
+    if (whole.startsWith("{{")) continue;
     if (name === undefined) {
       current().push({ kind: "br" });
       continue;
     }
     const tag = name.toLowerCase();
     if (closing) {
-      // Game data sometimes closes the wrong tag: close the innermost open one. [[/img]] closes nothing.
-      if (tag !== "img" && stack.length) stack.pop();
+      // Close the most recent open tag with the same name. Real game text sometimes mis-closes:
+      // `[[/col]]` and `[[/overridecol]]` both close the most recent open col/overridecol span
+      // (one family), and an unmatched `[[/b]]` or `[[/i]]` closes the innermost open b/i span.
+      // Any other unmatched closer is ignored.
+      const colourFamily = tag === "col" || tag === "overridecol";
+      const boldOrItalic = tag === "b" || tag === "i";
+      let closed = false;
+      for (let i = stack.length - 1; i >= 0; i -= 1) {
+        if (stack[i].tag === tag) {
+          stack.length = i;
+          closed = true;
+          break;
+        }
+      }
+      if (!closed && (colourFamily || boldOrItalic)) {
+        for (let i = stack.length - 1; i >= 0; i -= 1) {
+          const openTag = stack[i].tag;
+          if ((colourFamily && (openTag === "col" || openTag === "overridecol")) ||
+              (boldOrItalic && (openTag === "b" || openTag === "i"))) {
+            stack.length = i;
+            break;
+          }
+        }
+      }
       continue;
     }
     if (tag === "img") {
       if (arg) current().push({ kind: "img", target: arg });
       continue;
     }
-    const style = STYLES[tag];
-    if (!style) {
-      pushText(arg !== undefined ? `${name}:${arg}` : name);
-      continue;
-    }
-    const span: SpanNode = { kind: "span", style, colour: style === "colour" ? (arg ?? null) : null, children: [] };
+    const style = spanStyle(tag, arg);
+    const span: SpanNode = { kind: "span", tag, style, colour: style === "colour" ? (arg ?? null) : null, children: [] };
     current().push(span);
     stack.push(span);
   }
@@ -79,6 +104,15 @@ export function parseGameText(text: string): ParsedGameText {
   if (separator === -1) return { title: null, body: parseNodes(text) };
   const title = text.slice(0, separator);
   return { title: title.trim() ? parseNodes(title) : null, body: parseNodes(text.slice(separator + 2)) };
+}
+
+function renderColour(node: SpanNode, inner: string, images: GameTextImages): string {
+  const colour = node.colour?.trim().toLowerCase() ?? "";
+  if (!colour) return `<span class="gt-col">${inner}</span>`;
+  if (images.colours && !images.colours.has(colour)) {
+    return `<span class="gt-col" data-unknown-colour="${escapeHtml(colour)}">${inner}</span>`;
+  }
+  return `<span class="gt-col ${colourClassName(colour)}">${inner}</span>`;
 }
 
 function renderNodes(nodes: GameNode[], images: GameTextImages): string {
@@ -97,13 +131,12 @@ function renderNodes(nodes: GameNode[], images: GameTextImages): string {
             : '<span class="game-img game-img-inline placeholder" data-placeholder-image aria-hidden="true"></span>';
         }
         case "span": {
+          if (node.style === "hidden") return "";
           const inner = renderNodes(node.children, images);
           if (node.style === "bold") return `<strong>${inner}</strong>`;
           if (node.style === "italic") return `<em>${inner}</em>`;
-          if (node.style === "help") return `<span class="gt-help">${inner}</span>`;
-          const colourClass =
-            node.colour && KNOWN_COLOURS.includes(node.colour) ? ` gt-col-${node.colour.replace(/_/g, "-")}` : "";
-          return `<span class="gt-col${colourClass}">${inner}</span>`;
+          if (node.style === "plain") return inner;
+          return renderColour(node, inner, images);
         }
       }
     })
@@ -115,4 +148,9 @@ export function renderGameTextHtml(text: string | null | undefined, images: Game
   const { title, body } = parseGameText(text);
   const bodyHtml = renderNodes(body, images);
   return title ? `<span class="gt-title">${renderNodes(title, images)}</span>${bodyHtml}` : bodyHtml;
+}
+
+/** Plain text for places that can't show markup: tags and {{…}} tokens removed. */
+export function stripGameMarkup(text: string): string {
+  return text.replace(/\[\[[^\]]*\]\]|\{\{[^}]*\}\}/g, "").replace(/\s+/g, " ").trim();
 }

@@ -30,12 +30,19 @@ def catalog(ctx: Context) -> dict[str, dict[str, str | None]]:
     return out
 
 
+def _campaign_links(ctx: Context, rows: list[dict], source: tuple[str, str], relation: str,
+                    flag: str | None = None) -> list[dict]:
+    keys = sorted({r["campaign"] for r in rows if flag is None or r[flag]})
+    return [ctx.links.link("campaign", k, source=source, relation=relation) for k in keys]
+
+
 def build(ctx: Context) -> dict[str, list[dict]]:
     out: dict[str, list[dict]] = {
         "faction": [], "culture": [], "subculture": [], "difficulty_level": [], "campaign_variable": []}
     subcultures = by_key(ctx, "cultures_subcultures", "subculture")
 
     if ctx.require("faction", "factions"):
+        starts = grouped(ctx, "start_pos_factions", "faction", "campaign")
         for r in ctx.rows("SELECT * FROM factions ORDER BY key"):
             key = r["key"]
             source = ("faction", key)
@@ -53,6 +60,9 @@ def build(ctx: Context) -> dict[str, list[dict]]:
                 "flag_image": ctx.images.resolve(
                     "faction.flag_image", f"{r['flags_path']}/mon_64.png" if opt(r["flags_path"]) else None),
                 "primary_colour": opt(r["primary_colour_hex"]),
+                "start_campaigns": _campaign_links(ctx, starts.get(key, []), source, "start_campaigns"),
+                "playable_in": _campaign_links(ctx, starts.get(key, []), source, "playable_in", "playable"),
+                "major_in": _campaign_links(ctx, starts.get(key, []), source, "major_in", "is_major"),
                 "units": [],
                 "characters": [],
             })
@@ -79,7 +89,8 @@ def build(ctx: Context) -> dict[str, list[dict]]:
             levels[level]["human" if r["human"] else "ai"].append({
                 "application": effect_application(ctx, r["effect"], scope=r["effect_scope"], value=r["effect_value"],
                                                   source=("difficulty_level", str(level))),
-                "campaign": opt(r["optional_campaign_key"]),
+                "campaign": ctx.links.link("campaign", opt(r["optional_campaign_key"]),
+                                           source=("difficulty_level", str(level)), relation="campaign"),
             })
         for level in sorted(levels):
             out["difficulty_level"].append({"key": str(level), "level": level, **levels[level]})
@@ -92,8 +103,9 @@ def build(ctx: Context) -> dict[str, list[dict]]:
             out["campaign_variable"].append({
                 "key": key,
                 "value": r["value"],
-                "overrides": [{"campaign": o["campaign_name"], "difficulty": opt(o["difficulty"]),
-                               "campaign_type": opt(o["campaign_type"]), "value": o["value"]}
+                "overrides": [{"campaign": ctx.links.link("campaign", opt(o["campaign_name"]), source=("campaign_variable", key),
+                                                          relation="overrides"),
+                               "difficulty": opt(o["difficulty"]), "campaign_type": opt(o["campaign_type"]), "value": o["value"]}
                               for o in overrides.get(key, [])],
             })
     return out

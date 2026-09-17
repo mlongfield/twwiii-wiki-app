@@ -4,6 +4,7 @@ import pytest
 
 from tests.publish.fakes import FakeEntityStore
 from tests.publish.helpers import make_model
+from twwiki.model.build import MODEL_VERSION
 from twwiki.publish import PublishError
 from twwiki.publish.firestore_writer import (
     CURRENT, build_path, collection_path, go_live, prune, verify_counts, write_entities)
@@ -41,7 +42,7 @@ def test_write_entities_marks_loading_first_then_writes_every_type(tmp_path):
     assert [c[1] for c in store.calls if c[0] == "bulk_set"] == [f"builds/b1/{t}" for t in ENTITY_TYPES]
     build = store.docs["builds/b1"]
     assert build["status"] == "loading" and build["published_at"] is None
-    assert build["counts"]["unit"] == 2 and build["model_version"] == 2
+    assert build["counts"]["unit"] == 2 and build["model_version"] == MODEL_VERSION
     doc = store.docs["builds/b1/unit/u1"]
     assert doc["abilities_keys"] == ["hold"] and doc["tier"] == 1 and doc["entity"] == UNITS[0]
 
