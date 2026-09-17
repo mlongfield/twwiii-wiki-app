@@ -18,7 +18,7 @@ function searchCulture(site: Site, type: PageType, e: Entity): string {
     case "technology_tree":
       return cultureNames(site, [e.culture?.key]);
     case "building_level":
-      return cultureNames(site, e.cultures ?? []);
+      return cultureNames(site, (e.availability ?? []).filter((l: { type: string }) => l.type === "culture").map((l: { key: string }) => l.key));
     case "building_chain": {
       const subcultureCulture = (key: string) => site.model.entities.subculture.get(key)?.culture?.key;
       const factionCulture = (key: string) => site.model.entities.faction.get(key)?.culture?.key;
@@ -35,6 +35,7 @@ function searchCategory(type: PageType, e: Entity): string {
     case "unit":
       return e.category_name ?? e.category ?? "";
     case "item":
+      return e.category?.name ?? e.category?.key ?? "";
     case "building_chain":
       return e.category ?? "";
     case "ability":

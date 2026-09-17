@@ -182,6 +182,13 @@
         "pixel_offset_y": {
           "title": "Pixel Offset Y",
           "type": "integer"
+        },
+        "campaigns": {
+          "items": {
+            "$ref": "#/$defs/Link"
+          },
+          "title": "Campaigns",
+          "type": "array"
         }
       },
       "required": [
@@ -195,7 +202,8 @@
         "required_parents",
         "ui_group",
         "pixel_offset_x",
-        "pixel_offset_y"
+        "pixel_offset_y",
+        "campaigns"
       ],
       "title": "TreeNode",
       "type": "object"
@@ -217,6 +225,10 @@
         }
       ],
       "title": "Name"
+    },
+    "name_derived": {
+      "title": "Name Derived",
+      "type": "boolean"
     },
     "culture": {
       "anyOf": [
@@ -251,13 +263,12 @@
     "campaign": {
       "anyOf": [
         {
-          "type": "string"
+          "$ref": "#/$defs/Link"
         },
         {
           "type": "null"
         }
-      ],
-      "title": "Campaign"
+      ]
     },
     "colour": {
       "anyOf": [
@@ -288,6 +299,7 @@
   "required": [
     "key",
     "name",
+    "name_derived",
     "culture",
     "subculture",
     "faction",

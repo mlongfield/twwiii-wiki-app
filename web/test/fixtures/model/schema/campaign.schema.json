@@ -54,41 +54,68 @@
       ],
       "title": "Name"
     },
-    "campaign": {
+    "map": {
       "anyOf": [
         {
-          "$ref": "#/$defs/Link"
+          "type": "string"
         },
         {
           "type": "null"
         }
-      ]
+      ],
+      "title": "Map"
+    },
+    "script_folder": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Script Folder"
+    },
+    "factions": {
+      "items": {
+        "$ref": "#/$defs/Link"
+      },
+      "title": "Factions",
+      "type": "array"
+    },
+    "playable_factions": {
+      "items": {
+        "$ref": "#/$defs/Link"
+      },
+      "title": "Playable Factions",
+      "type": "array"
+    },
+    "major_factions": {
+      "items": {
+        "$ref": "#/$defs/Link"
+      },
+      "title": "Major Factions",
+      "type": "array"
     },
     "regions": {
+      "default": [],
       "items": {
         "$ref": "#/$defs/Link"
       },
       "title": "Regions",
       "type": "array"
-    },
-    "capital": {
-      "anyOf": [
-        {
-          "$ref": "#/$defs/Link"
-        },
-        {
-          "type": "null"
-        }
-      ]
     }
   },
   "required": [
     "key",
     "name",
-    "campaign",
-    "regions",
-    "capital"
+    "map",
+    "script_folder",
+    "factions",
+    "playable_factions",
+    "major_factions",
+    "regions"
   ],
-  "title": "Province",
+  "title": "Campaign",
   "type": "object"
 }

@@ -3,7 +3,8 @@ import path from "node:path";
 import { ModelLoadError, type Manifest } from "./load";
 import { ENTITY_TYPES } from "./pageTypes";
 
-export const MODEL_VERSION = 2;
+export const MODEL_VERSION = 3;
+export const REFERENCE_FILES = ["campaigns", "colours", "ui_labels"] as const;
 
 export async function validateModelDir(dir: string): Promise<Manifest> {
   let manifest: Manifest;
@@ -26,5 +27,14 @@ export async function validateModelDir(dir: string): Promise<Manifest> {
     }
   }
   if (missing.length) throw new ModelLoadError(`${dir}: missing entity files: ${missing.join(", ")}`);
+  const missingReference: string[] = [];
+  for (const name of REFERENCE_FILES) {
+    try {
+      await access(path.join(dir, "reference", `${name}.json`));
+    } catch {
+      missingReference.push(`reference/${name}.json`);
+    }
+  }
+  if (missingReference.length) throw new ModelLoadError(`${dir}: missing reference files: ${missingReference.join(", ")}`);
   return manifest;
 }

@@ -1,5 +1,31 @@
 {
   "$defs": {
+    "AgentType": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name"
+        }
+      },
+      "required": [
+        "key",
+        "name"
+      ],
+      "title": "AgentType",
+      "type": "object"
+    },
     "EffectApplication": {
       "additionalProperties": false,
       "properties": {
@@ -17,9 +43,57 @@
           ],
           "title": "Scope"
         },
+        "scope_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Scope Text"
+        },
         "value": {
           "title": "Value",
           "type": "number"
+        },
+        "priority": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Priority"
+        },
+        "hidden": {
+          "title": "Hidden",
+          "type": "boolean"
+        },
+        "favourable": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Favourable"
+        },
+        "icon_image": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Icon Image"
         },
         "source": {
           "$ref": "#/$defs/Link"
@@ -76,7 +150,12 @@
       "required": [
         "effect",
         "scope",
+        "scope_text",
         "value",
+        "priority",
+        "hidden",
+        "favourable",
+        "icon_image",
         "source",
         "value_damaged",
         "value_ruined",
@@ -84,6 +163,32 @@
         "advancement_stage"
       ],
       "title": "EffectApplication",
+      "type": "object"
+    },
+    "ItemCategory": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name"
+        }
+      },
+      "required": [
+        "key",
+        "name"
+      ],
+      "title": "ItemCategory",
       "type": "object"
     },
     "Link": {
@@ -120,6 +225,44 @@
         "missing"
       ],
       "title": "Link",
+      "type": "object"
+    },
+    "Rarity": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name"
+        },
+        "colour": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Colour"
+        }
+      },
+      "required": [
+        "key",
+        "name",
+        "colour"
+      ],
+      "title": "Rarity",
       "type": "object"
     },
     "RequiredSkill": {
@@ -196,8 +339,17 @@
       "type": "string"
     },
     "category": {
-      "title": "Category",
-      "type": "string"
+      "$ref": "#/$defs/ItemCategory"
+    },
+    "rarity": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Rarity"
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "subcategory": {
       "anyOf": [
@@ -213,10 +365,6 @@
     "legendary": {
       "title": "Legendary",
       "type": "boolean"
-    },
-    "applies_to": {
-      "title": "Applies To",
-      "type": "string"
     },
     "transferrable": {
       "title": "Transferrable",
@@ -242,7 +390,7 @@
     },
     "agent_types": {
       "items": {
-        "type": "string"
+        "$ref": "#/$defs/AgentType"
       },
       "title": "Agent Types",
       "type": "array"
@@ -277,9 +425,9 @@
     "icon_image",
     "type",
     "category",
+    "rarity",
     "subcategory",
     "legendary",
-    "applies_to",
     "transferrable",
     "unique_to_world",
     "unique_to_faction",

@@ -1,0 +1,23 @@
+[
+ {
+  "key": "wh3_main_chaos",
+  "name": "The Realm of Chaos",
+  "map": "wh3_main_chaos_map_4",
+  "playable_factions": 25,
+  "major_factions": 26
+ },
+ {
+  "key": "wh3_main_combi",
+  "name": "Immortal Empires",
+  "map": "wh3_main_combi_map_5",
+  "playable_factions": 104,
+  "major_factions": 112
+ },
+ {
+  "key": "wh3_main_prologue",
+  "name": "The Lost God",
+  "map": "wh3_main_prologue_map",
+  "playable_factions": 1,
+  "major_factions": 8
+ }
+]

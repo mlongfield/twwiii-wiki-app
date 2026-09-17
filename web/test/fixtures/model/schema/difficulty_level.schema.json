@@ -9,13 +9,12 @@
         "campaign": {
           "anyOf": [
             {
-              "type": "string"
+              "$ref": "#/$defs/Link"
             },
             {
               "type": "null"
             }
-          ],
-          "title": "Campaign"
+          ]
         }
       },
       "required": [
@@ -42,9 +41,57 @@
           ],
           "title": "Scope"
         },
+        "scope_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Scope Text"
+        },
         "value": {
           "title": "Value",
           "type": "number"
+        },
+        "priority": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Priority"
+        },
+        "hidden": {
+          "title": "Hidden",
+          "type": "boolean"
+        },
+        "favourable": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Favourable"
+        },
+        "icon_image": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Icon Image"
         },
         "source": {
           "$ref": "#/$defs/Link"
@@ -101,7 +148,12 @@
       "required": [
         "effect",
         "scope",
+        "scope_text",
         "value",
+        "priority",
+        "hidden",
+        "favourable",
+        "icon_image",
         "source",
         "value_damaged",
         "value_ruined",

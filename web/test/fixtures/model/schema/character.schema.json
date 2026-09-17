@@ -1,5 +1,31 @@
 {
   "$defs": {
+    "AgentType": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name"
+        }
+      },
+      "required": [
+        "key",
+        "name"
+      ],
+      "title": "AgentType",
+      "type": "object"
+    },
     "Link": {
       "additionalProperties": false,
       "properties": {
@@ -128,13 +154,12 @@
         "campaign": {
           "anyOf": [
             {
-              "type": "string"
+              "$ref": "#/$defs/Link"
             },
             {
               "type": "null"
             }
-          ],
-          "title": "Campaign"
+          ]
         },
         "for_army": {
           "title": "For Army",
@@ -265,13 +290,12 @@
         "campaign": {
           "anyOf": [
             {
-              "type": "string"
+              "$ref": "#/$defs/Link"
             },
             {
               "type": "null"
             }
-          ],
-          "title": "Campaign"
+          ]
         }
       },
       "required": [
@@ -331,7 +355,7 @@
     },
     "agent_types": {
       "items": {
-        "type": "string"
+        "$ref": "#/$defs/AgentType"
       },
       "title": "Agent Types",
       "type": "array"
@@ -387,6 +411,13 @@
       "title": "Factions",
       "type": "array"
     },
+    "campaigns": {
+      "items": {
+        "$ref": "#/$defs/Link"
+      },
+      "title": "Campaigns",
+      "type": "array"
+    },
     "abilities": {
       "items": {
         "$ref": "#/$defs/Link"
@@ -425,6 +456,7 @@
     "cost",
     "cap",
     "factions",
+    "campaigns",
     "abilities",
     "skill_trees",
     "items"

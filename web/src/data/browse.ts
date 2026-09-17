@@ -3,7 +3,13 @@ import { type EntityImage, mainImage } from "./images";
 import type { PageType } from "./pageTypes";
 import { type Site, urlFor } from "./site";
 
-export const BROWSE_FIELDS: Record<PageType, { field: string; label: string }[]> = {
+export interface BrowseField {
+  field: string;
+  label: string;
+  value?: (entity: Record<string, any>) => unknown;
+}
+
+export const BROWSE_FIELDS: Record<PageType, BrowseField[]> = {
   unit: [
     { field: "caste", label: "Caste" },
     { field: "category", label: "Category" },
@@ -12,7 +18,7 @@ export const BROWSE_FIELDS: Record<PageType, { field: string; label: string }[]>
     { field: "is_naval", label: "Naval" },
   ],
   character: [
-    { field: "agent_types", label: "Agent types" },
+    { field: "agent_types", label: "Agent types", value: (e) => e.agent_types.map((a: { key: string; name: string | null }) => a.name ?? a.key) },
     { field: "is_caster", label: "Caster" },
   ],
   skill: [{ field: "unlocked_at_rank", label: "Unlock rank" }],
@@ -22,13 +28,10 @@ export const BROWSE_FIELDS: Record<PageType, { field: string; label: string }[]>
   ],
   technology: [{ field: "is_hidden", label: "Hidden" }],
   technology_tree: [],
-  building_level: [
-    { field: "level", label: "Level" },
-    { field: "cultures", label: "Cultures" },
-  ],
+  building_level: [{ field: "level", label: "Level" }],
   building_chain: [{ field: "category", label: "Category" }],
   item: [
-    { field: "category", label: "Category" },
+    { field: "category", label: "Category", value: (e) => e.category.name ?? e.category.key },
     { field: "legendary", label: "Legendary" },
   ],
   trait: [{ field: "hidden", label: "Hidden" }],
@@ -36,11 +39,11 @@ export const BROWSE_FIELDS: Record<PageType, { field: string; label: string }[]>
   culture: [],
   subculture: [],
   region: [
-    { field: "campaign", label: "Campaign" },
     { field: "is_settlement", label: "Settlement" },
     { field: "template_source", label: "Templates" },
   ],
-  province: [{ field: "campaign", label: "Campaign" }],
+  province: [],
+  campaign: [],
 };
 
 export interface BrowseRow {
@@ -77,7 +80,7 @@ export function browseRows(site: Site, type: PageType): BrowseRow[] {
       unnamed: !name,
       url: urlFor(site, type, entity.key)!,
       image: mainImage(site, type, entity),
-      values: fields.map((f) => cellText(entity[f.field])),
+      values: fields.map((f) => cellText(f.value ? f.value(entity) : entity[f.field])),
     });
   }
   return rows.sort((a, b) => a.name.localeCompare(b.name) || a.key.localeCompare(b.key));

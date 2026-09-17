@@ -40,6 +40,14 @@ describe("browseRows", () => {
     expect(gs.values).toHaveLength(BROWSE_FIELDS.unit.length);
     expect(gs.values[3]).toBe("3");
   });
+
+  it("shows labels, not objects, for label fields", () => {
+    const rows = browseRows(site, "character");
+    const karl = rows.find((r) => r.key === "wh_main_emp_karl_franz")!;
+    expect(karl.values[BROWSE_FIELDS.character.findIndex((f) => f.field === "agent_types")]).toBe("Lord");
+    const item = browseRows(site, "item")[0];
+    expect(item.values.join(" ")).not.toContain("[object Object]");
+  });
 });
 
 describe("browseFilters", () => {
