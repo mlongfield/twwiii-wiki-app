@@ -11,7 +11,7 @@ from twwiki.publish.local_model import ENTITY_TYPES, check_model, find_model_dir
 FIXTURE_MODEL = Path("web/test/fixtures/model")
 
 
-def test_entity_types_are_the_nineteen_model_types_sorted():
+def test_entity_types_are_the_twenty_model_types_sorted():
     assert len(ENTITY_TYPES) == 20
     assert list(ENTITY_TYPES) == sorted(ENTITY_TYPES)
     assert "unit" in ENTITY_TYPES and "province" in ENTITY_TYPES
@@ -65,6 +65,13 @@ def test_check_model_lists_missing_files(tmp_path):
     assert "entities/unit.jsonl" in message
     assert "schema/region.schema.json" in message
     assert "images/inline.json" in message
+
+
+def test_check_model_rejects_a_model_missing_reference_files(tmp_path):
+    model_dir = make_model(tmp_path)
+    (model_dir / "reference" / "colours.json").unlink()
+    with pytest.raises(PublishError, match="reference/colours.json"):
+        check_model(model_dir)
 
 
 def test_check_model_without_manifest_fails(tmp_path):

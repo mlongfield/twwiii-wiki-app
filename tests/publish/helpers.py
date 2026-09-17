@@ -17,6 +17,7 @@ def make_model(root: Path, build_id: str = "b1", *, generated_at: str = "2026-09
     (model_dir / "entities").mkdir(parents=True)
     (model_dir / "schema").mkdir()
     (model_dir / "images" / "ui").mkdir(parents=True)
+    (model_dir / "reference").mkdir()
     for entity_type in ENTITY_TYPES:
         rows = entities.get(entity_type, [])
         (model_dir / "entities" / f"{entity_type}.jsonl").write_text(
@@ -24,6 +25,9 @@ def make_model(root: Path, build_id: str = "b1", *, generated_at: str = "2026-09
         (model_dir / "schema" / f"{entity_type}.schema.json").write_text("{}", encoding="utf-8")
     (model_dir / "images" / "inline.json").write_text("{}", encoding="utf-8")
     (model_dir / "images" / "ui" / "icon.png").write_bytes(b"png")
+    (model_dir / "reference" / "campaigns.json").write_text("[]", encoding="utf-8")
+    (model_dir / "reference" / "colours.json").write_text("[]", encoding="utf-8")
+    (model_dir / "reference" / "ui_labels.json").write_text("{}", encoding="utf-8")
     manifest = {
         "build_id": build_id,
         "model_version": model_version,
