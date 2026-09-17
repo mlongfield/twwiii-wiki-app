@@ -698,3 +698,27 @@ class CampaignVariable(Strict):
     key: str
     value: float
     overrides: list[CampaignVariableOverride]
+
+
+# ---- Reference documents (model/<build_id>/reference/) ---------------------
+
+class CampaignSummary(Strict):
+    key: str
+    name: str | None
+    map: str | None
+    playable_factions: int
+    major_factions: int
+
+
+class ColourProfiles(Strict):
+    deuteranopia: str | None
+    protanopia: str | None
+    tritanopia: str | None
+
+
+class Colour(Strict):
+    key: str
+    description: str
+    hex: str
+    dark_hex: str
+    profiles: ColourProfiles

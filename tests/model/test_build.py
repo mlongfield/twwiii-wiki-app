@@ -231,3 +231,13 @@ def test_write_output_rounds_floats_and_reports_text_and_quality_counts(tmp_path
     assert manifest["unnamed_by_type"] == {"culture": 1}
     assert manifest["unmatched_rarity_scores"] == 2
     assert all(isinstance(manifest[name], int) for name in build.QUALITY_COUNTS)
+
+
+def test_write_output_writes_reference_documents(tmp_path):
+    ctx = make_context({"dummy": [{"a": 1}]})
+    out = build.write_output(ctx, build.build_all(ctx, modules=[fake_module()]), tmp_path, "abc123")
+    for name in ("campaigns", "colours", "ui_labels"):
+        assert (out / "reference" / f"{name}.json").exists()
+    manifest = json.loads((out / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["reference"] == {"campaigns": 0, "colours": 0, "ui_labels": 8}
+    assert manifest["ui_labels_without_text"] == 8

@@ -15,6 +15,7 @@ from . import abilities, buildings, campaigns, characters, effects, factions, it
 from .context import Context, by_key
 from .images import INLINE_ICONS, ImageIndex, inline_targets
 from .link_report import link_report
+from .reference import build_reference
 from .schemas import ENTITY_MODELS
 from .text import round_float
 
@@ -125,7 +126,7 @@ def write_output(ctx: Context, entities: dict[str, list[dict]], out_root: Path, 
     staging = out_root / f"{build_id}.partial"
     if staging.exists():
         shutil.rmtree(staging)
-    for sub in ("entities", "index", "schema", "images"):
+    for sub in ("entities", "index", "schema", "images", "reference"):
         (staging / sub).mkdir(parents=True)
 
     for entity_type, rows in sorted(entities.items()):
@@ -149,6 +150,11 @@ def write_output(ctx: Context, entities: dict[str, list[dict]], out_root: Path, 
         json.dumps(inline, ensure_ascii=False, indent=1, sort_keys=True), encoding="utf-8")
     files_copied = ctx.images.copy_used(staging / "images")
 
+    reference_docs = build_reference(ctx, entities)
+    for name, doc in reference_docs.items():
+        (staging / "reference" / f"{name}.json").write_text(
+            json.dumps(round_floats(doc), ensure_ascii=False, indent=1), encoding="utf-8")
+
     manifest = {
         "build_id": build_id,
         "model_version": MODEL_VERSION,
@@ -162,6 +168,7 @@ def write_output(ctx: Context, entities: dict[str, list[dict]], out_root: Path, 
         **{name: ctx.tally[name] for name in QUALITY_COUNTS},
         "partial": ctx.partial,
         "images": ctx.images.manifest(files_copied),
+        "reference": {name: len(doc) for name, doc in reference_docs.items()},
     }
     manifest.update(ctx.manifest_sections)
     (staging / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
