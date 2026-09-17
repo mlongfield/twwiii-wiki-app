@@ -1,0 +1,13 @@
+---
+import { getSite } from "../data/model";
+import { campaignRestriction } from "../lib/campaignFilter";
+
+interface Props {
+  type: string;
+  entity: Record<string, any>;
+}
+
+const site = await getSite();
+const campaigns = campaignRestriction(Astro.props.type, Astro.props.entity, site.model.entities.campaign.size);
+---
+{campaigns.length > 0 && <p class="campaign-badge">{campaigns.map((c) => c.name ?? c.key).join(" · ")}</p>}

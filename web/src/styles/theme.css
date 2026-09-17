@@ -123,3 +123,5 @@ input[type="search"], select {
 .fx-bad { color: var(--col-red); }
 .hidden-effects { margin-top: 0.5rem; }
 .hidden-effects summary { cursor: pointer; color: var(--muted); }
+
+.campaign-badge { display: inline-block; margin: 0.3rem 0 0; padding: 0.05rem 0.5rem; border: 1px solid var(--border-accent); color: var(--gold); font-size: 0.8rem; }

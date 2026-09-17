@@ -29,7 +29,7 @@ const info = pageTypeInfo(type)!;
 const Body = PAGE_BODIES[type as keyof typeof PAGE_BODIES];
 ---
 <Layout title={name ?? entityKey} description={`${info.singular}: ${name ?? entityKey} — Total War: WARHAMMER III`}>
-  <EntityHeader type={type} entityKey={entityKey} name={name} image={mainImage(site, type, entity)} />
+  <EntityHeader type={type} entityKey={entityKey} name={name} image={mainImage(site, type, entity)} entity={entity} />
   <div class="entity-body">
     <Body entityKey={entityKey} />
   </div>

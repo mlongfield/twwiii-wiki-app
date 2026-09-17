@@ -48,6 +48,13 @@ describe("browseRows", () => {
     const item = browseRows(site, "item")[0];
     expect(item.values.join(" ")).not.toContain("[object Object]");
   });
+
+  it("tags rows with campaigns for filterable types only", () => {
+    const reikland = browseRows(site, "faction").find((r) => r.key === "wh_main_emp_empire")!;
+    expect(reikland.campaigns?.split(" ")).toContain("wh3_main_combi");
+    expect(browseRows(site, "unit")[0].campaigns).toBeNull();
+    expect(browseRows(site, "campaign").map((r) => r.key)).toContain("wh3_main_combi");
+  });
 });
 
 describe("browseFilters", () => {

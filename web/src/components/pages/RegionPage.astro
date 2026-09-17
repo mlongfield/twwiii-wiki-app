@@ -18,7 +18,6 @@ const initialCulture = region.is_settlement ? defaultCulture(site, region) : nul
 ---
 <Section title="Overview">
   <StatTable rows={[
-    ["Campaign", region.campaign],
     ["Settlement", region.is_settlement],
     ["Province capital", region.is_province_capital],
     ["Faction capital at start", region.is_faction_capital],
@@ -26,6 +25,7 @@ const initialCulture = region.is_settlement ? defaultCulture(site, region) : nul
     ["Slot templates", region.template_source === "special" ? "Special settlement" : "Generic"],
     ["Region groups", region.region_groups.join(", ")],
   ]} />
+  {region.campaign && <p>Campaign: <EntityLink link={region.campaign} /></p>}
   {region.province && <p>Province: <EntityLink link={region.province} /></p>}
   {region.starting_owner && <p>Starting owner: <EntityLink link={region.starting_owner} /></p>}
   {region.cultural_originator && <p>Cultural originator: <EntityLink link={region.cultural_originator} /></p>}

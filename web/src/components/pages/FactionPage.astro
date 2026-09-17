@@ -22,6 +22,12 @@ const faction = site.model.entities.faction.get(Astro.props.entityKey)!;
   ]} />
   {faction.culture && <p>Culture: <EntityLink link={faction.culture} /></p>}
   {faction.subculture && <p>Subculture: <EntityLink link={faction.subculture} /></p>}
+  {faction.start_campaigns.length > 0 && (
+    <p>Starts in: {faction.start_campaigns.map((c, i) => <>{i > 0 && " · "}<EntityLink link={c} showIcon={false} /></>)}</p>
+  )}
+  {faction.playable_in.length > 0 && (
+    <p>Playable in: {faction.playable_in.map((c, i) => <>{i > 0 && " · "}<EntityLink link={c} showIcon={false} /></>)}</p>
+  )}
 </Section>
 <Section title="Units" show={faction.units.length > 0}><LinkList links={faction.units} /></Section>
 <Section title="Characters" show={faction.characters.length > 0}><LinkList links={faction.characters} /></Section>

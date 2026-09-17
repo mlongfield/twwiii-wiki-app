@@ -13,7 +13,8 @@ const site = await getSite();
 const province = site.model.entities.province.get(Astro.props.entityKey)!;
 ---
 <Section title="Overview">
-  <StatTable rows={[["Campaign", province.campaign], ["Regions", province.regions.length]]} />
+  <StatTable rows={[["Regions", province.regions.length]]} />
+  {province.campaign && <p>Campaign: <EntityLink link={province.campaign} /></p>}
   {province.capital && <p>Capital: <EntityLink link={province.capital} /></p>}
 </Section>
 <Section title="Regions" show={province.regions.length > 0}><LinkList links={province.regions} /></Section>

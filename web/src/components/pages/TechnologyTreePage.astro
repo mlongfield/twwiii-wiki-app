@@ -16,7 +16,8 @@ const tree = site.model.entities.technology_tree.get(Astro.props.entityKey)!;
 const layout = technologyTreeLayout(site, tree);
 ---
 <Section title="Scope">
-  <StatTable rows={[["Campaign", tree.campaign], ["Technologies", tree.nodes.length]]} />
+  <StatTable rows={[["Technologies", tree.nodes.length]]} />
+  {tree.campaign && <p>Campaign: <EntityLink link={tree.campaign} /></p>}
   {tree.culture && <p>Culture: <EntityLink link={tree.culture} /></p>}
   {tree.subculture && <p>Subculture: <EntityLink link={tree.subculture} /></p>}
   {tree.faction && <p>Faction: <EntityLink link={tree.faction} /></p>}

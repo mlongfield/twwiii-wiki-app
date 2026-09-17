@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { DEFAULT_CAMPAIGN, EVERY_CAMPAIGN, campaignMatches } from "../lib/campaignFilter";
 
 interface FilterSpec {
   index: number;
@@ -10,12 +11,14 @@ interface Props {
   tableId: string;
   filters: FilterSpec[];
   total: number;
+  campaigns?: { key: string; name: string }[];
 }
 
-export default function BrowseFilter({ tableId, filters, total }: Props) {
+export default function BrowseFilter({ tableId, filters, total, campaigns = [] }: Props) {
   const [text, setText] = useState("");
   const [debouncedText, setDebouncedText] = useState("");
   const [selected, setSelected] = useState<Record<number, string>>({});
+  const [campaign, setCampaign] = useState(campaigns.some((c) => c.key === DEFAULT_CAMPAIGN) ? DEFAULT_CAMPAIGN : "");
   const [shown, setShown] = useState(total);
 
   // Debounce the free-text filter (~150ms) so fast typing doesn't force a full
@@ -32,6 +35,7 @@ export default function BrowseFilter({ tableId, filters, total }: Props) {
       document.querySelectorAll<HTMLTableRowElement>(`#${tableId} tbody tr`).forEach((row) => {
         const matches =
           (!needle || (row.dataset.search ?? "").includes(needle)) &&
+          (!campaigns.length || campaignMatches(row.dataset.campaigns ?? EVERY_CAMPAIGN, campaign)) &&
           Object.entries(selected).every(([index, value]) => !value || row.getAttribute(`data-f${index}`) === value);
         row.hidden = !matches;
         if (matches) count += 1;
@@ -39,7 +43,7 @@ export default function BrowseFilter({ tableId, filters, total }: Props) {
       setShown(count);
     });
     return () => cancelAnimationFrame(frame);
-  }, [debouncedText, selected, tableId]);
+  }, [debouncedText, selected, campaign, campaigns.length, tableId]);
 
   return (
     <div className="browse-filter" role="search">
@@ -50,6 +54,17 @@ export default function BrowseFilter({ tableId, filters, total }: Props) {
         value={text}
         onChange={(e) => setText(e.target.value)}
       />
+      {campaigns.length > 0 && (
+        <label>
+          Campaign{" "}
+          <select value={campaign} onChange={(e) => setCampaign(e.target.value)}>
+            <option value="">All</option>
+            {campaigns.map((c) => (
+              <option key={c.key} value={c.key}>{c.name}</option>
+            ))}
+          </select>
+        </label>
+      )}
       {filters.map((f) => (
         <label key={f.index}>
           {f.label}{" "}

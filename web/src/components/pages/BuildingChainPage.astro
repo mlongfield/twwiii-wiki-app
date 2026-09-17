@@ -25,7 +25,7 @@ const chain = site.model.entities.building_chain.get(Astro.props.entityKey)!;
           <td><EntityLink link={a.culture} /></td>
           <td><EntityLink link={a.subculture} /></td>
           <td><EntityLink link={a.faction} /></td>
-          <td>{a.campaign ?? ""}</td>
+          <td><EntityLink link={a.campaign} /></td>
         </tr>
       ))}
     </tbody>

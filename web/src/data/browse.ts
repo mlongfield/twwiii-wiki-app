@@ -1,3 +1,4 @@
+import { campaignTag } from "../lib/campaignFilter";
 import { formatNumber } from "../lib/effectText";
 import { type EntityImage, mainImage } from "./images";
 import type { PageType } from "./pageTypes";
@@ -53,6 +54,7 @@ export interface BrowseRow {
   url: string;
   image: EntityImage | null;
   values: string[];
+  campaigns: string | null;
 }
 
 export interface BrowseFilterSpec {
@@ -81,6 +83,7 @@ export function browseRows(site: Site, type: PageType): BrowseRow[] {
       url: urlFor(site, type, entity.key)!,
       image: mainImage(site, type, entity),
       values: fields.map((f) => cellText(f.value ? f.value(entity) : entity[f.field])),
+      campaigns: campaignTag(type, entity),
     });
   }
   return rows.sort((a, b) => a.name.localeCompare(b.name) || a.key.localeCompare(b.key));

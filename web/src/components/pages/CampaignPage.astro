@@ -1,0 +1,23 @@
+---
+import { getSite } from "../../data/model";
+import LinkList from "../LinkList.astro";
+import Section from "../Section.astro";
+import StatTable from "../StatTable.astro";
+
+interface Props {
+  entityKey: string;
+}
+
+const site = await getSite();
+const campaign = site.model.entities.campaign.get(Astro.props.entityKey)!;
+---
+<Section title="Overview">
+  <StatTable rows={[
+    ["Map", campaign.map],
+    ["Factions", campaign.factions.length],
+    ["Regions", campaign.regions.length],
+  ]} />
+</Section>
+<Section title="Playable factions" show={campaign.playable_factions.length > 0}><LinkList links={campaign.playable_factions} /></Section>
+<Section title="Major factions" show={campaign.major_factions.length > 0}><LinkList links={campaign.major_factions} /></Section>
+<Section title="Regions" show={campaign.regions.length > 0}><LinkList links={campaign.regions} /></Section>
