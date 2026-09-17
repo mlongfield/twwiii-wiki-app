@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 
 from tests.publish.helpers import make_model
+from twwiki.model.build import MODEL_VERSION
 from twwiki.publish import PublishError
 from twwiki.publish.local_model import ENTITY_TYPES, check_model, find_model_dir, iter_entities, model_files
 
@@ -49,7 +50,7 @@ def test_check_model_passes_for_the_web_fixture_model():
 
 def test_check_model_rejects_other_model_versions(tmp_path):
     model_dir = make_model(tmp_path, model_version=1)
-    with pytest.raises(PublishError, match="model_version 1, expected 2"):
+    with pytest.raises(PublishError, match=f"model_version 1, expected {MODEL_VERSION}"):
         check_model(model_dir)
 
 

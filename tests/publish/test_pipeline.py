@@ -9,6 +9,7 @@ from google.auth.exceptions import DefaultCredentialsError
 from tests.publish.fakes import FakeEntityStore, FakePost, FakeSnapshotStore
 from tests.publish.helpers import make_model
 from twwiki.config import load_config
+from twwiki.model.build import MODEL_VERSION
 from twwiki.publish import PublishError, documents
 from twwiki.publish import __main__ as cli
 from twwiki.publish.pipeline import Services, Settings, deploy_only, publish, prune_build
@@ -53,7 +54,7 @@ def test_publish_runs_every_step_and_switches_current_last(tmp_path):
     assert services.entities.docs["builds/b1/unit/u1"]["key"] == "u1"
     assert services.entities.docs["builds/b1"]["status"] == "ready"
     assert services.entities.docs["site/current"] == {
-        "build_id": "b1", "previous_build_id": None, "model_version": 2, "published_at": NOW}
+        "build_id": "b1", "previous_build_id": None, "model_version": MODEL_VERSION, "published_at": NOW}
     calls = services.entities.calls
     last_count = max(i for i, call in enumerate(calls) if call[0] == "count")
     assert calls.index(("set", "site/current")) > last_count
@@ -80,7 +81,7 @@ def test_publish_picks_the_newest_model_or_the_given_build(tmp_path):
 
 
 def _preflight_failure(tmp_path, scenario):
-    model_version = 1 if scenario == "version" else 2
+    model_version = 1 if scenario == "version" else MODEL_VERSION
     make_model(tmp_path, "b1", model_version=model_version)
     services = make_services(token=None if scenario == "token" else "tok",
                              snapshots=FakeSnapshotStore(exists=scenario != "bucket"))
@@ -92,7 +93,7 @@ def _preflight_failure(tmp_path, scenario):
 
 
 @pytest.mark.parametrize("scenario, message", [
-    ("version", "model_version 1, expected 2"),
+    ("version", f"model_version 1, expected {MODEL_VERSION}"),
     ("token", "TWWIKI_GITHUB_TOKEN is not set"),
     ("credentials", "gcloud auth application-default login"),
     ("permission", "gcloud auth application-default login"),

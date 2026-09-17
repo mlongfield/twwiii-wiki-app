@@ -30,6 +30,10 @@ class Context:
     partial: dict[str, list[str]] = field(default_factory=dict)
     images: ImageIndex = field(default_factory=ImageIndex.unavailable)
     manifest_sections: dict[str, dict] = field(default_factory=dict)
+    # Quality counters written to the manifest (see build.QUALITY_COUNTS).
+    tally: Counter = field(default_factory=Counter)
+    # effect key -> priority, polarity and icons, filled by effects.build for effect_application.
+    effect_display: dict[str, dict] = field(default_factory=dict)
     # Game tables any builder queried, for the link report.
     tables_read: set[str] = field(default_factory=set)
     _table_names: set[str] | None = field(default=None, repr=False)

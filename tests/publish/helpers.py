@@ -5,11 +5,12 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from twwiki.model.build import MODEL_VERSION
 from twwiki.publish.local_model import ENTITY_TYPES
 
 
 def make_model(root: Path, build_id: str = "b1", *, generated_at: str = "2026-09-16T00:00:00+00:00",
-               entities: dict[str, list[dict]] | None = None, model_version: int = 2) -> Path:
+               entities: dict[str, list[dict]] | None = None, model_version: int = MODEL_VERSION) -> Path:
     """Write a complete minimal model folder and return its path."""
     entities = entities or {}
     model_dir = root / build_id

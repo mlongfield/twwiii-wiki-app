@@ -198,4 +198,35 @@ def test_run_reads_images_from_the_raw_build(tmp_path):
 
     assert out == tmp_path / "model" / "abc123"
     manifest = json.loads((out / "manifest.json").read_text(encoding="utf-8"))
-    assert manifest["images"]["available"] is True and manifest["model_version"] == 2
+    assert manifest["images"]["available"] is True and manifest["model_version"] == build.MODEL_VERSION
+
+
+def test_round_floats_rounds_nested_floats_only():
+    data = {"a": 0.90000004, "b": [1.0000001, {"c": 2}], "d": True, "e": "0.90000004", "f": None}
+    assert build.round_floats(data) == {"a": 0.9, "b": [1.0, {"c": 2}], "d": True, "e": "0.90000004", "f": None}
+    assert type(build.round_floats({"c": 2})["c"]) is int
+
+
+def test_write_output_rounds_floats_and_reports_text_and_quality_counts(tmp_path):
+    ctx = make_context({"dummy": [{"a": 1}]}, loc={"s": "{{tt:x}} text", "p": "placeholder"})
+    ctx.loc.text("s")
+    ctx.loc.text("p")
+    ctx.tally["unmatched_rarity_scores"] = 2
+    module = SimpleNamespace(
+        catalog=lambda ctx: {"campaign_variable": {"v": "v"}, "culture": {"nameless": None}},
+        build=lambda ctx: {
+            "campaign_variable": [{"key": "v", "value": 0.90000004, "overrides": []}],
+            "culture": [{"key": "nameless", "name": None, "subcultures": [], "factions": []}],
+        },
+    )
+    out = build.write_output(ctx, build.build_all(ctx, modules=[module]), tmp_path, "abc123")
+
+    row = json.loads((out / "entities" / "campaign_variable.jsonl").read_text(encoding="utf-8"))
+    assert row["value"] == 0.9
+    manifest = json.loads((out / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["model_version"] == 3
+    assert manifest["text"] == {"placeholders_by_prefix": {"p": 1}, "dropped_tt_tokens": 1,
+                                "dropped_cco_tokens": 0, "dropped_tr_tokens": 0}
+    assert manifest["unnamed_by_type"] == {"culture": 1}
+    assert manifest["unmatched_rarity_scores"] == 2
+    assert all(isinstance(manifest[name], int) for name in build.QUALITY_COUNTS)
