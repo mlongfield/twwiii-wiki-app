@@ -1,6 +1,6 @@
 import type { SkillTree } from "../generated/character";
 import type { TechnologyTree } from "../generated/technology_tree";
-import { skillDetailHtml, technologyDetailHtml } from "../lib/detailHtml";
+import { campaignNoteHtml, skillDetailHtml, technologyDetailHtml } from "../lib/detailHtml";
 import { type TreeLayout, layoutTree } from "../lib/treeLayout";
 import { type Site, imageSrc, urlFor } from "./site";
 
@@ -15,7 +15,7 @@ export function skillTreeLayout(site: Site, tree: SkillTree): TreeLayout {
       icon: imageSrc(site, skill?.icon_image),
       url: urlFor(site, "skill", n.skill.key),
       hidden: !n.visible_in_ui,
-      detailHtml: skillDetailHtml(site, n.skill.key),
+      detailHtml: skillDetailHtml(site, n.skill.key) + campaignNoteHtml(site, n.campaign ? [n.campaign] : []),
     };
   });
   return layoutTree(nodes, tree.links.map((l) => ({ parent: l.parent, child: l.child })));

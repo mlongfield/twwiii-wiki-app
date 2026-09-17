@@ -18,6 +18,6 @@ export function formatEffect(description: string | null, key: string, value: num
   return substituted ? text : `${description} (${signed(value)})`;
 }
 
-export function scopeLabel(scope: string | null): string | null {
-  return scope ? scope.replace(/_/g, " ") : null;
+export function polarityClass(favourable: boolean | null | undefined): "fx-good" | "fx-bad" | null {
+  return favourable === true ? "fx-good" : favourable === false ? "fx-bad" : null;
 }
