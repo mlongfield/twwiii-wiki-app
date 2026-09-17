@@ -8,7 +8,9 @@ from tests.model.fixtures import make_context
     ("#999999", "#999999"),   # lightness exactly 60%: unchanged
     ("#989898", "#999999"),   # just under 60%: raised
     ("#000080", "#3333FF"),   # navy: same hue and saturation, lightness 60%
-    ("#41E1E1", "#41E1E1"),   # already light
+    ("#C8C8C8", "#C8C8C8"),   # already light
+    ("#41E1E1", "#4FE3E3"),   # bright cyan with HSL lightness 56.9%: raised
+    ("#FF0000", "#FF3333"),   # saturated red with HSL lightness 50%: raised
 ])
 def test_dark_hex_raises_lightness_to_sixty_percent(value, expected):
     assert reference.dark_hex(value) == expected
@@ -39,7 +41,7 @@ def test_build_reference_documents():
     assert docs["colours"] == [
         {"key": "dark_red", "description": "", "hex": "#800000", "dark_hex": "#FF3333",
          "profiles": {"deuteranopia": None, "protanopia": None, "tritanopia": None}},
-        {"key": "magic", "description": "Magic text", "hex": "#41E1E1", "dark_hex": "#41E1E1",
+        {"key": "magic", "description": "Magic text", "hex": "#41E1E1", "dark_hex": "#4FE3E3",
          "profiles": {"deuteranopia": "#364099", "protanopia": None, "tritanopia": None}},
     ]
     assert docs["ui_labels"]["duration"] == "Duration" and docs["ui_labels"]["effects"] == "Effects"

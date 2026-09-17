@@ -37,12 +37,11 @@ def hex_colour(value) -> str | None:
 
 
 def dark_hex(hex_value: str) -> str:
-    """The colour for a dark background: lightness raised to 60% when the colour reads as dark
-    (its brightest channel is below 60%), same hue and saturation."""
+    """The colour for a dark background: lightness raised to 60% when it is lower, same hue and saturation."""
     r, g, b = (int(hex_value[i:i + 2], 16) / 255 for i in (1, 3, 5))
-    if max(r, g, b) >= DARK_MIN_LIGHTNESS:
+    h, lightness, s = colorsys.rgb_to_hls(r, g, b)
+    if lightness >= DARK_MIN_LIGHTNESS:
         return hex_value
-    h, _lightness, s = colorsys.rgb_to_hls(r, g, b)
     return "#" + "".join(f"{round(c * 255):02X}" for c in colorsys.hls_to_rgb(h, DARK_MIN_LIGHTNESS, s))
 
 
