@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { type GameTextImages, parseGameText, renderGameTextHtml } from "../../src/lib/gameText";
+import { type GameTextImages, parseGameText, renderGameTextHtml, stripGameMarkup } from "../../src/lib/gameText";
 
 const images: GameTextImages = {
   inline: { icon_hero: "ui/skins/default/icon_agent_small.png", icon_gone: null },
@@ -12,7 +12,7 @@ describe("parseGameText", () => {
   it("builds a node tree", () => {
     expect(parseGameText("[[b]]x")).toEqual({
       title: null,
-      body: [{ kind: "span", style: "bold", colour: null, children: [{ kind: "text", text: "x" }] }],
+      body: [{ kind: "span", tag: "b", style: "bold", colour: null, children: [{ kind: "text", text: "x" }] }],
     });
   });
 
@@ -30,21 +30,43 @@ describe("renderGameTextHtml", () => {
     expect(html("")).toBe("");
   });
 
-  it("renders bold, italic, help and colour tags", () => {
-    expect(html("[[b]]x[[/b]] [[i]]y[[/i]] [[sl:campaign_armies]]z[[/sl]] [[col:red]]r[[/col]]")).toBe(
-      '<strong>x</strong> <em>y</em> <span class="gt-help">z</span> <span class="gt-col gt-col-red">r</span>',
+  it("renders bold, italic and colour tags", () => {
+    expect(html("[[b]]x[[/b]] [[i]]y[[/i]] [[col:red]]r[[/col]]")).toBe(
+      '<strong>x</strong> <em>y</em> <span class="gt-col gt-col-red">r</span>',
     );
     expect(html("[[overridecol:fe_white]]w[[/overridecol]]")).toBe('<span class="gt-col gt-col-fe-white">w</span>');
-    expect(html("[[col:blue]]b[[/col]]")).toBe('<span class="gt-col">b</span>');
   });
 
-  it("tolerates nesting, mismatched, stray and unclosed tags", () => {
+  it("leaves colours uncoloured and marked when they are not in the colour list", () => {
+    const known: GameTextImages = { ...images, colours: new Set(["red"]) };
+    expect(renderGameTextHtml("[[col:Red]]a[[/col]][[col:blue]]b[[/col]]", known)).toBe(
+      '<span class="gt-col gt-col-red">a</span><span class="gt-col" data-unknown-colour="blue">b</span>',
+    );
+  });
+
+  it("renders only the inner text of link, tooltip, fragment and unknown tags", () => {
+    expect(
+      html("[[sl:campaign_armies]]a[[/sl]] [[url:https://x]]b[[/url]] [[tooltip:]]c[[/tooltip]] [[sl_tooltip:t]]d[[/sl_tooltip]] " +
+        "[[fragment:f]]e[[/fragment]] [[sl_link:l]]f[[/sl_link]] [[foo:bar]]g[[/foo]] [[baz]]h"),
+    ).toBe("a b c d e f g h");
+  });
+
+  it("hides text at opacity 0 and shows it otherwise", () => {
+    expect(html("x[[opacity:0]]gone[[/opacity]]y[[opacity:0.5]]seen[[/opacity]]")).toBe("xyseen");
+  });
+
+  it("closes only the most recent open tag with the same name", () => {
     expect(html("A [[b]][[col:red]]Rampaging[[/col]][[/b]] unit")).toBe(
       'A <strong><span class="gt-col gt-col-red">Rampaging</span></strong> unit',
     );
-    expect(html("[[b]]Corrupt Units[[/i]] allows")).toBe("<strong>Corrupt Units</strong> allows");
+    expect(html("[[b]]Corrupt Units[[/i]] allows")).toBe("<strong>Corrupt Units allows</strong>");
+    expect(html("[[b]]a[[i]]b[[/b]]c")).toBe("<strong>a<em>b</em></strong>c");
     expect(html("[[b]]open")).toBe("<strong>open</strong>");
     expect(html("x[[/b]]y")).toBe("xy");
+  });
+
+  it("drops {{…}} tokens", () => {
+    expect(html("{{tr:research}}: x {{CcoFoo:bar}}")).toBe(": x ");
   });
 
   it("turns literal and real newlines into line breaks", () => {
@@ -54,10 +76,6 @@ describe("renderGameTextHtml", () => {
 
   it("renders a title line", () => {
     expect(html("Rampage||A [[b]]unit[[/b]]")).toBe('<span class="gt-title">Rampage</span>A <strong>unit</strong>');
-  });
-
-  it("shows unresolved and unknown tokens as text", () => {
-    expect(html("{{tr:research}}: [[foo:bar]] [[baz]]")).toBe("tr:research: foo:bar baz");
   });
 
   it("renders inline icons through inline.json and placeholders otherwise", () => {
@@ -71,5 +89,11 @@ describe("renderGameTextHtml", () => {
   it("shows a placeholder when the resolved image file is not available", () => {
     const noFiles: GameTextImages = { inline: images.inline, src: () => null };
     expect(renderGameTextHtml("[[img:icon_hero]][[/img]]", noFiles)).toBe(PLACEHOLDER);
+  });
+});
+
+describe("stripGameMarkup", () => {
+  it("removes tags and tokens and keeps the text", () => {
+    expect(stripGameMarkup("[[col:ancillary_rare]]Rare[[/col]] {{tt:x}}item")).toBe("Rare item");
   });
 });

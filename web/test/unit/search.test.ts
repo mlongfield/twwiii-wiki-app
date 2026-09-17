@@ -25,6 +25,7 @@ function minimalSite(overrides: Record<string, Map<string, any>>): Site {
     slugs: Object.fromEntries(PAGE_TYPES.map((p) => [p.type, new Map()])),
     chainsByCulture: new Map(),
     images: new Set(),
+    colourKeys: new Set(),
   } as unknown as Site;
 }
 

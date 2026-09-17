@@ -9,6 +9,7 @@ export interface Site {
   slugs: Record<PageType, Map<string, string>>;
   chainsByCulture: Map<string, string[]>;
   images: Set<string>;
+  colourKeys: Set<string>;
 }
 
 export interface AvailabilityRef {
@@ -69,7 +70,13 @@ export async function createSite(model: Model): Promise<Site> {
     list.sort((a, b) => chainName(a).localeCompare(chainName(b)) || a.localeCompare(b));
   }
 
-  return { model, slugs, chainsByCulture, images: await listImages(model.dir) };
+  return {
+    model,
+    slugs,
+    chainsByCulture,
+    images: await listImages(model.dir),
+    colourKeys: new Set(model.reference.colours.map((c) => c.key.toLowerCase())),
+  };
 }
 
 /** URL of an entity page, or null when the type has no pages or the key is not in the model. */

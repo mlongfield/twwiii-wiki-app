@@ -11,7 +11,7 @@ interface ApplicationRef {
 }
 
 function images(site: Site) {
-  return { inline: site.model.inline, src: (p: string) => imageSrc(site, p) };
+  return { inline: site.model.inline, src: (p: string) => imageSrc(site, p), colours: site.colourKeys };
 }
 
 export function effectsHtml(site: Site, applications: ApplicationRef[]): string {
