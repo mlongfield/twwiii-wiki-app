@@ -172,7 +172,7 @@ bring it to 286 MB (16,561 files) with an identical model.
   token counts), `unnamed_by_type`, quality counts (effect applications
   without scope text, unmatched rarity scores, unresolved agent type names,
   excluded campaign-exclusive permissions, unresolved building availability
-  keys), partial entity types, an `images` section (per-field
+  keys, `ui_labels_without_text`), partial entity types, an `images` section (per-field
   referenced/resolved/missing/ambiguous counts, plus `available` and
   `files_copied`), a `reference` section (document name to entry count), and a
   `regions` section (`special_templates_unmatched`).
