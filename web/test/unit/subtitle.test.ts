@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Site } from "../../src/data/site";
-import { repeatedNames, subtitleFor } from "../../src/lib/subtitle";
+import { SUBTITLE_TYPES, repeatedNames, subtitleFor } from "../../src/lib/subtitle";
 
 const link = (key: string, name: string | null) => ({ type: "x", key, name, missing: false });
 const site = {
@@ -43,6 +43,27 @@ describe("subtitleFor", () => {
 
   it("has no subtitle for other types", () => {
     expect(subtitleFor(site, "skill", { key: "s" })).toBeNull();
+  });
+});
+
+describe("SUBTITLE_TYPES", () => {
+  const SAMPLE_ENTITY: Record<string, Record<string, unknown>> = {
+    unit: { category_name: "Melee Infantry" },
+    character: { agent_types: [{ key: "general", name: "Lord" }], factions: [link("reikland", "Reikland")] },
+    building_level: { chain: link("c", "Barracks") },
+    item: { rarity: { key: "r", name: "Rare" }, category: { key: "weapon", name: "Weapon" } },
+    faction: { culture: link("emp", "The Empire"), start_campaigns: [] },
+    technology_tree: { faction: link("f", "Wulfhart"), culture: null },
+  };
+
+  it("has a case in subtitleFor for every listed type", () => {
+    for (const type of SUBTITLE_TYPES) {
+      expect(subtitleFor(site, type, SAMPLE_ENTITY[type])).not.toBeNull();
+    }
+  });
+
+  it("does not include types with no subtitle, such as skill", () => {
+    expect(SUBTITLE_TYPES.has("skill")).toBe(false);
   });
 });
 

@@ -5,6 +5,16 @@ import { stripGameMarkup } from "./gameText";
 type Entity = Record<string, any>;
 type NamedLink = { key: string; name: string | null } | null | undefined;
 
+/** Types `subtitleFor` returns text for; must stay consistent with the switch below. */
+export const SUBTITLE_TYPES: ReadonlySet<string> = new Set([
+  "unit",
+  "character",
+  "building_level",
+  "item",
+  "faction",
+  "technology_tree",
+]);
+
 function join(parts: (string | null | undefined)[]): string | null {
   const text = parts
     .filter((p): p is string => Boolean(p))
