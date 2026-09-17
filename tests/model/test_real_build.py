@@ -213,12 +213,18 @@ def test_link_report_labels_known_references(model):
 # first version 3 build. Raise it only after checking the new chains really have no name.
 MAX_UNNAMED_BUILDING_CHAINS = 0
 
+# Raw asset file keys copied from game tables; five effects and abilities use the literal key
+# "placeholder". Pages show resolved images, never these keys.
+RAW_ASSET_FIELDS = {"icon", "icon_negative"}
+
 
 def iter_strings(value):
     if isinstance(value, str):
         yield value
     elif isinstance(value, dict):
-        for v in value.values():
+        for k, v in value.items():
+            if k in RAW_ASSET_FIELDS:
+                continue
             yield from iter_strings(v)
     elif isinstance(value, list):
         for v in value:
