@@ -1,6 +1,5 @@
 ---
 import { getSite } from "../../data/model";
-import { stripGameMarkup } from "../../lib/gameText";
 import EffectList from "../EffectList.astro";
 import EntityLink from "../EntityLink.astro";
 import GameText from "../GameText.astro";
@@ -14,12 +13,14 @@ interface Props {
 
 const site = await getSite();
 const item = site.model.entities.item.get(Astro.props.entityKey)!;
+const rarityText = item.rarity ? (item.rarity.name ?? item.rarity.key) : null;
+const rarityHasColourMarkup = rarityText?.includes("[[col:") ?? false;
 ---
 <Section title="Overview">
   <GameText text={item.description} block />
   <GameText text={item.explanation} block />
   {item.rarity && (
-    <p class="item-rarity">Rarity: <span style={item.rarity.colour ? `color: ${item.rarity.colour}` : undefined}>{stripGameMarkup(item.rarity.name ?? item.rarity.key)}</span></p>
+    <p class="item-rarity">Rarity: <span style={item.rarity.colour && !rarityHasColourMarkup ? `color: ${item.rarity.colour}` : undefined}><GameText text={rarityText} /></span></p>
   )}
   <StatTable rows={[
     ["Category", item.category.name ?? item.category.key],

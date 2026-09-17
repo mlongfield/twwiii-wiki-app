@@ -107,6 +107,12 @@ test.describe("wiki", () => {
     await expect(page.locator(".item-rarity")).toContainText("Unique");
   });
 
+  test("uncommon item rarity renders readably through its colour class", async ({ page }) => {
+    await page.goto("/items/wh2_dlc09_anc_arcane_item_blue_khepra/");
+    const rarityColour = page.locator(".item-rarity span.gt-col-ancillary-uncommon");
+    await expect(rarityColour).toHaveText("Uncommon");
+  });
+
   test("unit page has no weapon key row", async ({ page }) => {
     await page.goto("/units/wh_main_emp_inf_greatswords/");
     await expect(page.getByRole("rowheader", { name: "Weapon", exact: true })).toHaveCount(0);
