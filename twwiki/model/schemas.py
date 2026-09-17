@@ -314,7 +314,7 @@ class SkillTreeNode(Strict):
     visible_in_ui: bool
     faction: str | None
     subculture: str | None
-    campaign: str | None
+    campaign: Link | None
 
 
 class SkillTreeLink(Strict):
@@ -335,7 +335,7 @@ class SkillTree(Strict):
     agent_type: str | None
     faction: str | None
     subculture: str | None
-    campaign: str | None
+    campaign: Link | None
     for_army: bool
     for_navy: bool
     nodes: list[SkillTreeNode]
@@ -365,6 +365,7 @@ class Character(Strict):
     cost: int
     cap: int
     factions: list[Link]
+    campaigns: list[Link]
     abilities: list[Link]
     skill_trees: list[SkillTree]
     items: list[Link] = []
@@ -406,6 +407,7 @@ class Placement(Strict):
     research_points_required: int
     cost_per_round: int
     resource_cost: ResourceCost | None
+    campaigns: list[Link]
 
 
 class TreeNode(Strict):
@@ -420,6 +422,7 @@ class TreeNode(Strict):
     ui_group: str | None
     pixel_offset_x: int
     pixel_offset_y: int
+    campaigns: list[Link]
 
 
 class TreeLink(Strict):
@@ -455,7 +458,7 @@ class TechnologyTree(Strict):
     culture: Link | None
     subculture: Link | None
     faction: Link | None
-    campaign: str | None
+    campaign: Link | None
     colour: str | None
     nodes: list[TreeNode]
     links: list[TreeLink]
@@ -490,7 +493,7 @@ class ChainAvailability(Strict):
     culture: Link | None
     subculture: Link | None
     faction: Link | None
-    campaign: str | None
+    campaign: Link | None
 
 
 @entity("building_chain")
@@ -574,7 +577,7 @@ class SlotTemplate(Strict):
 class Region(Strict):
     key: str
     name: str | None
-    campaign: str | None
+    campaign: Link | None
     is_settlement: bool
     province: Link | None
     is_province_capital: bool
@@ -591,7 +594,7 @@ class Region(Strict):
 class Province(Strict):
     key: str
     name: str | None
-    campaign: str | None
+    campaign: Link | None
     regions: list[Link]
     capital: Link | None
 
@@ -650,7 +653,7 @@ class Subculture(Strict):
 
 class DifficultyEffect(Strict):
     application: EffectApplication
-    campaign: str | None
+    campaign: Link | None
 
 
 @entity("difficulty_level")
@@ -662,7 +665,7 @@ class DifficultyLevel(Strict):
 
 
 class CampaignVariableOverride(Strict):
-    campaign: str
+    campaign: Link | None
     difficulty: str | None
     campaign_type: str | None
     value: float

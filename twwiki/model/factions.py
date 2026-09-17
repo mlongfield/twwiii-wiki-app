@@ -89,7 +89,8 @@ def build(ctx: Context) -> dict[str, list[dict]]:
             levels[level]["human" if r["human"] else "ai"].append({
                 "application": effect_application(ctx, r["effect"], scope=r["effect_scope"], value=r["effect_value"],
                                                   source=("difficulty_level", str(level))),
-                "campaign": opt(r["optional_campaign_key"]),
+                "campaign": ctx.links.link("campaign", opt(r["optional_campaign_key"]),
+                                           source=("difficulty_level", str(level)), relation="campaign"),
             })
         for level in sorted(levels):
             out["difficulty_level"].append({"key": str(level), "level": level, **levels[level]})
@@ -102,8 +103,9 @@ def build(ctx: Context) -> dict[str, list[dict]]:
             out["campaign_variable"].append({
                 "key": key,
                 "value": r["value"],
-                "overrides": [{"campaign": o["campaign_name"], "difficulty": opt(o["difficulty"]),
-                               "campaign_type": opt(o["campaign_type"]), "value": o["value"]}
+                "overrides": [{"campaign": ctx.links.link("campaign", opt(o["campaign_name"]), source=("campaign_variable", key),
+                                                          relation="overrides"),
+                               "difficulty": opt(o["difficulty"]), "campaign_type": opt(o["campaign_type"]), "value": o["value"]}
                               for o in overrides.get(key, [])],
             })
     return out

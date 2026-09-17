@@ -91,11 +91,11 @@ def test_unit_card_uses_the_default_variant_and_portrait_the_first_by_faction():
             {"faction": "reikland", "name": "", "unit": "arch_land", "variant": "", "unit_card": "reik_archers"},
         ],
         "units_custom_battle_permissions": [
-            {"faction": "reikland", "unit": "gs", "general_portrait": ""},
+            {"faction": "reikland", "unit": "gs", "general_portrait": "", "campaign_exclusive": False},
             {"faction": "reikland", "unit": "archers",
-             "general_portrait": "ui\\portraits\\portholes\\no_culture\\reik_captain_0.png"},
+             "general_portrait": "ui\\portraits\\portholes\\no_culture\\reik_captain_0.png", "campaign_exclusive": False},
             {"faction": "averland", "unit": "archers",
-             "general_portrait": "ui/portraits/portholes/no_culture/aver_captain_0.png"},
+             "general_portrait": "ui/portraits/portholes/no_culture/aver_captain_0.png", "campaign_exclusive": False},
         ],
     }), "ui/units/icons/gs_card.png", "ui/units/icons/reik_archers.png",
         "ui/portraits/portholes/no_culture/reik_captain_0.png", "ui/portraits/portholes/no_culture/aver_captain_0.png")

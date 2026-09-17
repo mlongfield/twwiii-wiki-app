@@ -56,7 +56,7 @@ def chain_availability(ctx: Context) -> dict[str, list[dict]]:
             "culture": ctx.links.link("culture", culture, source=source, relation="availability"),
             "subculture": ctx.links.link("subculture", subculture, source=source, relation="availability"),
             "faction": ctx.links.link("faction", faction, source=source, relation="availability"),
-            "campaign": campaign,
+            "campaign": ctx.links.link("campaign", campaign, source=source, relation="availability"),
         } for culture, subculture, faction, campaign in sorted(found, key=lambda s: tuple(x or "" for x in s))]
     return out
 

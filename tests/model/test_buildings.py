@@ -90,8 +90,9 @@ def test_chain_availability_scopes_sorted_and_deduplicated():
         ('bas_emp', 'wh_main_emp_empire', 'wh_main_sc_emp_empire', '', '')) t(set_id, culture, sub_culture, faction, campaign)""")
     ctx.links.register("culture", {"wh_main_emp_empire": "The Empire"})
     ctx.links.register("subculture", {"wh_main_sc_emp_empire": "The Empire", "wh_main_sc_teb_teb": "Tilea"})
+    ctx.links.register("campaign", {"wh3_main_combi": "Immortal Empires"})
     chains = {c["key"]: c for c in buildings.build(ctx)["building_chain"]}
-    assert [(a["culture"]["key"], a["subculture"]["key"], a["faction"], a["campaign"])
+    assert [(a["culture"]["key"], a["subculture"]["key"], a["faction"], a["campaign"]["key"] if a["campaign"] else None)
             for a in chains["emp_barracks"]["availability"]] == [
         ("wh_main_emp_empire", "wh_main_sc_emp_empire", None, None),
         ("wh_main_emp_empire", "wh_main_sc_teb_teb", None, "wh3_main_combi"),

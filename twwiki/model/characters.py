@@ -43,6 +43,10 @@ def _characters(ctx: Context) -> list[dict]:
     unit_abilities = grouped(ctx, "land_units_to_unit_abilites_junctions", "land_unit", "ability")
     permitted = grouped(ctx, "faction_agent_permitted_subtypes", "subtype", "faction, agent")
     trees = _skill_trees(ctx)
+    # campaign_to_agent_subtypes lists every campaign a subtype appears in (Karl Franz has
+    # rows for both Immortal Empires and The Realm of Chaos). No rows means no data; the
+    # web app treats an empty list as every campaign.
+    campaign_rows = grouped(ctx, "campaign_to_agent_subtypes", "agent_subtype", "campaign_type")
 
     out = []
     for r in ctx.rows("SELECT * FROM agent_subtypes ORDER BY key"):
@@ -68,6 +72,8 @@ def _characters(ctx: Context) -> list[dict]:
             "cap": r["cap"],
             "factions": [ctx.links.link("faction", f, source=source, relation="factions")
                          for f in sorted({p["faction"] for p in rows})],
+            "campaigns": [ctx.links.link("campaign", c, source=source, relation="campaigns")
+                          for c in sorted({row["campaign_type"] for row in campaign_rows.get(key, [])})],
             "abilities": [ctx.links.link("ability", a["ability"], source=source, relation="abilities")
                           for a in (unit_abilities.get(lu, []) if lu else [])],
             "skill_trees": [_tree(ctx, key, t) for t in trees.get(key, [])],
@@ -122,7 +128,7 @@ def _tree(ctx: Context, character: str, tree: dict) -> dict:
         "agent_type": opt(s["agent_key"]),
         "faction": opt(s["faction_key"]),
         "subculture": opt(s["subculture"]),
-        "campaign": opt(s["campaign_key"]),
+        "campaign": ctx.links.link("campaign", opt(s["campaign_key"]), source=source, relation="skill_tree_campaign"),
         "for_army": s["for_army"],
         "for_navy": s["for_navy"],
         "nodes": [{
@@ -135,7 +141,7 @@ def _tree(ctx: Context, character: str, tree: dict) -> dict:
             "visible_in_ui": n["visible_in_ui"],
             "faction": opt(n["faction_key"]),
             "subculture": opt(n["subculture"]),
-            "campaign": opt(n["campaign_key"]),
+            "campaign": ctx.links.link("campaign", opt(n["campaign_key"]), source=source, relation="skill_tree_campaign"),
         } for n in tree["nodes"]],
         "links": [{"parent": l["parent_key"], "child": l["child_key"], "link_type": l["link_type"],
                    "initial_descent_tiers": l["initial_descent_tiers"]} for l in tree["links"]],

@@ -47,7 +47,9 @@ def unit_context(extra_tables: dict | None = None):
         "land_units_to_unit_abilites_junctions": [{"ability": "hold", "land_unit": "gs_land"},
                                                   {"ability": "missing_ability", "land_unit": "gs_land"}],
         "agent_subtypes": [{"key": "captain", "associated_unit_override": "gs"}],
-        "units_custom_battle_permissions": [{"faction": "reikland", "unit": "gs"}, {"faction": "reikland", "unit": "gs"}],
+        "units_custom_battle_permissions": [{"faction": "reikland", "unit": "gs", "campaign_exclusive": False},
+                                            {"faction": "reikland", "unit": "gs", "campaign_exclusive": False},
+                                            {"faction": "norsca", "unit": "gs", "campaign_exclusive": True}],
         "building_units_allowed": [{"building": "barracks_2", "unit": "gs"}],
     }
     if extra_tables:
@@ -132,3 +134,9 @@ def test_units_carry_resolved_unit_sets():
     schemas.ENTITY_MODELS["unit"].model_validate(gs)
     schemas.ENTITY_MODELS["unit"].model_validate(archers)
     schemas.ENTITY_MODELS["unit"].model_validate(ship)
+
+
+def test_campaign_exclusive_permissions_are_excluded_and_counted():
+    ctx, built = built_units()
+    assert [f["key"] for f in built["gs"]["custom_battle_factions"]] == ["reikland"]
+    assert ctx.tally["campaign_exclusive_permissions_excluded"] == 1

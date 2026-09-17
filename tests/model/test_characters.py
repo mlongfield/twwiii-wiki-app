@@ -139,3 +139,19 @@ def test_skill_tree_items_pointing_at_missing_nodes_are_counted():
     assert [n["key"] for n in kf["skill_trees"][0]["nodes"]] == ["n_leader", "n_mentor"]
     assert ctx.links.missing["skill_tree.missing_node"] == 1
     schemas.ENTITY_MODELS["character"].model_validate(kf)
+
+
+def test_character_campaigns_and_skill_node_campaign_links():
+    ctx = character_context()
+    ctx.con.execute("CREATE TABLE campaign_to_agent_subtypes AS SELECT * FROM (VALUES "
+                    "('kf', 'wh3_main_combi'), ('kf', 'wh3_main_chaos')) t(agent_subtype, campaign_type)")
+    ctx.con.execute("UPDATE character_skill_nodes SET campaign_key = 'wh3_main_combi' WHERE key = 'n_mentor'")
+    ctx.links.register("campaign", {"wh3_main_combi": "Immortal Empires", "wh3_main_chaos": "The Realm of Chaos"})
+    built = {c["key"]: c for c in characters.build(ctx)["character"]}
+    kf = built["kf"]
+    assert [c["key"] for c in kf["campaigns"]] == ["wh3_main_chaos", "wh3_main_combi"]
+    assert built["wizard"]["campaigns"] == []
+    tree = kf["skill_trees"][0]
+    assert tree["campaign"] is None
+    assert tree["nodes"][0]["campaign"] is None and tree["nodes"][1]["campaign"]["name"] == "Immortal Empires"
+    schemas.ENTITY_MODELS["character"].model_validate(kf)

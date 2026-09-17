@@ -49,6 +49,10 @@ def build(ctx: Context) -> dict[str, list[dict]]:
     nodes = ctx.rows("SELECT * FROM technology_nodes ORDER BY technology_node_set, key") \
         if ctx.table_exists("technology_nodes") else []
 
+    def node_campaigns(n: dict, source: tuple[str, str]) -> list[dict]:
+        key = opt(n["campaign_key"])
+        return [ctx.links.link("campaign", key, source=source, relation="campaigns")] if key else []
+
     if ctx.require("technology", "technologies"):
         placements: dict[str, list[dict]] = defaultdict(list)
         for n in nodes:
@@ -61,6 +65,7 @@ def build(ctx: Context) -> dict[str, list[dict]]:
                 "research_points_required": n["research_points_required"],
                 "cost_per_round": n["cost_per_round"],
                 "resource_cost": costs.get(opt(n["resource_cost"])),
+                "campaigns": node_campaigns(n, ("technology", n["technology_key"])),
             })
         required_techs = grouped(ctx, "technology_required_technology_junctions", "technology", "required_technology")
         required_buildings = grouped(ctx, "technology_required_building_levels_junctions", "technology",
@@ -111,6 +116,7 @@ def build(ctx: Context) -> dict[str, list[dict]]:
                 "ui_group": opt(n["optional_ui_group"]),
                 "pixel_offset_x": n["pixel_offset_x"],
                 "pixel_offset_y": n["pixel_offset_y"],
+                "campaigns": node_campaigns(n, ("technology_tree", n["technology_node_set"])),
             })
         tree_links: dict[str, list[dict]] = defaultdict(list)
         if ctx.table_exists("technology_node_links"):
@@ -129,7 +135,7 @@ def build(ctx: Context) -> dict[str, list[dict]]:
                 "culture": ctx.links.link("culture", opt(r["culture"]), source=source, relation="culture"),
                 "subculture": ctx.links.link("subculture", opt(r["subculture"]), source=source, relation="subculture"),
                 "faction": ctx.links.link("faction", opt(r["faction_key"]), source=source, relation="faction"),
-                "campaign": opt(r["campaign_key"]),
+                "campaign": ctx.links.link("campaign", opt(r["campaign_key"]), source=source, relation="campaign"),
                 "colour": opt(r["colour_hex"]),
                 "nodes": tree_nodes.get(key, []),
                 "links": tree_links.get(key, []),

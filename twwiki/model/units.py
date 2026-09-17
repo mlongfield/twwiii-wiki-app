@@ -52,6 +52,20 @@ def _distinct(ctx: Context, table: str, key_col: str, value_col: str) -> dict[st
     return out
 
 
+def _custom_battle_factions(ctx: Context) -> dict[str, list[str]]:
+    """Factions that field each unit in custom battles; campaign-exclusive rows are left out and counted."""
+    out: dict[str, list[str]] = defaultdict(list)
+    if not ctx.table_exists("units_custom_battle_permissions"):
+        return out
+    for r in ctx.rows("SELECT DISTINCT unit, faction, campaign_exclusive FROM units_custom_battle_permissions "
+                      "ORDER BY unit, faction, campaign_exclusive"):
+        if r["campaign_exclusive"]:
+            ctx.tally["campaign_exclusive_permissions_excluded"] += 1
+        elif opt(r["faction"]) and r["faction"] not in out[r["unit"]]:
+            out[r["unit"]].append(r["faction"])
+    return out
+
+
 def build(ctx: Context) -> dict[str, list[dict]]:
     if not ctx.require("unit", "main_units", "land_units"):
         return {"unit": []}
@@ -65,7 +79,7 @@ def build(ctx: Context) -> dict[str, list[dict]]:
     attributes = _distinct(ctx, "unit_attributes_to_groups_junctions", "attribute_group", "attribute")
     abilities = _distinct(ctx, "land_units_to_unit_abilites_junctions", "land_unit", "ability")
     characters = _distinct(ctx, "agent_subtypes", "associated_unit_override", "key")
-    factions = _distinct(ctx, "units_custom_battle_permissions", "unit", "faction")
+    factions = _custom_battle_factions(ctx)
     buildings = _distinct(ctx, "building_units_allowed", "unit", "building")
     unit_sets = resolve_unit_sets(ctx)
     # Faction-specific cards are out of scope; take the unit's default card.

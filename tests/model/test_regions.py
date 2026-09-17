@@ -90,6 +90,8 @@ def regions_context():
     ctx.links.register("faction", {"wh_main_emp_empire": "Reikland"})
     ctx.links.register("subculture", {"wh_main_sc_emp_empire": "The Empire", "wh_main_sc_ksl_kislev": "Kislev"})
     ctx.links.register("building_chain", {k: None for k in CHAINS})
+    ctx.links.register("campaign", {"wh3_main_combi": "Immortal Empires", "wh3_main_chaos": "The Realm of Chaos",
+                                    "wh3_main_prologue": "The Lost God"})
     return ctx
 
 
@@ -128,7 +130,8 @@ def test_altdorf():
     ctx = regions_context()
     by_region, _ = built(ctx)
     altdorf = by_region[ALTDORF]
-    assert altdorf["name"] == "Altdorf" and altdorf["campaign"] == "wh3_main_combi"
+    assert altdorf["name"] == "Altdorf"
+    assert altdorf["campaign"]["key"] == "wh3_main_combi" and altdorf["campaign"]["name"] == "Immortal Empires"
     assert altdorf["is_settlement"] is True
     assert (altdorf["province"]["key"], altdorf["province"]["name"]) == ("reikland", "Reikland")
     assert altdorf["is_province_capital"] is True and altdorf["is_faction_capital"] is True
@@ -171,11 +174,11 @@ def test_generic_sea_prologue_port_and_counted_gaps():
 def test_provinces():
     _, by_province = built(regions_context())
     reikland = by_province["reikland"]
-    assert reikland["name"] == "Reikland" and reikland["campaign"] == "wh3_main_combi"
+    assert reikland["name"] == "Reikland" and reikland["campaign"]["key"] == "wh3_main_combi"
     assert [r["key"] for r in reikland["regions"]] == [ALTDORF, GRUNBURG]
     assert reikland["capital"]["key"] == ALTDORF
     ice = by_province["ice_canyon"]
-    assert ice["capital"] is None and ice["campaign"] == "wh3_main_prologue"
+    assert ice["capital"] is None and ice["campaign"]["key"] == "wh3_main_prologue"
     for province in by_province.values():
         schemas.ENTITY_MODELS["province"].model_validate(province)
 

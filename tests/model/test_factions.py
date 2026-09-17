@@ -49,7 +49,7 @@ def test_difficulty_levels_split_ai_and_human():
     assert level["key"] == "2" and level["level"] == 2
     assert level["ai"][0]["application"]["value"] == -100.0 and level["ai"][0]["campaign"] is None
     assert level["ai"][0]["application"]["source"] == {"type": "difficulty_level", "key": "2", "name": None, "missing": False}
-    assert level["human"][0]["campaign"] == "main_warhammer"
+    assert level["human"][0]["campaign"] == {"type": "campaign", "key": "main_warhammer", "name": None, "missing": True}
     schemas.ENTITY_MODELS["difficulty_level"].model_validate(level)
 
 
@@ -84,6 +84,7 @@ def test_campaign_variables_with_overrides():
     assert variables["base_research_points_per_turn"]["value"] == 100.0
     assert variables["base_research_points_per_turn"]["overrides"] == []
     assert variables["minimum_research_rate"]["overrides"] == [
-        {"campaign": "wh3_main_chaos", "difficulty": None, "campaign_type": None, "value": 7.0}]
+        {"campaign": {"type": "campaign", "key": "wh3_main_chaos", "name": None, "missing": True},
+         "difficulty": None, "campaign_type": None, "value": 7.0}]
     for v in variables.values():
         schemas.ENTITY_MODELS["campaign_variable"].model_validate(v)

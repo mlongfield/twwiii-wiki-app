@@ -2,11 +2,11 @@ from twwiki.model import schemas, technologies
 from tests.model.fixtures import make_context
 
 
-def node(key, tech, tree, rp, tier=0, indent=0, cost_per_round=0, resource_cost=""):
+def node(key, tech, tree, rp, tier=0, indent=0, cost_per_round=0, resource_cost="", campaign_key=""):
     return {"key": key, "technology_key": tech, "technology_node_set": tree, "tier": tier, "indent": indent,
             "research_points_required": rp, "cost_per_round": cost_per_round, "food_cost": 0,
             "optional_ui_group": "", "resource_cost": resource_cost, "required_parents": 0,
-            "pixel_offset_x": 0, "pixel_offset_y": 0, "faction_key": "", "campaign_key": ""}
+            "pixel_offset_x": 0, "pixel_offset_y": 0, "faction_key": "", "campaign_key": campaign_key}
 
 
 def tech_context():
@@ -94,5 +94,22 @@ def test_technology_tree_scope_nodes_and_links():
     assert civ["nodes"][1]["technology"]["key"] == "heavy_weapons"
     assert civ["links"] == [{"parent": "agent_node", "child": "hw_node", "initial_descent_tiers": 0, "visible_in_ui": True}]
     assert trees["emp_wulfhart"]["faction"]["key"] == "wulfhart_faction"
+    for tree in trees.values():
+        schemas.ENTITY_MODELS["technology_tree"].model_validate(tree)
+
+
+def test_campaign_restricted_nodes_and_placements():
+    ctx = tech_context()
+    ctx.links.register("campaign", {"wh3_main_chaos": "The Realm of Chaos"})
+    ctx.con.execute("UPDATE technology_nodes SET campaign_key = 'wh3_main_chaos' WHERE key = 'hw_wulf_node'")
+    built = technologies.build(ctx)
+    trees = {t["key"]: t for t in built["technology_tree"]}
+    wulf_nodes = {n["key"]: n for n in trees["emp_wulfhart"]["nodes"]}
+    assert [c["key"] for c in wulf_nodes["hw_wulf_node"]["campaigns"]] == ["wh3_main_chaos"]
+    assert all(n["campaigns"] == [] for n in trees["emp_civ_reworkd"]["nodes"])
+    assert trees["emp_wulfhart"]["campaign"] is None
+    placements = {p["node_key"]: p for p in {t["key"]: t for t in built["technology"]}["heavy_weapons"]["placements"]}
+    assert placements["hw_node"]["campaigns"] == []
+    assert [c["name"] for c in placements["hw_wulf_node"]["campaigns"]] == ["The Realm of Chaos"]
     for tree in trees.values():
         schemas.ENTITY_MODELS["technology_tree"].model_validate(tree)
