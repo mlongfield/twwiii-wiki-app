@@ -460,6 +460,7 @@ class Technology(Strict):
 class TechnologyTree(Strict):
     key: str
     name: str | None
+    name_derived: bool
     culture: Link | None
     subculture: Link | None
     faction: Link | None
@@ -489,7 +490,7 @@ class BuildingLevel(Strict):
     can_convert: bool
     visible_in_ui: bool
     resource_cost: ResourceCost | None
-    cultures: list[str]
+    availability: list[Link]
     effects: list[EffectApplication]
     units_recruited: list[Link]
 

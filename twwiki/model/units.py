@@ -9,6 +9,7 @@ from collections import defaultdict
 
 from .context import Context, by_key, opt
 from .images import UNIT_CARDS
+from .text import split_title_body
 from .unit_sets import resolve_unit_sets
 
 LAND_STAT_FIELDS = (
@@ -64,6 +65,12 @@ def _custom_battle_factions(ctx: Context) -> dict[str, list[str]]:
         elif opt(r["faction"]) and r["faction"] not in out[r["unit"]]:
             out[r["unit"]].append(r["faction"])
     return out
+
+
+def _attribute(ctx: Context, key: str) -> dict:
+    """An attribute's name and description; the bullet text's title names it when it has no name of its own."""
+    title, body = split_title_body(ctx.loc.text(f"unit_attributes_bullet_text_{key}"))
+    return {"key": key, "name": ctx.loc.text(f"unit_attributes_imued_effect_text_{key}") or title, "description": body}
 
 
 def build(ctx: Context) -> dict[str, list[dict]]:
@@ -124,8 +131,7 @@ def build(ctx: Context) -> dict[str, list[dict]]:
             "shield": _shield(shields.get(lu["shield"])) if lu else None,
             "mount": opt(lu["mount"]) if lu else None,
             "attributes": [
-                {"key": a, "name": ctx.loc.text(f"unit_attributes_imued_effect_text_{a}"),
-                 "description": ctx.loc.text(f"unit_attributes_bullet_text_{a}")}
+                _attribute(ctx, a)
                 for a in (attributes.get(lu["attribute_group"], []) if lu and opt(lu["attribute_group"]) else [])
             ],
             "abilities": [link("ability", a, "abilities") for a in (abilities.get(lu["key"], []) if lu else [])],

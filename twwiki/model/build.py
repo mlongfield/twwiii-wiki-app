@@ -47,7 +47,7 @@ INDEX_FIELDS = {
     "ability": ["type", "source_type"],
     "effect": ["category"],
     "effect_bundle": ["target"],
-    "building_level": ["level", "cultures"],
+    "building_level": ["level"],
     "building_chain": ["category"],
     "technology": ["is_hidden"],
     "item": ["category", "legendary"],

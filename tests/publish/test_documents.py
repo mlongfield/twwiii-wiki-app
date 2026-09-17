@@ -15,7 +15,7 @@ def test_link_fields_come_from_the_model_schema():
         "associated_unit": "one", "factions": "list", "campaigns": "list", "abilities": "list", "items": "list"}
     assert link_fields("item") == {"bodyguard_unit": "one", "agent_subtypes": "list"}
     assert link_fields("campaign_variable") == {}
-    assert sum(len(link_fields(t)) for t in ENTITY_TYPES) == 49
+    assert sum(len(link_fields(t)) for t in ENTITY_TYPES) == 50
 
 
 def test_no_derived_field_collides_with_the_current_schemas():

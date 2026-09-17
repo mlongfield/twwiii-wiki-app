@@ -1,5 +1,5 @@
 from twwiki.model import schemas, technologies
-from tests.model.fixtures import make_context
+from tests.model.fixtures import make_context, register_catalogs
 
 
 def node(key, tech, tree, rp, tier=0, indent=0, cost_per_round=0, resource_cost="", campaign_key=""):
@@ -113,3 +113,29 @@ def test_campaign_restricted_nodes_and_placements():
     assert [c["name"] for c in placements["hw_wulf_node"]["campaigns"]] == ["The Realm of Chaos"]
     for tree in trees.values():
         schemas.ENTITY_MODELS["technology_tree"].model_validate(tree)
+
+
+def test_unnamed_trees_derive_a_name_from_faction_then_culture():
+    def tree(key, culture, faction=""):
+        return {"key": key, "culture": culture, "subculture": "", "faction_key": faction, "campaign_key": "",
+                "colour_hex": ""}
+
+    ctx = make_context({
+        "technology_node_sets": [tree("named", "cathay"), tree("wulf", "empire", "wulfhart"),
+                                 tree("cth_mil", "cathay"), tree("rogue_mil", "rogue")],
+        "technology_nodes": [node("n1", "t1", "named", 100)],
+    }, loc={
+        "technology_node_sets_localised_name_named": "Cathay Civil",
+        "factions_screen_name_wulfhart": "The Huntsmarshal's Expedition",
+        "cultures_name_empire": "The Empire",
+        "cultures_name_cathay": "Grand Cathay",
+    })
+    register_catalogs(ctx, technologies)
+    trees = {t["key"]: t for t in technologies.build(ctx)["technology_tree"]}
+    assert (trees["named"]["name"], trees["named"]["name_derived"]) == ("Cathay Civil", False)
+    assert (trees["wulf"]["name"], trees["wulf"]["name_derived"]) == ("The Huntsmarshal's Expedition Technologies", True)
+    assert (trees["cth_mil"]["name"], trees["cth_mil"]["name_derived"]) == ("Grand Cathay Technologies", True)
+    assert (trees["rogue_mil"]["name"], trees["rogue_mil"]["name_derived"]) == (None, False)
+    assert ctx.missing_names["technology_tree"] == 1
+    for t in trees.values():
+        schemas.ENTITY_MODELS["technology_tree"].model_validate(t)

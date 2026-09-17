@@ -38,6 +38,29 @@ def level_name(ctx: Context, level_key: str, variants: list[dict]) -> str | None
     return ctx.loc.text(_variant_name_key(level_key, v)) if v else None
 
 
+AVAILABILITY_TYPES = ("culture", "subculture", "faction")
+
+
+def level_availability(ctx: Context, variants: list[dict], source: tuple[str, str]) -> list[dict]:
+    """Links for the culture, subculture and faction keys on a level's culture variants.
+    Each key is looked up as a culture, then a subculture, then a faction; a key that
+    is none of them becomes a missing link of its own column's type and is counted."""
+    found: dict[str, str] = {}
+    for v in variants:
+        for column in AVAILABILITY_TYPES:
+            value = opt(v[column])
+            if value:
+                found.setdefault(value, column)
+    out = []
+    for value, column in sorted(found.items()):
+        entity_type = next((t for t in AVAILABILITY_TYPES if ctx.links.has(t, value)), None)
+        if entity_type is None:
+            ctx.tally["unresolved_building_availability_keys"] += 1
+            entity_type = column
+        out.append(ctx.links.link(entity_type, value, source=source, relation="level_availability"))
+    return out
+
+
 def chain_availability(ctx: Context) -> dict[str, list[dict]]:
     """Which cultures, subcultures, factions and campaigns can build each chain."""
     if not (ctx.table_exists("building_chain_availability_sets")
@@ -117,7 +140,7 @@ def build(ctx: Context) -> dict[str, list[dict]]:
             "can_convert": r["can_convert"],
             "visible_in_ui": r["visible_in_ui"],
             "resource_cost": costs.get(opt(r["resource_cost"])),
-            "cultures": sorted({v["culture"] for v in own_variants if opt(v["culture"])}),
+            "availability": level_availability(ctx, own_variants, source),
             "effects": [effect_application(
                 ctx, e["effect"], scope=e["effect_scope"], value=e["value"], source=source,
                 value_damaged=e["value_damaged"], value_ruined=e["value_ruined"],

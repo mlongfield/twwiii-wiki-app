@@ -60,7 +60,6 @@ def test_training_field_level():
     levels = {b["key"]: b for b in buildings.build(ctx)["building_level"]}
     tf = levels["barracks_1"]
     assert tf["chain"]["name"] == "Barracks" and tf["level"] == 0 and tf["create_cost"] == 750
-    assert tf["cultures"] == ["wh_main_emp_empire"]
     assert tf["short_description"] == "Drill troops."
     effect = tf["effects"][0]
     assert (effect["value"], effect["value_damaged"], effect["value_ruined"]) == (-5.0, -2.0, 0.0)
@@ -107,3 +106,24 @@ def test_chain_availability_scopes_sorted_and_deduplicated():
 def test_chain_availability_is_empty_without_tables():
     chains = buildings.build(building_context())["building_chain"]
     assert all(c["availability"] == [] for c in chains)
+
+
+def test_level_availability_resolves_culture_subculture_faction_and_unresolved_keys():
+    ctx = building_context()
+    ctx.con.execute("INSERT INTO building_culture_variants (building, culture, subculture, faction, short_description, "
+                    "icon, disables) VALUES ('barracks_2', '', 'sc_teb', '', '', '', false), "
+                    "('barracks_2', 'ghost', '', '', '', '', false)")
+    ctx.links.register("culture", {"wh_main_emp_empire": "The Empire"})
+    ctx.links.register("subculture", {"sc_teb": "Tilea"})
+    ctx.links.register("faction", {"followers": "Followers of Nagash"})
+    levels = {l["key"]: l for l in buildings.build(ctx)["building_level"]}
+    assert levels["barracks_1"]["availability"] == [
+        {"type": "culture", "key": "wh_main_emp_empire", "name": "The Empire", "missing": False}]
+    assert levels["tower"]["availability"] == [
+        {"type": "faction", "key": "followers", "name": "Followers of Nagash", "missing": False}]
+    assert levels["barracks_2"]["availability"] == [
+        {"type": "culture", "key": "ghost", "name": None, "missing": True},
+        {"type": "subculture", "key": "sc_teb", "name": "Tilea", "missing": False}]
+    assert ctx.tally["unresolved_building_availability_keys"] == 1
+    for level in levels.values():
+        schemas.ENTITY_MODELS["building_level"].model_validate(level)
