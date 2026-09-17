@@ -32,7 +32,7 @@ const campaigns = CAMPAIGN_FILTER_TYPES.has(type)
   <div class="table-wrap">
     <table id="browse-table" class="browse">
       <thead>
-        <tr><th>Name</th><th>Key</th>{fields.map((f) => <th>{f.label}</th>)}</tr>
+        <tr><th>Name</th><th>Details</th><th>Key</th>{fields.map((f) => <th>{f.label}</th>)}</tr>
       </thead>
       <tbody>
         {rows.map((row) => (
@@ -44,9 +44,10 @@ const campaigns = CAMPAIGN_FILTER_TYPES.has(type)
             <td>
               <a class="entity-link" href={row.url}>
                 {row.image && <GameImage path={row.image.path} kind="icon" />}
-                <span class:list={[{ unnamed: row.unnamed }]}>{row.name}</span>
+                <span>{row.name}</span>
               </a>
             </td>
+            <td>{row.subtitle}</td>
             <td><code>{row.key}</code></td>
             {row.values.map((v) => <td>{v}</td>)}
           </tr>

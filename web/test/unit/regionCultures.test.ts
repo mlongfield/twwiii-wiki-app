@@ -27,7 +27,9 @@ describe("region cultures", () => {
     const groups = chainGroups(site, "wh_main_emp_empire");
     expect(groups.map((g) => g.category)).toEqual(["happiness", "military", "money"]);
     const all = groups.flatMap((g) => g.chains);
-    expect(all).toHaveLength(site.chainsByCulture.get("wh_main_emp_empire")!.length);
+    const named = site.chainsByCulture.get("wh_main_emp_empire")!.filter((k) => site.model.entities.building_chain.get(k)!.name);
+    expect(all).toHaveLength(named.length);
+    expect(all.every((c) => c.name && !/placeholder/i.test(c.name))).toBe(true);
     const major = all.find((c) => c.key === "wh_main_EMPIRE_settlement_major")!;
     expect(major.url).toBe("/building-chains/wh_main_empire_settlement_major/");
     expect(major.icon).toBeNull();

@@ -1,5 +1,6 @@
 import { campaignTag } from "../lib/campaignFilter";
 import { formatNumber } from "../lib/effectText";
+import { subtitleFor } from "../lib/subtitle";
 import { type EntityImage, mainImage } from "./images";
 import type { PageType } from "./pageTypes";
 import { type Site, urlFor } from "./site";
@@ -50,7 +51,7 @@ export const BROWSE_FIELDS: Record<PageType, BrowseField[]> = {
 export interface BrowseRow {
   key: string;
   name: string;
-  unnamed: boolean;
+  subtitle: string;
   url: string;
   image: EntityImage | null;
   values: string[];
@@ -76,10 +77,11 @@ export function browseRows(site: Site, type: PageType): BrowseRow[] {
   const rows: BrowseRow[] = [];
   for (const entity of (site.model.entities[type] as Map<string, Record<string, any>>).values()) {
     const name: string | null = entity.name ?? null;
+    if (!name) continue;
     rows.push({
       key: entity.key,
-      name: name ?? entity.key,
-      unnamed: !name,
+      name,
+      subtitle: subtitleFor(site, type, entity) ?? "",
       url: urlFor(site, type, entity.key)!,
       image: mainImage(site, type, entity),
       values: fields.map((f) => cellText(f.value ? f.value(entity) : entity[f.field])),

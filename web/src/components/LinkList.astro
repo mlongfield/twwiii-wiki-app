@@ -1,14 +1,26 @@
 ---
+import { getSite } from "../data/model";
+import { repeatedNames, subtitleFor } from "../lib/subtitle";
 import EntityLink from "./EntityLink.astro";
 
+type LinkRef = { type: string; key: string; name: string | null; missing: boolean };
+
 interface Props {
-  links: ({ type: string; key: string; name: string | null; missing: boolean } | null)[];
+  links: (LinkRef | null)[];
 }
 
-const links = Astro.props.links.filter((l) => l !== null);
+const site = await getSite();
+const links = Astro.props.links.filter((l): l is LinkRef => l !== null);
+const repeated = repeatedNames(links);
+const entities = site.model.entities as Record<string, Map<string, Record<string, any>>>;
+const subtitle = (link: LinkRef) =>
+  link.name && repeated.has(link.name) ? subtitleFor(site, link.type, entities[link.type]?.get(link.key) ?? {}) : null;
 ---
 {links.length > 0 && (
   <ul class="link-list">
-    {links.map((link) => <li><EntityLink link={link} /></li>)}
+    {links.map((link) => {
+      const sub = subtitle(link);
+      return <li><EntityLink link={link} />{sub && <span class="muted link-subtitle"> · {sub}</span>}</li>;
+    })}
   </ul>
 )}

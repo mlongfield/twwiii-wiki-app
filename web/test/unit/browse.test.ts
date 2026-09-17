@@ -29,14 +29,15 @@ describe("browseRows", () => {
     expect(Object.keys(BROWSE_FIELDS).sort()).toEqual(PAGE_TYPES.map((p) => p.type).sort());
   });
 
-  it("lists every entity with URL, name and field values, sorted by name", () => {
+  it("lists every named entity with URL, name, subtitle and field values, sorted by name", () => {
     const rows = browseRows(site, "unit");
-    expect(rows).toHaveLength(site.model.entities.unit.size);
+    expect(rows).toHaveLength([...site.model.entities.unit.values()].filter((u) => u.name).length);
     const names = rows.map((r) => r.name);
     expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b)));
     const gs = rows.find((r) => r.key === "wh_main_emp_inf_greatswords")!;
     expect(gs.url).toBe("/units/wh_main_emp_inf_greatswords/");
     expect(gs.name).toBe("Greatswords");
+    expect(gs.subtitle).toBe(site.model.entities.unit.get("wh_main_emp_inf_greatswords")!.category_name);
     expect(gs.values).toHaveLength(BROWSE_FIELDS.unit.length);
     expect(gs.values[3]).toBe("3");
   });

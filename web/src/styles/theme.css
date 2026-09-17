@@ -125,3 +125,7 @@ input[type="search"], select {
 .hidden-effects summary { cursor: pointer; color: var(--muted); }
 
 .campaign-badge { display: inline-block; margin: 0.3rem 0 0; padding: 0.05rem 0.5rem; border: 1px solid var(--border-accent); color: var(--gold); font-size: 0.8rem; }
+
+.entity-subtitle { margin: 0.1rem 0 0; color: var(--text); }
+.search-hit-text { display: flex; flex-direction: column; }
+.search-hit-subtitle { color: var(--muted); font-size: 0.75rem; }
