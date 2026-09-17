@@ -12,7 +12,7 @@ FIXTURE_MODEL = Path("web/test/fixtures/model")
 
 
 def test_entity_types_are_the_nineteen_model_types_sorted():
-    assert len(ENTITY_TYPES) == 19
+    assert len(ENTITY_TYPES) == 20
     assert list(ENTITY_TYPES) == sorted(ENTITY_TYPES)
     assert "unit" in ENTITY_TYPES and "province" in ENTITY_TYPES
 

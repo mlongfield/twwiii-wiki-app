@@ -11,7 +11,7 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
-from . import abilities, buildings, characters, effects, factions, items, regions, technologies, units
+from . import abilities, buildings, campaigns, characters, effects, factions, items, regions, technologies, units
 from .context import Context, by_key
 from .images import INLINE_ICONS, ImageIndex, inline_targets
 from .link_report import link_report
@@ -21,7 +21,7 @@ from .text import round_float
 log = logging.getLogger(__name__)
 
 MODEL_VERSION = 3
-MODULES = [effects, abilities, units, characters, technologies, buildings, items, factions, regions]
+MODULES = [effects, campaigns, abilities, units, characters, technologies, buildings, items, factions, regions]
 
 # (target type, field, relation, source type or None for any)
 REVERSE = [
@@ -36,6 +36,7 @@ REVERSE = [
     ("culture", "subcultures", "culture", "subculture"),
     ("culture", "factions", "culture", "faction"),
     ("subculture", "factions", "subculture", "faction"),
+    ("campaign", "regions", "campaign", "region"),
 ]
 
 # Extra fields copied into index/<type>.json next to key and name.
@@ -55,6 +56,7 @@ INDEX_FIELDS = {
     "campaign_variable": ["value"],
     "region": ["campaign", "is_settlement", "template_source"],
     "province": ["campaign"],
+    "campaign": ["map"],
 }
 
 # Counters builders add to ctx.tally; each is written to the manifest, 0 when never touched.

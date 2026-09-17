@@ -15,7 +15,7 @@ def test_link_fields_come_from_the_model_schema():
         "associated_unit": "one", "factions": "list", "abilities": "list", "items": "list"}
     assert link_fields("item") == {"bodyguard_unit": "one", "agent_subtypes": "list"}
     assert link_fields("campaign_variable") == {}
-    assert sum(len(link_fields(t)) for t in ENTITY_TYPES) == 38
+    assert sum(len(link_fields(t)) for t in ENTITY_TYPES) == 45
 
 
 def test_no_derived_field_collides_with_the_current_schemas():
@@ -69,7 +69,7 @@ def test_types_without_links_or_browse_fields():
     assert entity_document("faction", {"key": "f", "name": "F", "subculture": None, "culture": None,
                                        "units": [], "characters": []}) == {
         "key": "f", "name": "F", "subculture_keys": [], "culture_keys": [], "units_keys": [],
-        "characters_keys": [],
+        "characters_keys": [], "start_campaigns_keys": [], "playable_in_keys": [], "major_in_keys": [],
         "entity": {"key": "f", "name": "F", "subculture": None, "culture": None, "units": [], "characters": []}}
     assert entity_document("campaign_variable", entity) == {"key": "v", "name": "Variable", "value": 3,
                                                             "entity": entity}

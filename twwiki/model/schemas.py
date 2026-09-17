@@ -596,6 +596,20 @@ class Province(Strict):
     capital: Link | None
 
 
+# ---- Campaigns -------------------------------------------------------------
+
+@entity("campaign")
+class Campaign(Strict):
+    key: str
+    name: str | None
+    map: str | None
+    script_folder: str | None
+    factions: list[Link]
+    playable_factions: list[Link]
+    major_factions: list[Link]
+    regions: list[Link] = []
+
+
 # ---- Factions, cultures, difficulty, campaign variables ---------------------
 
 @entity("faction")
@@ -611,6 +625,9 @@ class Faction(Strict):
     flags_path: str
     flag_image: str | None
     primary_colour: str | None
+    start_campaigns: list[Link]
+    playable_in: list[Link]
+    major_in: list[Link]
     units: list[Link] = []
     characters: list[Link] = []
 

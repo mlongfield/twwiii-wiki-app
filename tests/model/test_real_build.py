@@ -28,7 +28,7 @@ EXPECTED_COUNTS = {
     "effect_bundle": 5855, "building_level": 5259, "building_chain": 1943, "technology": 1869,
     "technology_tree": 33, "item": 2671, "trait": 744, "faction": 717, "culture": 27,
     "subculture": 32, "difficulty_level": 7, "campaign_variable": 1052,
-    "region": 945, "province": 316,
+    "region": 945, "province": 316, "campaign": 3,
 }
 
 
