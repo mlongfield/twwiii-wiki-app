@@ -6,11 +6,12 @@ failing build pass unexamined.
 """
 
 import json
+import re
 from pathlib import Path
 
 import pytest
 
-from twwiki.model.build import build_all
+from twwiki.model.build import build_all, round_floats
 from twwiki.model.context import Context
 from twwiki.model.images import ImageIndex
 from twwiki.model.link_report import link_report
@@ -73,6 +74,8 @@ def test_karl_franz(model):
     leader = next(by_type["skill"][n["skill"]["key"]] for n in nodes if n["skill"]["name"] == "Leader of Men")
     aura = [e for e in leader["levels"][0]["effects"] if e["value"] == 50.0]
     assert aura and aura[0]["effect"]["name"].startswith("Leadership aura size")
+    assert {"key": "general", "name": "Lord"} in kf["agent_types"]
+    assert [c["key"] for c in kf["campaigns"]] == ["wh3_main_chaos", "wh3_main_combi"]
 
 
 def test_hold_the_line(model):
@@ -87,7 +90,7 @@ def test_training_field(model):
     tf = model[1]["building_level"]["wh_main_emp_barracks_1"]
     assert tf["name"] == "Training Field"
     assert (tf["chain"]["key"], tf["level"], tf["create_cost"]) == ("wh_main_EMPIRE_barracks", 0, 750)
-    assert tf["cultures"] == ["wh_main_emp_empire"]
+    assert "wh_main_emp_empire" in [l["key"] for l in tf["availability"]]
 
 
 def test_empire_settlement_chain_availability(model):
@@ -204,3 +207,77 @@ def test_link_report_labels_known_references(model):
     unread = refs[("battle_context_unit_ability_junctions", "unit_ability", "unit_abilities")]
     assert unread["status"] == "source_not_read"
     assert report["summary"]["both_read"] > 100
+
+
+# Unnamed building chains left after placeholder text counts as missing; set from the
+# first version 3 build. Raise it only after checking the new chains really have no name.
+MAX_UNNAMED_BUILDING_CHAINS = 0
+
+
+def iter_strings(value):
+    if isinstance(value, str):
+        yield value
+    elif isinstance(value, dict):
+        for v in value.values():
+            yield from iter_strings(v)
+    elif isinstance(value, list):
+        for v in value:
+            yield from iter_strings(v)
+
+
+def test_campaigns_and_campaign_links(model):
+    by_type = model[1]
+    assert {k: c["name"] for k, c in by_type["campaign"].items()} == {
+        "wh3_main_chaos": "The Realm of Chaos", "wh3_main_combi": "Immortal Empires", "wh3_main_prologue": "The Lost God"}
+    combi = by_type["campaign"]["wh3_main_combi"]
+    assert len(combi["playable_factions"]) == 104
+    assert "wh3_main_combi_region_altdorf" in {r["key"] for r in combi["regions"]}
+    assert by_type["region"]["wh3_main_combi_region_altdorf"]["campaign"] == {
+        "type": "campaign", "key": "wh3_main_combi", "name": "Immortal Empires", "missing": False}
+    assert "wh3_main_combi" in {c["key"] for c in by_type["faction"]["wh_main_emp_empire"]["playable_in"]}
+
+
+def test_placeholder_names_are_replaced(model):
+    by_type = model[1]
+    name = by_type["building_chain"]["wh2_dlc09_special_settlement_khemri_tmb"]["name"]
+    assert name and name.strip().lower() != "placeholder"
+    unnamed = sum(1 for c in by_type["building_chain"].values() if c["name"] is None)
+    assert unnamed <= MAX_UNNAMED_BUILDING_CHAINS
+
+
+def test_item_rarity_and_category(model):
+    ghal = model[1]["item"]["wh_main_anc_weapon_ghal_maraz"]
+    assert ghal["rarity"] is not None and ghal["rarity"]["key"] == "wh_main_anc_group_unique"
+    assert ghal["category"]["key"] == "weapon" and ghal["category"]["name"] == "Weapon"
+
+
+def iter_dicts(value):
+    if isinstance(value, dict):
+        yield value
+        for v in value.values():
+            yield from iter_dicts(v)
+    elif isinstance(value, list):
+        for v in value:
+            yield from iter_dicts(v)
+
+
+def test_lords_army_scope_text(model):
+    apps = (d for rows in model[1].values() for entity in rows.values() for d in iter_dicts(entity)
+            if d.get("scope") == "army_to_army_own" and "scope_text" in d)
+    assert any("Lord's army" in (a["scope_text"] or "") for a in apps)
+
+
+def test_derived_technology_tree_name(model):
+    tree = model[1]["technology_tree"]["cth_mil"]
+    assert tree["name_derived"] is True and tree["name"].endswith(" Technologies")
+
+
+def test_no_dead_tokens_placeholders_or_float_artefacts(model):
+    by_type = model[1]
+    bad = [(t, key, s) for t, rows in by_type.items() for key, entity in rows.items() for s in iter_strings(entity)
+           if "{{tt:" in s or "{{Cco" in s or s.strip().lower() == "placeholder"]
+    assert bad[:5] == []
+    artefact = re.compile(r"\d\.\d*0{5,}\d")
+    floats = [(t, key) for t, rows in by_type.items() for key, entity in rows.items()
+              if artefact.search(json.dumps(round_floats(entity)))]
+    assert floats[:5] == []
