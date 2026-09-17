@@ -22,6 +22,8 @@ TR_PREFIXES = (
 TR_TOKEN = re.compile(r"\{\{tr:([^}]+)\}\}")
 TT_TOKEN = re.compile(r"\{\{tt:([^}]*)\}\}")
 CCO_TOKEN = re.compile(r"\{\{Cco[^:}]*:[^}]*\}\}")
+# An unclosed `{{` with no later `}}`: a broken token that never got a closing brace.
+UNCLOSED_TOKEN = re.compile(r"\{\{(?:(?!\}\}).)*$", re.DOTALL)
 MAX_DEPTH = 5
 
 
@@ -77,7 +79,10 @@ class LocResolver:
 
     def text(self, key: str) -> str | None:
         raw = self.raw(key)
-        return None if raw is None else self.substitute(raw)
+        if raw is None:
+            return None
+        substituted = self.substitute(raw)
+        return substituted if substituted.strip() else None
 
     def substitute(self, text: str) -> str:
         for _ in range(MAX_DEPTH):
@@ -97,7 +102,15 @@ class LocResolver:
                 break
         text = TR_TOKEN.sub(self._drop_tr, text)
         text = TT_TOKEN.sub(self._drop_tt, text)
-        return CCO_TOKEN.sub(self._drop_cco, text)
+        text = CCO_TOKEN.sub(self._drop_cco, text)
+        return UNCLOSED_TOKEN.sub(self._drop_unclosed, text)
+
+    def _drop_unclosed(self, match: re.Match) -> str:
+        tail = match.group(0)
+        prefix = "{{tr:"
+        target = tail[len(prefix):] if tail.startswith(prefix) else tail
+        self.unresolved_targets.add(target)
+        return ""
 
     def _drop_tr(self, match: re.Match) -> str:
         self.unresolved_targets.add(match.group(1))

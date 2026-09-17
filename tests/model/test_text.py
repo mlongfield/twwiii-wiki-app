@@ -73,6 +73,27 @@ def test_tooltip_and_cco_tokens_are_dropped_and_markup_is_kept():
                                  "dropped_cco_tokens": 1, "dropped_tr_tokens": 0}
 
 
+def test_unclosed_tr_tail_is_removed_and_recorded():
+    loc = LocResolver({"s": "Name {{tr:broken_"})
+    assert loc.text("s") == "Name "
+    assert loc.unresolved_targets == {"broken_"}
+
+
+def test_unclosed_tr_tail_that_leaves_text_empty_returns_none():
+    loc = LocResolver({"s": "{{tr:building_culture_variants_name_"})
+    assert loc.text("s") is None
+    assert loc.unresolved_targets == {"building_culture_variants_name_"}
+
+
+def test_a_normal_closed_token_is_unaffected_by_unclosed_tail_handling():
+    loc = LocResolver({
+        "s": "{{tr:effect_technology_research_points_description}}: %+n",
+        "ui_text_replacements_localised_text_effect_technology_research_points_description": "Research rate",
+    })
+    assert loc.text("s") == "Research rate: %+n"
+    assert loc.unresolved_targets == set()
+
+
 @pytest.mark.parametrize("text, expected", [
     ("Just a body", (None, "Just a body")),
     ("Title||Body", ("Title", "Body")),

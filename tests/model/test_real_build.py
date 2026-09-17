@@ -281,7 +281,7 @@ def test_derived_technology_tree_name(model):
 def test_no_dead_tokens_placeholders_or_float_artefacts(model):
     by_type = model[1]
     bad = [(t, key, s) for t, rows in by_type.items() for key, entity in rows.items() for s in iter_strings(entity)
-           if "{{tt:" in s or "{{Cco" in s or s.strip().lower() == "placeholder"]
+           if "{{" in s or s.strip().lower() == "placeholder"]
     assert bad[:5] == []
     artefact = re.compile(r"\d\.\d*0{5,}\d")
     floats = [(t, key) for t, rows in by_type.items() for key, entity in rows.items()
