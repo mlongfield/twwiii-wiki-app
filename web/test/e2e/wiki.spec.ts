@@ -81,9 +81,58 @@ test.describe("wiki", () => {
     await expect(page).toHaveURL(/\/units\//);
   });
 
-  test("browse page lists every unit", async ({ page }) => {
+  test("browse page lists every named unit", async ({ page }) => {
     await page.goto("/units/");
-    await expect(page.locator("#browse-table tbody tr")).toHaveCount(2609);
+    await expect(page.locator("#browse-table tbody tr")).toHaveCount(2603);
+  });
+
+  test("factions list defaults to Immortal Empires and All shows more", async ({ page }) => {
+    await page.goto("/factions/");
+    await waitForHydrated(page, "BrowseFilter");
+    // Not getByLabel: the Campaign <select> is nested inside its <label> alongside its
+    // own <option> text, so a label lookup matches on the label's full textContent
+    // ("Campaign AllThe Realm of Chaos…") rather than the computed accessible name.
+    // getByRole matches Chromium's actual accessible name, which is "Campaign" alone.
+    const campaign = page.getByRole("combobox", { name: "Campaign", exact: true });
+    await expect(campaign).toHaveValue("wh3_main_combi");
+    const visible = page.locator("#browse-table tbody tr:not([hidden])");
+    await expect.poll(() => visible.count()).toBeGreaterThan(0);
+    const immortalEmpires = await visible.count();
+    await campaign.selectOption("");
+    await expect.poll(() => visible.count()).toBeGreaterThan(immortalEmpires);
+  });
+
+  test("item page shows its rarity", async ({ page }) => {
+    await page.goto("/items/wh_main_anc_weapon_ghal_maraz/");
+    await expect(page.locator(".item-rarity")).toContainText("Unique");
+  });
+
+  test("unit page has no weapon key row", async ({ page }) => {
+    await page.goto("/units/wh_main_emp_inf_greatswords/");
+    await expect(page.getByRole("rowheader", { name: "Weapon", exact: true })).toHaveCount(0);
+    await expect(page.getByText("wh_main_emp_greatsword", { exact: true })).toHaveCount(0);
+  });
+
+  test("effect lists set hidden effects aside", async ({ page }) => {
+    await page.goto("/skills/wh2_dlc09_skill_all_dummy_agent_actions_tmb_liche_priest/");
+    await expect(page.locator("details.hidden-effects summary").first()).toHaveText(/^Hidden effects \(\d+\)$/);
+  });
+
+  test("campaign page lists playable factions", async ({ page }) => {
+    await page.goto("/campaigns/wh3_main_combi/");
+    await expect(page.locator("h1")).toHaveText("Immortal Empires");
+    await expect(page.getByRole("heading", { name: "Playable factions" })).toBeVisible();
+  });
+
+  test("region culture picker has no placeholder entries", async ({ page }) => {
+    await page.goto("/regions/wh3_main_combi_region_altdorf/");
+    const picker = page.locator(".culture-picker");
+    await picker.scrollIntoViewIfNeeded();
+    const options = await picker.locator("select option").allTextContents();
+    expect(options.length).toBeGreaterThan(1);
+    expect(options.some((t) => /placeholder/i.test(t))).toBe(false);
+    const chains = await picker.locator(".chain-group li").allTextContents();
+    expect(chains.some((t) => /placeholder/i.test(t))).toBe(false);
   });
 
   test("unknown pages show the 404 page", async ({ page }) => {
