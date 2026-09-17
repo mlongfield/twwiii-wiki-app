@@ -304,6 +304,11 @@ class LoreOfMagic(Strict):
     name: str | None
 
 
+class AgentType(Strict):
+    key: str
+    name: str | None
+
+
 class SkillTreeNode(Strict):
     key: str
     skill: Link
@@ -355,7 +360,7 @@ class Character(Strict):
     name: str | None
     title: str | None
     description: str | None
-    agent_types: list[str]
+    agent_types: list[AgentType]
     associated_unit: Link | None
     lore_of_magic: LoreOfMagic | None
     is_caster: bool
@@ -513,6 +518,17 @@ class RequiredSkill(Strict):
     level: int
 
 
+class ItemCategory(Strict):
+    key: str
+    name: str | None
+
+
+class Rarity(Strict):
+    key: str
+    name: str | None      # game markup kept, e.g. [[col:ancillary_rare]]Rare[[/col]]
+    colour: str | None    # "#RRGGBB"
+
+
 @entity("item")
 class Item(Strict):
     key: str
@@ -521,15 +537,15 @@ class Item(Strict):
     explanation: str | None
     icon_image: str | None
     type: str
-    category: str
+    category: ItemCategory
+    rarity: Rarity | None
     subcategory: str | None
     legendary: bool
-    applies_to: str
     transferrable: bool
     unique_to_world: bool
     unique_to_faction: bool
     bodyguard_unit: Link | None
-    agent_types: list[str]
+    agent_types: list[AgentType]
     agent_subtypes: list[Link]
     required_skills: list[RequiredSkill]
     effects: list[EffectApplication]

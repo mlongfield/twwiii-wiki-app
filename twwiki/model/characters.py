@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections import defaultdict
+from collections import Counter, defaultdict
 
 from .context import Context, by_key, grouped, opt
 from .effects import effect_application
@@ -13,6 +13,44 @@ def _land_units(ctx: Context) -> dict[str, str | None]:
     """Load unit -> land_unit mapping, or empty dict if table missing."""
     return {r["unit"]: opt(r["land_unit"]) for r in ctx.rows("SELECT unit, land_unit FROM main_units")} \
         if ctx.table_exists("main_units") else {}
+
+
+def agent_type_labels(ctx: Context) -> dict[str, dict[str, str]]:
+    """agent -> culture -> onscreen name, from agent_culture_details rows that have text."""
+    labels: dict[str, dict[str, str]] = defaultdict(dict)
+    if ctx.table_exists("agent_culture_details"):
+        for r in ctx.rows("SELECT agent, culture, key FROM agent_culture_details ORDER BY agent, culture, level, key"):
+            name = ctx.loc.text(f"agent_culture_details_onscreen_name_{r['key']}")
+            if name and r["culture"] not in labels[r["agent"]]:
+                labels[r["agent"]][r["culture"]] = name
+    return labels
+
+
+def agent_type(ctx: Context, labels: dict[str, dict[str, str]], agent: str, culture: str | None) -> dict:
+    """The culture's own name for an agent type, else the name most cultures use
+    (ties go to the earliest culture key). A type with no name at all is counted."""
+    names = labels.get(agent, {})
+    name = names.get(culture) if culture else None
+    if name is None and names:
+        counts = Counter(names.values())
+        first_culture: dict[str, str] = {}
+        for c in sorted(names):
+            first_culture.setdefault(names[c], c)
+        name = min(counts, key=lambda n: (-counts[n], first_culture[n]))
+    if name is None:
+        ctx.tally["unresolved_agent_type_names"] += 1
+    return {"key": agent, "name": name}
+
+
+def faction_cultures(ctx: Context) -> dict[str, str]:
+    """faction key -> culture key, through the faction's subculture."""
+    subcultures = by_key(ctx, "cultures_subcultures", "subculture")
+    out = {}
+    for key, faction in by_key(ctx, "factions", "key").items():
+        sub = subcultures.get(faction["subculture"])
+        if sub and opt(sub["culture"]):
+            out[key] = sub["culture"]
+    return out
 
 
 def catalog(ctx: Context) -> dict[str, dict[str, str | None]]:
@@ -43,6 +81,8 @@ def _characters(ctx: Context) -> list[dict]:
     unit_abilities = grouped(ctx, "land_units_to_unit_abilites_junctions", "land_unit", "ability")
     permitted = grouped(ctx, "faction_agent_permitted_subtypes", "subtype", "faction, agent")
     trees = _skill_trees(ctx)
+    labels = agent_type_labels(ctx)
+    cultures = faction_cultures(ctx)
     # campaign_to_agent_subtypes lists every campaign a subtype appears in (Karl Franz has
     # rows for both Immortal Empires and The Realm of Chaos). No rows means no data; the
     # web app treats an empty list as every campaign.
@@ -55,12 +95,14 @@ def _characters(ctx: Context) -> list[dict]:
         lore = opt(r["magic_lore"])
         lu = land_unit.get(r["associated_unit_override"])
         rows = permitted.get(key, [])
+        faction_keys = sorted({p["faction"] for p in rows})
+        culture = cultures.get(faction_keys[0]) if faction_keys else None
         out.append({
             "key": key,
             "name": ctx.links.name("character", key),
             "title": ctx.loc.text(f"agent_subtypes_onscreen_name_override_{key}"),
             "description": ctx.loc.text(f"agent_subtypes_description_text_override_{key}"),
-            "agent_types": sorted({p["agent"] for p in rows}),
+            "agent_types": [agent_type(ctx, labels, a, culture) for a in sorted({p["agent"] for p in rows})],
             "associated_unit": ctx.links.link("unit", opt(r["associated_unit_override"]), source=source,
                                               relation="associated_unit"),
             "lore_of_magic": {"key": lore, "name": ctx.loc.text(f"special_ability_groups_name_{lore}")} if lore else None,
@@ -71,7 +113,7 @@ def _characters(ctx: Context) -> list[dict]:
             "cost": r["cost"],
             "cap": r["cap"],
             "factions": [ctx.links.link("faction", f, source=source, relation="factions")
-                         for f in sorted({p["faction"] for p in rows})],
+                         for f in faction_keys],
             "campaigns": [ctx.links.link("campaign", c, source=source, relation="campaigns")
                           for c in sorted({row["campaign_type"] for row in campaign_rows.get(key, [])})],
             "abilities": [ctx.links.link("ability", a["ability"], source=source, relation="abilities")

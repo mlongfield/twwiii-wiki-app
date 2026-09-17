@@ -64,6 +64,11 @@ def character_context(extra_items=None, extra_links=None):
         "agent_subtypes_onscreen_name_override_wizard": "Bright Wizard",
         "special_ability_groups_name_lore_fire": "Lore of Fire",
         "character_skills_localised_name_leader_of_men": "Leader of Men",
+        "agent_culture_details_onscreen_name_11": "General of the Empire",
+        "agent_culture_details_onscreen_name_12": "Lord",
+        "agent_culture_details_onscreen_name_13": "Lord",
+        "agent_culture_details_onscreen_name_14": "Damsel",
+        "agent_culture_details_onscreen_name_15": "Runesmith",
     })
     for entity_type, names in characters.catalog(ctx).items():
         ctx.links.register(entity_type, names)
@@ -85,7 +90,7 @@ def test_karl_franz_character_and_tree():
     built = characters.build(ctx)
     kf = {c["key"]: c for c in built["character"]}["kf"]
     assert kf["name"] == "Emperor Karl Franz" and kf["title"] == "Legendary Lord"
-    assert kf["agent_types"] == ["general"]
+    assert kf["agent_types"] == [{"key": "general", "name": None}]
     assert kf["associated_unit"]["key"] == "kf_unit"
     assert [f["key"] for f in kf["factions"]] == ["golden_order", "reikland"]
     assert [a["key"] for a in kf["abilities"]] == ["hold"]
@@ -155,3 +160,24 @@ def test_character_campaigns_and_skill_node_campaign_links():
     assert tree["campaign"] is None
     assert tree["nodes"][0]["campaign"] is None and tree["nodes"][1]["campaign"]["name"] == "Immortal Empires"
     schemas.ENTITY_MODELS["character"].model_validate(kf)
+
+
+def test_agent_type_names_use_the_character_culture_then_the_common_name():
+    ctx = character_context()
+    ctx.con.execute("CREATE TABLE agent_culture_details AS SELECT * FROM (VALUES "
+                    "('general', 'wh_main_emp_empire', 11, 0), ('general', 'wh_main_brt_bretonnia', 12, 0), "
+                    "('general', 'wh_main_dwf_dwarfs', 13, 0), ('wizard', 'wh_main_brt_bretonnia', 14, 0), "
+                    "('wizard', 'wh_main_dwf_dwarfs', 15, 0)) t(agent, culture, key, level)")
+    ctx.con.execute("CREATE TABLE factions AS SELECT * FROM (VALUES ('reikland', 'sc_empire'), "
+                    "('golden_order', 'sc_empire')) t(key, subculture)")
+    ctx.con.execute("CREATE TABLE cultures_subcultures AS SELECT * FROM (VALUES ('sc_empire', 'wh_main_emp_empire')) "
+                    "t(subculture, culture)")
+    built = {c["key"]: c for c in characters.build(ctx)["character"]}
+    assert built["kf"]["agent_types"] == [{"key": "general", "name": "General of the Empire"}]
+    # No Empire wizard label: Damsel and Runesmith tie, and Bretonnia's culture key sorts first.
+    assert built["wizard"]["agent_types"] == [{"key": "wizard", "name": "Damsel"}]
+    labels = characters.agent_type_labels(ctx)
+    assert characters.agent_type(ctx, labels, "general", None) == {"key": "general", "name": "Lord"}
+    assert characters.agent_type(ctx, labels, "spy", None) == {"key": "spy", "name": None}
+    assert ctx.tally["unresolved_agent_type_names"] == 1
+    schemas.ENTITY_MODELS["character"].model_validate(built["kf"])
