@@ -59,10 +59,17 @@ describe("renderGameTextHtml", () => {
     expect(html("A [[b]][[col:red]]Rampaging[[/col]][[/b]] unit")).toBe(
       'A <strong><span class="gt-col gt-col-red">Rampaging</span></strong> unit',
     );
-    expect(html("[[b]]Corrupt Units[[/i]] allows")).toBe("<strong>Corrupt Units allows</strong>");
     expect(html("[[b]]a[[i]]b[[/b]]c")).toBe("<strong>a<em>b</em></strong>c");
     expect(html("[[b]]open")).toBe("<strong>open</strong>");
     expect(html("x[[/b]]y")).toBe("xy");
+  });
+
+  it("falls back an unmatched [[/b]] or [[/i]] to the innermost open b/i span", () => {
+    expect(html("[[b]]Corrupt Units[[/i]] allows")).toBe("<strong>Corrupt Units</strong> allows");
+  });
+
+  it("falls back an unmatched [[/col]] or [[/overridecol]] to the innermost open col/overridecol span", () => {
+    expect(html("[[overridecol:red]]x[[/col]]y")).toBe('<span class="gt-col gt-col-red">x</span>y');
   });
 
   it("drops {{…}} tokens", () => {

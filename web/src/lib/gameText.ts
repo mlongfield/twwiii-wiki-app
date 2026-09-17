@@ -60,11 +60,28 @@ function parseNodes(text: string): GameNode[] {
     }
     const tag = name.toLowerCase();
     if (closing) {
-      // Close the most recent open tag with the same name; a close with no match is ignored.
+      // Close the most recent open tag with the same name. Real game text sometimes mis-closes:
+      // `[[/col]]` and `[[/overridecol]]` both close the most recent open col/overridecol span
+      // (one family), and an unmatched `[[/b]]` or `[[/i]]` closes the innermost open b/i span.
+      // Any other unmatched closer is ignored.
+      const colourFamily = tag === "col" || tag === "overridecol";
+      const boldOrItalic = tag === "b" || tag === "i";
+      let closed = false;
       for (let i = stack.length - 1; i >= 0; i -= 1) {
         if (stack[i].tag === tag) {
           stack.length = i;
+          closed = true;
           break;
+        }
+      }
+      if (!closed && (colourFamily || boldOrItalic)) {
+        for (let i = stack.length - 1; i >= 0; i -= 1) {
+          const openTag = stack[i].tag;
+          if ((colourFamily && (openTag === "col" || openTag === "overridecol")) ||
+              (boldOrItalic && (openTag === "b" || openTag === "i"))) {
+            stack.length = i;
+            break;
+          }
         }
       }
       continue;
