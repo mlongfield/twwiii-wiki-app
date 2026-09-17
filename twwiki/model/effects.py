@@ -8,6 +8,7 @@ patch are picked up without code changes.
 
 from __future__ import annotations
 
+import re
 from collections import defaultdict
 
 from .context import Context, opt
@@ -34,6 +35,7 @@ COMBINED_UNIT_SET_TABLES = {
 }
 EFFECT_COLUMNS = ("effect", "effect_key")
 BONUS_COLUMNS = ("bonus_value_id", "bonus_value")
+SCOPE_LEADING_NEWLINES = re.compile(r"^(?:\s|\\+n)+")
 
 
 def catalog(ctx: Context) -> dict[str, dict[str, str | None]]:
@@ -48,12 +50,37 @@ def catalog(ctx: Context) -> dict[str, dict[str, str | None]]:
     return out
 
 
+def scope_text(ctx: Context, scope: str | None) -> str | None:
+    """The suffix the game prints after an effect for its scope; a scope with no text is counted."""
+    if not scope:
+        return None
+    text = ctx.loc.text(f"campaign_effect_scopes_localised_text_{scope}")
+    text = SCOPE_LEADING_NEWLINES.sub("", text) if text else ""
+    if not text:
+        ctx.tally["effect_applications_without_scope_text"] += 1
+        return None
+    return text
+
+
 def effect_application(ctx: Context, effect_key: str, *, scope: str | None, value: float,
                        source: tuple[str, str], **extra) -> dict:
+    value = float(value)
+    display = ctx.effect_display.get(effect_key)
+    priority = display["priority"] if display else None
+    favourable = None if display is None or value == 0 else (value > 0) == display["is_positive_value_good"]
+    icon = None
+    if display:
+        negative = favourable is False and display["icon_negative_image"]
+        icon = display["icon_negative_image"] if negative else display["icon_image"]
     app = {
         "effect": ctx.links.link("effect", effect_key, source=source, relation="effect"),
         "scope": opt(scope),
-        "value": float(value),
+        "scope_text": scope_text(ctx, opt(scope)),
+        "value": value,
+        "priority": priority,
+        "hidden": priority == 0,
+        "favourable": favourable,
+        "icon_image": icon,
         "source": ctx.links.link(source[0], source[1], source=None, relation="source"),
     }
     app.update(extra)
@@ -132,7 +159,7 @@ def build(ctx: Context) -> dict[str, list[dict]]:
             targets = {}
         for r in ctx.rows("SELECT * FROM effects ORDER BY effect"):
             key = r["effect"]
-            out["effect"].append({
+            effect = {
                 "key": key,
                 "description": ctx.links.name("effect", key),
                 "additional_tooltip": ctx.loc.text(
@@ -146,7 +173,11 @@ def build(ctx: Context) -> dict[str, list[dict]]:
                 "is_positive_value_good": r["is_positive_value_good"],
                 "bonus_targets": targets.get(key, []),
                 "sources": [],
-            })
+            }
+            out["effect"].append(effect)
+            ctx.effect_display[key] = {
+                "priority": effect["priority"], "is_positive_value_good": effect["is_positive_value_good"],
+                "icon_image": effect["icon_image"], "icon_negative_image": effect["icon_negative_image"]}
 
     if ctx.require("effect_bundle", "effect_bundles", "effect_bundles_to_effects_junctions"):
         apps: dict[str, list[dict]] = defaultdict(list)

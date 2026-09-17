@@ -36,7 +36,12 @@ class Link(Strict):
 class EffectApplication(Strict):
     effect: Link
     scope: str | None
+    scope_text: str | None          # e.g. "([[img:icon_general]][[/img]]Lord's army)"
     value: float
+    priority: int | None            # None when the effect is not in the game data
+    hidden: bool                    # priority 0: the game does not display it
+    favourable: bool | None         # None for a zero value or an unknown effect
+    icon_image: str | None          # the negative icon when unfavourable and one exists
     source: Link
     value_damaged: float | None = None      # buildings only
     value_ruined: float | None = None       # buildings only
